@@ -1,22 +1,26 @@
-import { NextResponse } from "next/server"
+import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json()
-    const { model, messages, stream = false } = body
+    const body = await req.json();
+    const { model, messages, stream = false } = body;
 
     // This is a mock implementation for demonstration purposes
     // In a real app, you would forward this request to your OpenAI-compatible API
-
+    console.log("Received request:", body);
+    console.log("Model:", model);
+    console.log("Messages:", messages);
+    console.log("Stream:", stream);
+    console.log("Request Headers:", req.headers);
     if (stream) {
       // Handle streaming response
-      const encoder = new TextEncoder()
+      const encoder = new TextEncoder();
       const stream = new ReadableStream({
         async start(controller) {
           // Simulate a streaming response
           const assistantMessage =
-            "I'm an AI assistant. I'm here to help you with any questions or tasks you might have. I can provide information, assist with various topics, or engage in conversation. How can I assist you today?"
-          const chunks = assistantMessage.split(" ")
+            "I'm an AI assistant. I'm here to help you with any questions or tasks you might have. I can provide information, assist with various topics, or engage in conversation. How can I assist you today?";
+          const chunks = assistantMessage.split(" ");
 
           // Send the response header
           controller.enqueue(
@@ -35,13 +39,13 @@ export async function POST(req: Request) {
                     },
                   ],
                 }) +
-                "\n\n",
-            ),
-          )
+                "\n\n"
+            )
+          );
 
           // Send each word with a delay
           for (let i = 0; i < chunks.length; i++) {
-            await new Promise((resolve) => setTimeout(resolve, 100))
+            await new Promise((resolve) => setTimeout(resolve, 100));
 
             controller.enqueue(
               encoder.encode(
@@ -59,16 +63,16 @@ export async function POST(req: Request) {
                       },
                     ],
                   }) +
-                  "\n\n",
-              ),
-            )
+                  "\n\n"
+              )
+            );
           }
 
           // Send the [DONE] message
-          controller.enqueue(encoder.encode("data: [DONE]\n\n"))
-          controller.close()
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          controller.close();
         },
-      })
+      });
 
       return new Response(stream, {
         headers: {
@@ -76,23 +80,27 @@ export async function POST(req: Request) {
           "Cache-Control": "no-cache",
           Connection: "keep-alive",
         },
-      })
+      });
     } else {
       // Handle regular response
-      const lastMessage = messages[messages.length - 1]
-      let responseContent = "I'm an AI assistant. How can I help you today?"
+      const lastMessage = messages[messages.length - 1];
+      let responseContent = "I'm an AI assistant. How can I help you today?";
 
       // Simple echo for demonstration
       if (lastMessage.role === "user") {
-        if (lastMessage.content.toLowerCase().includes("hello") || lastMessage.content.toLowerCase().includes("hi")) {
-          responseContent = "Hello! How can I assist you today?"
+        if (
+          lastMessage.content.toLowerCase().includes("hello") ||
+          lastMessage.content.toLowerCase().includes("hi")
+        ) {
+          responseContent = "Hello! How can I assist you today?";
         } else if (lastMessage.content.toLowerCase().includes("help")) {
-          responseContent = "I can help with a variety of tasks. Just let me know what you need!"
+          responseContent =
+            "I can help with a variety of tasks. Just let me know what you need!";
         } else if (lastMessage.content === "/help") {
           responseContent =
-            "**Available Commands:**\n- /help - Show this help message\n- /reset or /clear - Clear the chat history"
+            "**Available Commands:**\n- /help - Show this help message\n- /reset or /clear - Clear the chat history";
         } else {
-          responseContent = `I received your message: "${lastMessage.content}". How can I assist you further?`
+          responseContent = `I received your message: "${lastMessage.content}". How can I assist you further?`;
         }
       }
 
@@ -116,11 +124,13 @@ export async function POST(req: Request) {
           completion_tokens: 100,
           total_tokens: 200,
         },
-      })
+      });
     }
   } catch (error) {
-    console.error("Error in chat completions API:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("Error in chat completions API:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
-

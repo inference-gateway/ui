@@ -3,27 +3,21 @@
 import type React from "react";
 
 import { useState, useEffect } from "react";
-import { User, Bot, Moon, Sun, Trash2 } from "lucide-react";
+import { User, Bot, Moon, Sun, Trash2, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import ModelSelector from "@/components/model-selector";
-
-// Define types
-interface Message {
-  id: string;
-  role: "user" | "assistant" | "system";
-  content: string;
-}
+import type { CreateChatCompletionRequest, Message } from "@/types/chat";
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [selectedModel, setSelectedModel] = useState("gpt-3.5-turbo");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || isLoading) return;
 
-    // Process commands
     if (inputValue.startsWith("/")) {
       if (inputValue.trim() === "/reset" || inputValue.trim() === "/clear") {
         setMessages([]);
@@ -32,7 +26,6 @@ export default function Home() {
       }
     }
 
-    // Add user message to chat
     const userMessage: Message = {
       role: "user",
       content: inputValue,
@@ -41,33 +34,52 @@ export default function Home() {
 
     setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
+    setIsLoading(true);
 
-    setTimeout(() => {
-      let responseContent = "I'm an AI assistant. How can I help you today?";
+    try {
+      const chatRequest: CreateChatCompletionRequest = {
+        model: selectedModel,
+        messages: [...messages, userMessage].map(({ role, content }) => ({
+          role,
+          content,
+          id: "",
+        })),
+      };
 
-      if (
-        inputValue.toLowerCase().includes("hello") ||
-        inputValue.toLowerCase().includes("hi")
-      ) {
-        responseContent = "Hello! How can I assist you today?";
-      } else if (inputValue.toLowerCase().includes("help")) {
-        responseContent =
-          "I can help with a variety of tasks. Just let me know what you need!";
-      } else if (inputValue === "/help") {
-        responseContent =
-          "**Available Commands:**\n- /help - Show this help message\n- /reset or /clear - Clear the chat history";
-      } else {
-        responseContent = `I received your message: "${inputValue}". How can I assist you further?`;
+      const response = await fetch("/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(chatRequest),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API call failed with status: ${response.status}`);
       }
+
+      const data = await response.json();
 
       const assistantMessage: Message = {
         role: "assistant",
-        content: responseContent,
-        id: (Date.now() + 1).toString(),
+        content: data.choices[0].message.content,
+        id: data.id || Date.now().toString(),
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
-    }, 500);
+    } catch (error) {
+      console.error("Failed to get response:", error);
+
+      const errorMessage: Message = {
+        role: "assistant",
+        content: "Sorry, I encountered an error. Please try again later.",
+        id: Date.now().toString(),
+      };
+
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -88,10 +100,6 @@ export default function Home() {
       document.documentElement.classList.remove("dark");
     }
   }, [isDarkMode]);
-
-  useEffect(() => {
-    console.log("Model changed:", selectedModel);
-  }, [selectedModel]);
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 flex flex-col">
@@ -188,20 +196,29 @@ export default function Home() {
               onKeyDown={handleKeyDown}
               placeholder="Type a message..."
               rows={1}
-              className="flex-1 min-h-[40px] max-h-[200px] rounded-md border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 resize-none"
+              disabled={isLoading}
+              className="flex-1 min-h-[40px] max-h-[200px] rounded-md border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 resize-none disabled:opacity-70"
             />
             <button
               onClick={handleSendMessage}
-              disabled={!inputValue.trim()}
-              className="h-10 px-4 py-2 rounded-md bg-blue-600 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!inputValue.trim() || isLoading}
+              className="h-10 px-4 py-2 rounded-md bg-blue-600 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              Send
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Sending...</span>
+                </>
+              ) : (
+                "Send"
+              )}
             </button>
             {messages.length > 0 && (
               <button
                 onClick={() => setMessages([])}
+                disabled={isLoading}
                 title="Clear chat"
-                className="h-10 w-10 rounded-md border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 flex items-center justify-center"
+                className="h-10 w-10 rounded-md border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 flex items-center justify-center disabled:opacity-50"
               >
                 <Trash2 className="h-4 w-4 text-neutral-800 dark:text-neutral-200" />
               </button>
