@@ -14,10 +14,6 @@ export async function POST(req: Request) {
 
     const completionsEndpoint = `${gatewayUrl}/chat/completions`;
 
-    // Get the content type to properly handle streaming
-    // const contentType = req.headers.get("Content-Type") || "application/json";
-
-    // Clone headers but remove host
     const headers = new Headers();
     for (const [key, value] of req.headers.entries()) {
       if (key.toLowerCase() !== "host") {
@@ -25,11 +21,9 @@ export async function POST(req: Request) {
       }
     }
 
-    // Get the request body
     const body = await req.json();
     const { stream } = body;
 
-    // Forward the request to the gateway
     const response = await fetch(completionsEndpoint, {
       method: "POST",
       headers,
@@ -45,12 +39,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // If this is a streaming response, we need to forward the stream
     if (stream) {
-      // Create a new readable stream from the response body
       const responseStream = response.body;
-
-      // Return a new streaming response
       return new Response(responseStream, {
         headers: {
           "Content-Type": "text/event-stream",
@@ -59,7 +49,6 @@ export async function POST(req: Request) {
         },
       });
     } else {
-      // For non-streaming responses, just forward the JSON
       const completionData = await response.json();
       return NextResponse.json(completionData);
     }
