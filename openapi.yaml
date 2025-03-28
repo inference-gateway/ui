@@ -1,0 +1,1235 @@
+---
+openapi: 3.1.0
+info:
+  title: Inference Gateway API
+  description: |
+    The API for interacting with various language models and other AI services.
+    OpenAI, Groq, Ollama, and other providers are supported.
+    OpenAI compatible API for using with existing clients.
+    Unified API for all providers.
+  contact:
+    name: Inference Gateway
+    url: https://inference-gateway.github.io/docs/
+  version: 1.0.0
+  license:
+    name: MIT
+    url: https://github.com/inference-gateway/inference-gateway/blob/main/LICENSE
+servers:
+  - url: http://localhost:8080
+    description: Default server without version prefix for healthcheck and proxy and points
+    x-server-tags: ["Health", "Proxy"]
+  - url: http://localhost:8080/v1
+    description: Default server with version prefix for listing models and chat completions
+    x-server-tags: ["Models", "Completions"]
+  - url: https://api.inference-gateway.local/v1
+    description: Local server with version prefix for listing models and chat completions
+    x-server-tags: ["Models", "Completions"]
+tags:
+  - name: Models
+    description: List and describe the various models available in the API.
+  - name: Completions
+    description: Generate completions from the models.
+  - name: Proxy
+    description: Proxy requests to provider endpoints.
+  - name: Health
+    description: Health check
+paths:
+  /models:
+    get:
+      operationId: listModels
+      tags:
+        - Models
+      description: |
+        Lists the currently available models, and provides basic information
+        about each one such as the owner and availability.
+      summary:
+        Lists the currently available models, and provides basic information
+        about each one such as the owner and availability.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: provider
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Provider"
+          description: Specific provider to query (optional)
+      responses:
+        "200":
+          description: List of available models
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListModelsResponse"
+              examples:
+                allProviders:
+                  summary: Models from all providers
+                  value:
+                    object: "list"
+                    data:
+                      - id: "gpt-4o"
+                        object: "model"
+                        created: 1686935002
+                        owned_by: "openai"
+                      - id: "llama-3.3-70b-versatile"
+                        object: "model"
+                        created: 1723651281
+                        owned_by: "groq"
+                      - id: "claude-3-opus-20240229"
+                        object: "model"
+                        created: 1708905600
+                        owned_by: "anthropic"
+                      - id: "command-r"
+                        object: "model"
+                        created: 1707868800
+                        owned_by: "cohere"
+                      - id: "phi3:3.8b"
+                        object: "model"
+                        created: 1718441600
+                        owned_by: "ollama"
+                singleProvider:
+                  summary: Models from a specific provider
+                  value:
+                    object: "list"
+                    data:
+                      - id: "gpt-4o"
+                        object: "model"
+                        created: 1686935002
+                        owned_by: "openai"
+                      - id: "gpt-4-turbo"
+                        object: "model"
+                        created: 1687882410
+                        owned_by: "openai"
+                      - id: "gpt-3.5-turbo"
+                        object: "model"
+                        created: 1677649963
+                        owned_by: "openai"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /chat/completions:
+    post:
+      operationId: createChatCompletion
+      tags:
+        - Completions
+      description: |
+        Generates a chat completion based on the provided input.
+        The completion can be streamed to the client as it is generated.
+      summary: Create a chat completion
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: provider
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Provider"
+          description: Specific provider to use (default determined by model)
+      requestBody:
+        $ref: "#/components/requestBodies/CreateChatCompletionRequest"
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateChatCompletionResponse"
+            text/event-stream:
+              schema:
+                $ref: "#/components/schemas/SSEvent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /proxy/{provider}/{path}:
+    parameters:
+      - name: provider
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/Provider"
+      - name: path
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        description: The remaining path to proxy to the provider
+    get:
+      operationId: proxyGet
+      tags:
+        - Proxy
+      description: |
+        Proxy GET request to provider
+        The request body depends on the specific provider and endpoint being called.
+        If you decide to use this approach, please follow the provider-specific documentations.
+      summary: Proxy GET request to provider
+      responses:
+        "200":
+          $ref: "#/components/responses/ProviderResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+      security:
+        - bearerAuth: []
+    post:
+      operationId: proxyPost
+      tags:
+        - Proxy
+      description: |
+        Proxy POST request to provider
+        The request body depends on the specific provider and endpoint being called.
+        If you decide to use this approach, please follow the provider-specific documentations.
+      summary: Proxy POST request to provider
+      requestBody:
+        $ref: "#/components/requestBodies/ProviderRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/ProviderResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+      security:
+        - bearerAuth: []
+    put:
+      operationId: proxyPut
+      tags:
+        - Proxy
+      description: |
+        Proxy PUT request to provider
+        The request body depends on the specific provider and endpoint being called.
+        If you decide to use this approach, please follow the provider-specific documentations.
+      summary: Proxy PUT request to provider
+      requestBody:
+        $ref: "#/components/requestBodies/ProviderRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/ProviderResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+      security:
+        - bearerAuth: []
+    delete:
+      operationId: proxyDelete
+      tags:
+        - Proxy
+      description: |
+        Proxy DELETE request to provider
+        The request body depends on the specific provider and endpoint being called.
+        If you decide to use this approach, please follow the provider-specific documentations.
+      summary: Proxy DELETE request to provider
+      responses:
+        "200":
+          $ref: "#/components/responses/ProviderResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+      security:
+        - bearerAuth: []
+    patch:
+      operationId: proxyPatch
+      tags:
+        - Proxy
+      description: |
+        Proxy PATCH request to provider
+        The request body depends on the specific provider and endpoint being called.
+        If you decide to use this approach, please follow the provider-specific documentations.
+      summary: Proxy PATCH request to provider
+      requestBody:
+        $ref: "#/components/requestBodies/ProviderRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/ProviderResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+      security:
+        - bearerAuth: []
+  /health:
+    get:
+      operationId: healthCheck
+      tags:
+        - Health
+      description: |
+        Health check endpoint
+        Returns a 200 status code if the service is healthy
+      summary: Health check
+      responses:
+        "200":
+          description: Health check successful
+components:
+  requestBodies:
+    ProviderRequest:
+      required: true
+      description: |
+        ProviderRequest depends on the specific provider and endpoint being called
+        If you decide to use this approach, please follow the provider-specific documentations.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              model:
+                type: string
+              messages:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    role:
+                      type: string
+                    content:
+                      type: string
+              temperature:
+                type: number
+                format: float
+                default: 0.7
+          examples:
+            openai:
+              summary: OpenAI chat completion request
+              value:
+                model: "gpt-3.5-turbo"
+                messages:
+                  - role: "user"
+                    content: "Hello! How can I assist you today?"
+                temperature: 0.7
+            anthropic:
+              summary: Anthropic Claude request
+              value:
+                model: "claude-3-opus-20240229"
+                messages:
+                  - role: "user"
+                    content: "Explain quantum computing"
+                temperature: 0.5
+    CreateChatCompletionRequest:
+      required: true
+      description: |
+        ProviderRequest depends on the specific provider and endpoint being called
+        If you decide to use this approach, please follow the provider-specific documentations.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CreateChatCompletionRequest"
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    ProviderResponse:
+      description: |
+        ProviderResponse depends on the specific provider and endpoint being called
+        If you decide to use this approach, please follow the provider-specific documentations.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProviderSpecificResponse"
+          examples:
+            openai:
+              summary: OpenAI API response
+              value:
+                {
+                  "id": "chatcmpl-123",
+                  "object": "chat.completion",
+                  "created": 1677652288,
+                  "model": "gpt-3.5-turbo",
+                  "choices":
+                    [
+                      {
+                        "index": 0,
+                        "message":
+                          {
+                            "role": "assistant",
+                            "content": "Hello! How can I help you today?",
+                          },
+                        "finish_reason": "stop",
+                      },
+                    ],
+                }
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Authentication is optional by default.
+        To enable authentication, set ENABLE_AUTH to true.
+        When enabled, requests must include a valid JWT token in the Authorization header.
+  schemas:
+    Provider:
+      type: string
+      enum:
+        - ollama
+        - groq
+        - openai
+        - cloudflare
+        - cohere
+        - anthropic
+        - deepseek
+      x-provider-configs:
+        ollama:
+          id: "ollama"
+          url: "http://ollama:8080/v1"
+          auth_type: "none"
+          endpoints:
+            models:
+              name: "list_models"
+              method: "GET"
+              endpoint: "/models"
+            chat:
+              name: "chat_completions"
+              method: "POST"
+              endpoint: "/chat/completions"
+        anthropic:
+          id: "anthropic"
+          url: "https://api.anthropic.com/v1"
+          auth_type: "bearer"
+          endpoints:
+            models:
+              name: "list_models"
+              method: "GET"
+              endpoint: "/models"
+            chat:
+              name: "chat_completions"
+              method: "POST"
+              endpoint: "/chat/completions"
+        cohere:
+          id: "cohere"
+          url: "https://api.cohere.ai"
+          auth_type: "bearer"
+          endpoints:
+            models:
+              name: "list_models"
+              method: "GET"
+              endpoint: "/v1/models"
+            chat:
+              name: "chat_completions"
+              method: "POST"
+              endpoint: "/compatibility/v1/chat/completions"
+        groq:
+          id: "groq"
+          url: "https://api.groq.com/openai/v1"
+          auth_type: "bearer"
+          endpoints:
+            models:
+              name: "list_models"
+              method: "GET"
+              endpoint: "/models"
+            chat:
+              name: "chat_completions"
+              method: "POST"
+              endpoint: "/chat/completions"
+        openai:
+          id: "openai"
+          url: "https://api.openai.com/v1"
+          auth_type: "bearer"
+          endpoints:
+            models:
+              name: "list_models"
+              method: "GET"
+              endpoint: "/models"
+            chat:
+              name: "chat_completions"
+              method: "POST"
+              endpoint: "/chat/completions"
+        cloudflare:
+          id: "cloudflare"
+          url: "https://api.cloudflare.com/client/v4/accounts/{ACCOUNT_ID}/ai"
+          auth_type: "bearer"
+          endpoints:
+            models:
+              name: "list_models"
+              method: "GET"
+              endpoint: "/finetunes/public?limit=1000"
+            chat:
+              name: "chat_completions"
+              method: "POST"
+              endpoint: "/v1/chat/completions"
+        deepseek:
+          id: "deepseek"
+          url: "https://api.deepseek.com"
+          auth_type: "bearer"
+          endpoints:
+            models:
+              name: "list_models"
+              method: "GET"
+              endpoint: "/models"
+            chat:
+              name: "chat_completions"
+              method: "POST"
+              endpoint: "/chat/completions"
+    ProviderSpecificResponse:
+      type: object
+      description: |
+        Provider-specific response format. Examples:
+
+        OpenAI GET /v1/models?provider=openai response:
+        ```json
+        {
+          "provider": "openai",
+          "object": "list",
+          "data": [
+            {
+              "id": "gpt-4",
+              "object": "model",
+              "created": 1687882410,
+              "owned_by": "openai",
+              "served_by": "openai"
+            }
+          ]
+        }
+        ```
+
+        Anthropic GET /v1/models?provider=anthropic response:
+        ```json
+        {
+          "provider": "anthropic",
+          "object": "list",
+          "data": [
+            {
+              "id": "gpt-4",
+              "object": "model",
+              "created": 1687882410,
+              "owned_by": "openai",
+              "served_by": "openai"
+            }
+          ]
+        }
+        ```
+    ProviderAuthType:
+      type: string
+      description: Authentication type for providers
+      enum:
+        - bearer
+        - xheader
+        - query
+        - none
+    SSEvent:
+      type: object
+      properties:
+        event:
+          type: string
+          enum:
+            - message-start
+            - stream-start
+            - content-start
+            - content-delta
+            - content-end
+            - message-end
+            - stream-end
+        data:
+          type: string
+          format: byte
+        retry:
+          type: integer
+    Endpoints:
+      type: object
+      properties:
+        models:
+          type: string
+        chat:
+          type: string
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+    MessageRole:
+      type: string
+      description: Role of the message sender
+      enum:
+        - system
+        - user
+        - assistant
+        - tool
+    Message:
+      type: object
+      description: Message structure for provider requests
+      properties:
+        role:
+          $ref: "#/components/schemas/MessageRole"
+        content:
+          type: string
+        tool_calls:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatCompletionMessageToolCall"
+        tool_call_id:
+          type: string
+        reasoning:
+          type: string
+        reasoning_content:
+          type: string
+      required:
+        - role
+        - content
+    Model:
+      type: object
+      description: Common model information
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+        created:
+          type: integer
+          format: int64
+        owned_by:
+          type: string
+        served_by:
+          $ref: "#/components/schemas/Provider"
+    ListModelsResponse:
+      type: object
+      description: Response structure for listing models
+      properties:
+        provider:
+          $ref: "#/components/schemas/Provider"
+        object:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Model"
+          default: []
+    FunctionObject:
+      type: object
+      properties:
+        description:
+          type: string
+          description:
+            A description of what the function does, used by the model to
+            choose when and how to call the function.
+        name:
+          type: string
+          description:
+            The name of the function to be called. Must be a-z, A-Z, 0-9, or
+            contain underscores and dashes, with a maximum length of 64.
+        parameters:
+          $ref: "#/components/schemas/FunctionParameters"
+        strict:
+          type: boolean
+          default: false
+          description:
+            Whether to enable strict schema adherence when generating the
+            function call. If set to true, the model will follow the exact
+            schema defined in the `parameters` field. Only a subset of JSON
+            Schema is supported when `strict` is `true`. Learn more about
+            Structured Outputs in the [function calling
+            guide](docs/guides/function-calling).
+      required:
+        - name
+    ChatCompletionTool:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/ChatCompletionToolType"
+        function:
+          $ref: "#/components/schemas/FunctionObject"
+      required:
+        - type
+        - function
+    FunctionParameters:
+      type: object
+      description: >-
+        The parameters the functions accepts, described as a JSON Schema object.
+        See the [guide](/docs/guides/function-calling) for examples, and the
+        [JSON Schema
+        reference](https://json-schema.org/understanding-json-schema/) for
+        documentation about the format. 
+
+        Omitting `parameters` defines a function with an empty parameter list.
+      properties:
+        type:
+          type: string
+          description: The type of the parameters. Currently, only `object` is supported.
+        properties:
+          type: object
+          description: The properties of the parameters.
+        required:
+          type: array
+          items:
+            type: string
+          description: The required properties of the parameters.
+    ChatCompletionToolType:
+      type: string
+      description: The type of the tool. Currently, only `function` is supported.
+      enum:
+        - function
+    CompletionUsage:
+      type: object
+      description: Usage statistics for the completion request.
+      properties:
+        completion_tokens:
+          type: integer
+          default: 0
+          format: int64
+          description: Number of tokens in the generated completion.
+        prompt_tokens:
+          type: integer
+          default: 0
+          format: int64
+          description: Number of tokens in the prompt.
+        total_tokens:
+          type: integer
+          default: 0
+          format: int64
+          description: Total number of tokens used in the request (prompt + completion).
+      required:
+        - prompt_tokens
+        - completion_tokens
+        - total_tokens
+    ChatCompletionStreamOptions:
+      description: >
+        Options for streaming response. Only set this when you set `stream:
+        true`.
+      type: object
+      properties:
+        include_usage:
+          type: boolean
+          description: >
+            If set, an additional chunk will be streamed before the `data:
+            [DONE]` message. The `usage` field on this chunk shows the token
+            usage statistics for the entire request, and the `choices` field
+            will always be an empty array. All other chunks will also include a
+            `usage` field, but with a null value.
+          default: true
+    CreateChatCompletionRequest:
+      type: object
+      properties:
+        model:
+          type: string
+          description: Model ID to use
+        messages:
+          description: >
+            A list of messages comprising the conversation so far.
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/Message"
+        max_tokens:
+          description: >
+            An upper bound for the number of tokens that can be generated
+            for a completion, including visible output tokens and reasoning tokens.
+          type: integer
+        stream:
+          description: >
+            If set to true, the model response data will be streamed to the
+            client as it is generated using [server-sent
+            events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format).
+          type: boolean
+          default: false
+        stream_options:
+          $ref: "#/components/schemas/ChatCompletionStreamOptions"
+        tools:
+          type: array
+          description: >
+            A list of tools the model may call. Currently, only functions
+            are supported as a tool. Use this to provide a list of functions
+            the model may generate JSON inputs for. A max of 128 functions
+            are supported.
+          items:
+            $ref: "#/components/schemas/ChatCompletionTool"
+      required:
+        - model
+        - messages
+    ChatCompletionMessageToolCallFunction:
+      type: object
+      description: The function that the model called.
+      properties:
+        name:
+          type: string
+          description: The name of the function to call.
+        arguments:
+          type: string
+          description:
+            The arguments to call the function with, as generated by the model
+            in JSON format. Note that the model does not always generate
+            valid JSON, and may hallucinate parameters not defined by your
+            function schema. Validate the arguments in your code before
+            calling your function.
+      required:
+        - name
+        - arguments
+    ChatCompletionMessageToolCall:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the tool call.
+        type:
+          $ref: "#/components/schemas/ChatCompletionToolType"
+        function:
+          $ref: "#/components/schemas/ChatCompletionMessageToolCallFunction"
+      required:
+        - id
+        - type
+        - function
+    ChatCompletionChoice:
+      type: object
+      properties:
+        finish_reason:
+          type: string
+          description: >
+            The reason the model stopped generating tokens. This will be
+            `stop` if the model hit a natural stop point or a provided
+            stop sequence,
+
+            `length` if the maximum number of tokens specified in the
+            request was reached,
+
+            `content_filter` if content was omitted due to a flag from our
+            content filters,
+
+            `tool_calls` if the model called a tool.
+          enum:
+            - stop
+            - length
+            - tool_calls
+            - content_filter
+            - function_call
+        index:
+          type: integer
+          description: The index of the choice in the list of choices.
+        message:
+          $ref: "#/components/schemas/Message"
+      required:
+        - finish_reason
+        - index
+        - message
+        - logprobs
+    ChatCompletionStreamChoice:
+      type: object
+      required:
+        - delta
+        - finish_reason
+        - index
+      properties:
+        delta:
+          $ref: "#/components/schemas/ChatCompletionStreamResponseDelta"
+        logprobs:
+          description: Log probability information for the choice.
+          type: object
+          properties:
+            content:
+              description: A list of message content tokens with log probability information.
+              type: array
+              items:
+                $ref: "#/components/schemas/ChatCompletionTokenLogprob"
+            refusal:
+              description: A list of message refusal tokens with log probability information.
+              type: array
+              items:
+                $ref: "#/components/schemas/ChatCompletionTokenLogprob"
+          required:
+            - content
+            - refusal
+        finish_reason:
+          $ref: "#/components/schemas/FinishReason"
+        index:
+          type: integer
+          description: The index of the choice in the list of choices.
+    CreateChatCompletionResponse:
+      type: object
+      description:
+        Represents a chat completion response returned by model, based on
+        the provided input.
+      properties:
+        id:
+          type: string
+          description: A unique identifier for the chat completion.
+        choices:
+          type: array
+          description:
+            A list of chat completion choices. Can be more than one if `n` is
+            greater than 1.
+          items:
+            $ref: "#/components/schemas/ChatCompletionChoice"
+        created:
+          type: integer
+          description:
+            The Unix timestamp (in seconds) of when the chat completion was
+            created.
+        model:
+          type: string
+          description: The model used for the chat completion.
+        object:
+          type: string
+          description: The object type, which is always `chat.completion`.
+          x-stainless-const: true
+        usage:
+          $ref: "#/components/schemas/CompletionUsage"
+      required:
+        - choices
+        - created
+        - id
+        - model
+        - object
+    ChatCompletionStreamResponseDelta:
+      type: object
+      description: A chat completion delta generated by streamed model responses.
+      properties:
+        content:
+          type: string
+          description: The contents of the chunk message.
+        tool_calls:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatCompletionMessageToolCallChunk"
+        role:
+          $ref: "#/components/schemas/MessageRole"
+        refusal:
+          type: string
+          description: The refusal message generated by the model.
+    ChatCompletionMessageToolCallChunk:
+      type: object
+      properties:
+        index:
+          type: integer
+        id:
+          type: string
+          description: The ID of the tool call.
+        type:
+          type: string
+          description: The type of the tool. Currently, only `function` is supported.
+        function:
+          type: object
+          properties:
+            name:
+              type: string
+              description: The name of the function to call.
+            arguments:
+              type: string
+              description:
+                The arguments to call the function with, as generated by the model
+                in JSON format. Note that the model does not always generate
+                valid JSON, and may hallucinate parameters not defined by your
+                function schema. Validate the arguments in your code before
+                calling your function.
+      required:
+        - index
+    ChatCompletionTokenLogprob:
+      type: object
+      properties:
+        token: &a1
+          description: The token.
+          type: string
+        logprob: &a2
+          description:
+            The log probability of this token, if it is within the top 20 most
+            likely tokens. Otherwise, the value `-9999.0` is used to signify
+            that the token is very unlikely.
+          type: number
+        bytes: &a3
+          description:
+            A list of integers representing the UTF-8 bytes representation of
+            the token. Useful in instances where characters are represented by
+            multiple tokens and their byte representations must be combined to
+            generate the correct text representation. Can be `null` if there is
+            no bytes representation for the token.
+          type: array
+          items:
+            type: integer
+        top_logprobs:
+          description:
+            List of the most likely tokens and their log probability, at this
+            token position. In rare cases, there may be fewer than the number of
+            requested `top_logprobs` returned.
+          type: array
+          items:
+            type: object
+            properties:
+              token: *a1
+              logprob: *a2
+              bytes: *a3
+            required:
+              - token
+              - logprob
+              - bytes
+      required:
+        - token
+        - logprob
+        - bytes
+        - top_logprobs
+    FinishReason:
+      type: string
+      description: >
+        The reason the model stopped generating tokens. This will be
+        `stop` if the model hit a natural stop point or a provided
+        stop sequence,
+
+        `length` if the maximum number of tokens specified in the
+        request was reached,
+
+        `content_filter` if content was omitted due to a flag from our
+        content filters,
+
+        `tool_calls` if the model called a tool.
+      enum:
+        - stop
+        - length
+        - tool_calls
+        - content_filter
+        - function_call
+    CreateChatCompletionStreamResponse:
+      type: object
+      description: |
+        Represents a streamed chunk of a chat completion response returned
+        by the model, based on the provided input.
+      properties:
+        id:
+          type: string
+          description:
+            A unique identifier for the chat completion. Each chunk has the
+            same ID.
+        choices:
+          type: array
+          description: >
+            A list of chat completion choices. Can contain more than one
+            elements if `n` is greater than 1. Can also be empty for the
+
+            last chunk if you set `stream_options: {"include_usage": true}`.
+          items:
+            $ref: "#/components/schemas/ChatCompletionStreamChoice"
+        created:
+          type: integer
+          description:
+            The Unix timestamp (in seconds) of when the chat completion was
+            created. Each chunk has the same timestamp.
+        model:
+          type: string
+          description: The model to generate the completion.
+        system_fingerprint:
+          type: string
+          description: >
+            This fingerprint represents the backend configuration that the model
+            runs with.
+
+            Can be used in conjunction with the `seed` request parameter to
+            understand when backend changes have been made that might impact
+            determinism.
+        object:
+          type: string
+          description: The object type, which is always `chat.completion.chunk`.
+        usage:
+          $ref: "#/components/schemas/CompletionUsage"
+      required:
+        - choices
+        - created
+        - id
+        - model
+        - object
+    Config:
+      x-config:
+        sections:
+          - general:
+              title: "General settings"
+              settings:
+                - name: application_name
+                  env: "APPLICATION_NAME"
+                  type: string
+                  default: "inference-gateway"
+                  description: "The name of the application"
+                - name: environment
+                  env: "ENVIRONMENT"
+                  type: string
+                  default: "production"
+                  description: "The environment"
+                - name: enable_telemetry
+                  env: "ENABLE_TELEMETRY"
+                  type: bool
+                  default: "false"
+                  description: "Enable telemetry"
+                - name: enable_auth
+                  env: "ENABLE_AUTH"
+                  type: bool
+                  default: "false"
+                  description: "Enable authentication"
+          - oidc:
+              title: "OpenID Connect"
+              settings:
+                - name: issuer_url
+                  env: "OIDC_ISSUER_URL"
+                  type: string
+                  default: "http://keycloak:8080/realms/inference-gateway-realm"
+                  description: "OIDC issuer URL"
+                - name: client_id
+                  env: "OIDC_CLIENT_ID"
+                  type: string
+                  default: "inference-gateway-client"
+                  description: "OIDC client ID"
+                  secret: true
+                - name: client_secret
+                  env: "OIDC_CLIENT_SECRET"
+                  type: string
+                  description: "OIDC client secret"
+                  secret: true
+          - server:
+              title: "Server settings"
+              settings:
+                - name: host
+                  env: "SERVER_HOST"
+                  type: string
+                  default: "0.0.0.0"
+                  description: "Server host"
+                - name: port
+                  env: "SERVER_PORT"
+                  type: string
+                  default: "8080"
+                  description: "Server port"
+                - name: read_timeout
+                  env: "SERVER_READ_TIMEOUT"
+                  type: time.Duration
+                  default: "30s"
+                  description: "Read timeout"
+                - name: write_timeout
+                  env: "SERVER_WRITE_TIMEOUT"
+                  type: time.Duration
+                  default: "30s"
+                  description: "Write timeout"
+                - name: idle_timeout
+                  env: "SERVER_IDLE_TIMEOUT"
+                  type: time.Duration
+                  default: "120s"
+                  description: "Idle timeout"
+                - name: tls_cert_path
+                  env: "SERVER_TLS_CERT_PATH"
+                  type: string
+                  description: "TLS certificate path"
+                - name: tls_key_path
+                  env: "SERVER_TLS_KEY_PATH"
+                  type: string
+                  description: "TLS key path"
+          - client:
+              title: "Client settings"
+              settings:
+                - name: timeout
+                  env: "CLIENT_TIMEOUT"
+                  type: time.Duration
+                  default: "30s"
+                  description: "Client timeout"
+                - name: max_idle_conns
+                  env: "CLIENT_MAX_IDLE_CONNS"
+                  type: int
+                  default: "20"
+                  description: "Maximum idle connections"
+                - name: max_idle_conns_per_host
+                  env: "CLIENT_MAX_IDLE_CONNS_PER_HOST"
+                  type: int
+                  default: "20"
+                  description: "Maximum idle connections per host"
+                - name: idle_conn_timeout
+                  env: "CLIENT_IDLE_CONN_TIMEOUT"
+                  type: time.Duration
+                  default: "30s"
+                  description: "Idle connection timeout"
+                - name: tls_min_version
+                  env: "CLIENT_TLS_MIN_VERSION"
+                  type: string
+                  default: "TLS12"
+                  description: "Minimum TLS version"
+          - providers:
+              title: "Providers"
+              settings:
+                - name: anthropic_api_url
+                  env: "ANTHROPIC_API_URL"
+                  type: string
+                  default: "https://api.anthropic.com/v1"
+                  description: "Anthropic API URL"
+                - name: anthropic_api_key
+                  env: "ANTHROPIC_API_KEY"
+                  type: string
+                  description: "Anthropic API Key"
+                  secret: true
+                - name: cloudflare_api_url
+                  env: "CLOUDFLARE_API_URL"
+                  type: string
+                  default: "https://api.cloudflare.com/client/v4/accounts/{ACCOUNT_ID}/ai"
+                  description: "Cloudflare API URL"
+                - name: cloudflare_api_key
+                  env: "CLOUDFLARE_API_KEY"
+                  type: string
+                  description: "Cloudflare API Key"
+                  secret: true
+                - name: cohere_api_url
+                  env: "COHERE_API_URL"
+                  type: string
+                  default: "https://api.cohere.ai"
+                  description: "Cohere API URL"
+                - name: cohere_api_key
+                  env: "COHERE_API_KEY"
+                  type: string
+                  description: "Cohere API Key"
+                  secret: true
+                - name: groq_api_url
+                  env: "GROQ_API_URL"
+                  type: string
+                  default: "https://api.groq.com/openai/v1"
+                  description: "Groq API URL"
+                - name: groq_api_key
+                  env: "GROQ_API_KEY"
+                  type: string
+                  description: "Groq API Key"
+                  secret: true
+                - name: ollama_api_url
+                  env: "OLLAMA_API_URL"
+                  type: string
+                  default: "http://ollama:8080/v1"
+                  description: "Ollama API URL"
+                - name: ollama_api_key
+                  env: "OLLAMA_API_KEY"
+                  type: string
+                  description: "Ollama API Key"
+                  secret: true
+                - name: openai_api_url
+                  env: "OPENAI_API_URL"
+                  type: string
+                  default: "https://api.openai.com/v1"
+                  description: "OpenAI API URL"
+                - name: openai_api_key
+                  env: "OPENAI_API_KEY"
+                  type: string
+                  description: "OpenAI API Key"
+                  secret: true
+                - name: deepseek_api_url
+                  env: "DEEPSEEK_API_URL"
+                  type: string
+                  default: "https://api.deepseek.com"
+                  description: "DeepSeek API URL"
+                - name: deepseek_api_key
+                  env: "DEEPSEEK_API_KEY"
+                  type: string
+                  description: "DeepSeek API Key"
+                  secret: true
