@@ -5,3 +5,8 @@ export interface Model {
   owned_by: string;
   served_by: string;
 }
+
+export interface ListModelsResponse {
+  object: string;
+  data: Model[];
+}

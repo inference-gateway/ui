@@ -1,47 +1,34 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { User, Bot, Moon, Sun, Trash2 } from "lucide-react"
-import ReactMarkdown from "react-markdown"
+import { useState, useEffect } from "react";
+import { User, Bot, Moon, Sun, Trash2 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import ModelSelector from "@/components/model-selector";
 
 // Define types
 interface Message {
-  id: string
-  role: "user" | "assistant" | "system"
-  content: string
-}
-
-interface Model {
-  id: string
-  object: string
-  created: number
-  owned_by: string
+  id: string;
+  role: "user" | "assistant" | "system";
+  content: string;
 }
 
 export default function Home() {
-  const [messages, setMessages] = useState<Message[]>([])
-  const [inputValue, setInputValue] = useState("")
-  const [isDarkMode, setIsDarkMode] = useState(true)
-  const [selectedModel, setSelectedModel] = useState("gpt-3.5-turbo")
-
-  // Mock models data
-  const models: Model[] = [
-    { id: "gpt-4", object: "model", created: 1687882411, owned_by: "openai" },
-    { id: "gpt-3.5-turbo", object: "model", created: 1677610602, owned_by: "openai" },
-    { id: "gpt-4o", object: "model", created: 1712689492, owned_by: "openai" },
-  ]
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputValue, setInputValue] = useState("");
+  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [selectedModel, setSelectedModel] = useState("gpt-3.5-turbo");
 
   const handleSendMessage = async () => {
-    if (!inputValue.trim()) return
+    if (!inputValue.trim()) return;
 
     // Process commands
     if (inputValue.startsWith("/")) {
       if (inputValue.trim() === "/reset" || inputValue.trim() === "/clear") {
-        setMessages([])
-        setInputValue("")
-        return
+        setMessages([]);
+        setInputValue("");
+        return;
       }
     }
 
@@ -50,73 +37,76 @@ export default function Home() {
       role: "user",
       content: inputValue,
       id: Date.now().toString(),
-    }
+    };
 
-    setMessages((prev) => [...prev, userMessage])
-    setInputValue("")
+    setMessages((prev) => [...prev, userMessage]);
+    setInputValue("");
 
     setTimeout(() => {
-      let responseContent = "I'm an AI assistant. How can I help you today?"
+      let responseContent = "I'm an AI assistant. How can I help you today?";
 
-      if (inputValue.toLowerCase().includes("hello") || inputValue.toLowerCase().includes("hi")) {
-        responseContent = "Hello! How can I assist you today?"
+      if (
+        inputValue.toLowerCase().includes("hello") ||
+        inputValue.toLowerCase().includes("hi")
+      ) {
+        responseContent = "Hello! How can I assist you today?";
       } else if (inputValue.toLowerCase().includes("help")) {
-        responseContent = "I can help with a variety of tasks. Just let me know what you need!"
+        responseContent =
+          "I can help with a variety of tasks. Just let me know what you need!";
       } else if (inputValue === "/help") {
         responseContent =
-          "**Available Commands:**\n- /help - Show this help message\n- /reset or /clear - Clear the chat history"
+          "**Available Commands:**\n- /help - Show this help message\n- /reset or /clear - Clear the chat history";
       } else {
-        responseContent = `I received your message: "${inputValue}". How can I assist you further?`
+        responseContent = `I received your message: "${inputValue}". How can I assist you further?`;
       }
 
       const assistantMessage: Message = {
         role: "assistant",
         content: responseContent,
         id: (Date.now() + 1).toString(),
-      }
+      };
 
-      setMessages((prev) => [...prev, assistantMessage])
-    }, 500)
-  }
+      setMessages((prev) => [...prev, assistantMessage]);
+    }, 500);
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      handleSendMessage()
+      e.preventDefault();
+      handleSendMessage();
     }
-  }
+  };
 
   const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode)
-  }
+    setIsDarkMode(!isDarkMode);
+  };
 
   useEffect(() => {
     if (isDarkMode) {
-      document.documentElement.classList.add("dark")
+      document.documentElement.classList.add("dark");
     } else {
-      document.documentElement.classList.remove("dark")
+      document.documentElement.classList.remove("dark");
     }
-  }, [isDarkMode])
+  }, [isDarkMode]);
+
+  useEffect(() => {
+    console.log("Model changed:", selectedModel);
+  }, [selectedModel]);
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 flex flex-col">
       {/* Header */}
       <header className="border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold text-neutral-800 dark:text-white">Inference Gateway UI</h1>
+          <h1 className="text-xl font-bold text-neutral-800 dark:text-white">
+            Inference Gateway UI
+          </h1>
           <div className="flex items-center gap-4">
             {/* Model Selector */}
-            <select
-              value={selectedModel}
-              onChange={(e) => setSelectedModel(e.target.value)}
-              className="h-10 rounded-md border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100"
-            >
-              {models.map((model) => (
-                <option key={model.id} value={model.id}>
-                  {model.id}
-                </option>
-              ))}
-            </select>
+            <ModelSelector
+              selectedModel={selectedModel}
+              onSelectModel={setSelectedModel}
+            />
 
             {/* Theme Toggle */}
             <button
@@ -140,12 +130,14 @@ export default function Home() {
           {messages.length > 0 ? (
             <div className="flex flex-col gap-4">
               {messages.map((message) => {
-                const isUser = message.role === "user"
+                const isUser = message.role === "user";
                 return (
                   <div
                     key={message.id}
                     className={`flex items-start gap-4 rounded-lg p-4 ${
-                      isUser ? "bg-blue-50 dark:bg-blue-950/20" : "bg-neutral-100 dark:bg-neutral-800"
+                      isUser
+                        ? "bg-blue-50 dark:bg-blue-950/20"
+                        : "bg-neutral-100 dark:bg-neutral-800"
                     }`}
                   >
                     <div
@@ -155,23 +147,31 @@ export default function Home() {
                           : "border-neutral-200 bg-neutral-100 text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
                       }`}
                     >
-                      {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+                      {isUser ? (
+                        <User className="h-4 w-4" />
+                      ) : (
+                        <Bot className="h-4 w-4" />
+                      )}
                     </div>
                     <div className="flex-1 space-y-2">
-                      <div className="font-medium">{isUser ? "You" : "Assistant"}</div>
+                      <div className="font-medium">
+                        {isUser ? "You" : "Assistant"}
+                      </div>
                       <div className="prose prose-sm dark:prose-invert max-w-none">
                         <ReactMarkdown>{message.content}</ReactMarkdown>
                       </div>
                     </div>
                   </div>
-                )
+                );
               })}
             </div>
           ) : (
             <div className="flex items-center justify-center h-[calc(100vh-180px)]">
               <div className="text-center text-neutral-500 dark:text-neutral-400">
                 <p className="text-lg font-medium">Start a conversation</p>
-                <p className="text-sm">Type a message to begin chatting with the AI assistant</p>
+                <p className="text-sm">
+                  Type a message to begin chatting with the AI assistant
+                </p>
               </div>
             </div>
           )}
@@ -208,11 +208,13 @@ export default function Home() {
             )}
           </div>
           <div className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
-            <span>Press Enter to send, Shift+Enter for new line. Try commands like /help or /reset</span>
+            <span>
+              Press Enter to send, Shift+Enter for new line. Try commands like
+              /help or /reset
+            </span>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
-
