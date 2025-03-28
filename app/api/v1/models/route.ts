@@ -2,34 +2,41 @@ import type { ListModelsResponse } from "@/types/model";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  // This is a mock implementation
-  // In a real app, you would fetch models from your OpenAI-compatible API
-  const models: ListModelsResponse = {
-    object: "list",
-    data: [
-      {
-        id: "gpt-4",
-        object: "model",
-        created: 1687882411,
-        owned_by: "openai",
-        served_by: "openai",
-      },
-      {
-        id: "gpt-3.5-turbo",
-        object: "model",
-        created: 1677610602,
-        owned_by: "openai",
-        served_by: "openai",
-      },
-      {
-        id: "gpt-4o",
-        object: "model",
-        created: 1712689492,
-        owned_by: "openai",
-        served_by: "openai",
-      },
-    ],
-  };
+  try {
+    const gatewayUrl = process.env.INFERENCE_GATEWAY_URL;
 
-  return NextResponse.json(models);
+    if (!gatewayUrl) {
+      console.error("INFERENCE_GATEWAY_URL environment variable is not set");
+      return NextResponse.json(
+        { error: "Gateway URL configuration missing" },
+        { status: 500 }
+      );
+    }
+
+    const modelsEndpoint = `${gatewayUrl}/models`;
+    const response = await fetch(modelsEndpoint, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Error fetching models from gateway: ${errorText}`);
+      return NextResponse.json(
+        { error: "Failed to fetch models from inference gateway" },
+        { status: response.status }
+      );
+    }
+
+    const models: ListModelsResponse = await response.json();
+    return NextResponse.json(models);
+  } catch (error) {
+    console.error("Error connecting to inference gateway:", error);
+    return NextResponse.json(
+      { error: "Failed to connect to inference gateway" },
+      { status: 500 }
+    );
+  }
 }
