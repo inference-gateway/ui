@@ -1,17 +1,11 @@
 ---
 services:
   ui:
-    # TODO - after pushing to a registry update this to use the image
-    build:
-      context: ../../..
-      dockerfile: Dockerfile
+    image: ghcr.io/inference-gateway/ui:latest
     ports:
       - "3000:3000"
     env_file:
       - .env.frontend
-    # TODO - remove after pushing to a registry
-    volumes:
-      - ../../..:/app
     depends_on:
       - inference-gateway
     deploy:
@@ -22,10 +16,6 @@ services:
         reservations:
           cpus: "0.25"
           memory: 256M
-    command:
-      - npm
-      - run
-      - dev
     restart: unless-stopped
 
   inference-gateway:
