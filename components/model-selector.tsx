@@ -65,7 +65,7 @@ export default function ModelSelector({
             </SelectItem>
           ))
         ) : (
-          <SelectItem value="gpt-3.5-turbo">gpt-3.5-turbo</SelectItem>
+          <SelectItem value="none">Empty</SelectItem>
         )}
       </SelectContent>
     </Select>
