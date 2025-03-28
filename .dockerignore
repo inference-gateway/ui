@@ -1,0 +1,16 @@
+node_modules
+.git
+.github
+.next
+.devcontainer
+out
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+*.pem
+.env*
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+temp
