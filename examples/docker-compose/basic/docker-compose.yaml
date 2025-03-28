@@ -9,6 +9,7 @@ services:
       - "3000:3000"
     env_file:
       - .env.frontend
+    # TODO - remove after pushing to a registry
     volumes:
       - ../../..:/app
     depends_on:
