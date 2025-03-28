@@ -22,7 +22,9 @@ This example demonstrates how to set up and use the UI library with Docker Compo
    ```
 
 3. Start the application using Docker Compose:
+
    ```sh
    docker-compose up
    ```
+
 4. Open your web browser and navigate to `http://localhost:3000` to see the UI in action.
