@@ -3,7 +3,7 @@ name: Artifacts
 on:
   release:
     types:
-      - publish
+      - published
 
 jobs:
   containers:
