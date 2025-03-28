@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.2](https://github.com/inference-gateway/ui/compare/v0.1.1...v0.1.2) (2025-03-28)
+
+### 🐛 Bug Fixes
+
+* **workflow:** Add 'created' event type for release and enable manual workflow dispatch ([c4d754b](https://github.com/inference-gateway/ui/commit/c4d754b0de7ea4a90576bafe485a7ce232c18663))
+
 ## [0.1.1](https://github.com/inference-gateway/ui/compare/v0.1.0...v0.1.1) (2025-03-28)
 
 ### 🐛 Bug Fixes
