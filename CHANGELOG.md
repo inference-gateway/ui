@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.3](https://github.com/inference-gateway/ui/compare/v0.1.2...v0.1.3) (2025-03-28)
+
+### 👷 CI
+
+* **artifacts:** Update Docker image signing process and add latest tag support ([f868f8b](https://github.com/inference-gateway/ui/commit/f868f8b3780151cd7f71da763782448b5b66b469))
+
 ## [0.1.2](https://github.com/inference-gateway/ui/compare/v0.1.1...v0.1.2) (2025-03-28)
 
 ### 🐛 Bug Fixes
