@@ -35,6 +35,11 @@
     --radius: 0.5rem;
   }
 
+  body {
+    color: hsl(var(--foreground));
+    background-color: hsl(var(--background));
+  }
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
@@ -89,7 +94,8 @@
   background-color: rgba(0, 0, 0, 0.1);
   border-radius: 0.25rem;
   padding: 0.125rem 0.25rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
   font-size: 0.875em;
 }
 
@@ -189,4 +195,3 @@
 .dark .prose th {
   background-color: rgba(255, 255, 255, 0.05);
 }
-
