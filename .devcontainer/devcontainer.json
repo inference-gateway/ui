@@ -9,9 +9,11 @@
     "vscode": {
       "settings": {
         "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.codeActionsOnSave": {
           "source.fixAll.eslint": "always"
         },
+        "files.insertFinalNewline": true,
         "typescript.tsdk": "node_modules/typescript/lib",
         "files.associations": {
           "*.css": "tailwindcss"
