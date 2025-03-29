@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.4](https://github.com/inference-gateway/ui/compare/v0.1.3...v0.1.4) (2025-03-29)
+
+### 👷 CI
+
+* **workflow:** Add 'released' event type to artifacts workflow ([b9dd210](https://github.com/inference-gateway/ui/commit/b9dd210ac49de43f067d0ed4e6c65d683f1569da))
+
+### 🎨 Miscellaneous
+
+* **workflow:** Rename sign-containers job to sign_containers for consistency ([813bd6a](https://github.com/inference-gateway/ui/commit/813bd6a0f2110ee45051ddecf6a9bfa3e9656970))
+
 ## [0.1.3](https://github.com/inference-gateway/ui/compare/v0.1.2...v0.1.3) (2025-03-28)
 
 ### 👷 CI
