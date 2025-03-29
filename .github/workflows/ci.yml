@@ -41,6 +41,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          target: prod
           push: false
           load: true
           tags: inference-gateway-ui:test
