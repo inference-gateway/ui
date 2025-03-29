@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
+  reactStrictMode: true,
   images: {
     unoptimized: true,
   },
@@ -9,6 +11,6 @@ const nextConfig: NextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
-}
+};
 
-export default nextConfig
+export default nextConfig;
