@@ -20,7 +20,7 @@ CMD [ "npm", "run", "dev" ]
 FROM base AS deps
 ENV NODE_ENV=development
 COPY package.json package-lock.json ./
-RUN npm ci && npm cache clean --force
+RUN npm ci
 
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
