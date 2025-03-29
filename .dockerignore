@@ -16,3 +16,4 @@ next-env.d.ts
 temp
 openapi.yaml
 examples
+tsconfig.tsbuildinfo
