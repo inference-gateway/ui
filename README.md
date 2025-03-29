@@ -24,10 +24,10 @@ This application can be containerized using Docker:
 
 ```bash
 # Build the Docker image locally
-docker build -t inference-gateway-ui .
+docker build -t inference-gateway-ui --target dev .
 
 # Run the container
-docker run -p 3000:3000 inference-gateway-ui
+docker run -v $(PWD):/app -w /app -e INFERENCE_GATEWAY_URL=http://localhost:8080/v1 -p 3000:3000 inference-gateway-ui
 ```
 
 ## Deployment
