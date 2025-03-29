@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.6](https://github.com/inference-gateway/ui/compare/v0.1.5...v0.1.6) (2025-03-29)
+
+### 👷 CI
+
+* **workflow:** Remove unnecessary release event types from artifacts workflow ([7a85ca4](https://github.com/inference-gateway/ui/commit/7a85ca4c05d161284f335be518fc959a1b372ba4))
+* **workflow:** Update container build job to support multiple OS platforms ([4d62474](https://github.com/inference-gateway/ui/commit/4d624743e615836de8c5da251ecff3b830f67c23))
+
 ## [0.1.5](https://github.com/inference-gateway/ui/compare/v0.1.4...v0.1.5) (2025-03-29)
 
 ### 👷 CI
