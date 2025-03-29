@@ -64,6 +64,7 @@ jobs:
         id: semantic
         env:
           CI: true
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           # Create first release if not exists using gh cli - Initial Release Version 0.1.0
           # This is an HACK because semantic release doesn't support versions under 1.0.0
