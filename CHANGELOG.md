@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.7-rc.1](https://github.com/inference-gateway/ui/compare/v0.1.6...v0.1.7-rc.1) (2025-03-29)
+
+### 🔧 Miscellaneous
+
+* **devcontainer:** update Dockerfile to install GitHub CLI and improve package installation ([65b37ab](https://github.com/inference-gateway/ui/commit/65b37abac8a0ae135b2c2cdaaf70df7e6d6ce37d))
+* **docker-compose:** set pull_policy to always for services ([6a2230a](https://github.com/inference-gateway/ui/commit/6a2230a597fd316e0687d249801e551072c63bc0))
+
+### 📦 Miscellaneous
+
+* **docker:** optimize Dockerfile and update .dockerignore for improved production build process ([21bcab7](https://github.com/inference-gateway/ui/commit/21bcab7c1c447a3e416ac520f3c6a87b26205c58))
+
 ## [0.1.6](https://github.com/inference-gateway/ui/compare/v0.1.5...v0.1.6) (2025-03-29)
 
 ### 👷 CI
