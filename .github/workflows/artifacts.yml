@@ -11,7 +11,7 @@ on:
 jobs:
   containers:
     name: Build and Push Container Images
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
