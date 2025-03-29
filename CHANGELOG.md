@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.7](https://github.com/inference-gateway/ui/compare/v0.1.6...v0.1.7) (2025-03-29)
+
+### ♻️ Improvements
+
+* Optimize Container Image Size ([#5](https://github.com/inference-gateway/ui/issues/5)) ([5c7a898](https://github.com/inference-gateway/ui/commit/5c7a89839c9cd0aef79b35fb30bfe0c841104bd5))
+
 ## [0.1.7-rc.2](https://github.com/inference-gateway/ui/compare/v0.1.7-rc.1...v0.1.7-rc.2) (2025-03-29)
 
 ### 👷 CI
