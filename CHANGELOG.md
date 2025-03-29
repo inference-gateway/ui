@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.7-rc.2](https://github.com/inference-gateway/ui/compare/v0.1.7-rc.1...v0.1.7-rc.2) (2025-03-29)
+
+### 👷 CI
+
+* **workflow:** update artifacts.yml to conditionally enable latest version for non-rc tags ([66611e7](https://github.com/inference-gateway/ui/commit/66611e7aa2a17f9846450fc022959665ccb7416d))
+
 ## [0.1.7-rc.1](https://github.com/inference-gateway/ui/compare/v0.1.6...v0.1.7-rc.1) (2025-03-29)
 
 ### 🔧 Miscellaneous
