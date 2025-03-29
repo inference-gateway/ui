@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.5](https://github.com/inference-gateway/ui/compare/v0.1.4...v0.1.5) (2025-03-29)
+
+### 👷 CI
+
+* **workflow:** Add GITHUB_TOKEN to release workflow for authentication ([77a0271](https://github.com/inference-gateway/ui/commit/77a0271315fa3a303f76787c73913a49a73fe79e))
+* **workflow:** Add support for multiple platforms in artifacts workflow ([cc39e0d](https://github.com/inference-gateway/ui/commit/cc39e0d62e9525866c7e5c6d2c5cd9166afaf636))
+* **workflow:** Disable GPG signing for commits in release workflow ([09fb7c6](https://github.com/inference-gateway/ui/commit/09fb7c6e89aa3c5bd9ffcfb907ccc1f28a8e67b7))
+* **workflow:** Set Git author and committer information for GitHub Actions ([0cf3cdc](https://github.com/inference-gateway/ui/commit/0cf3cdcb1155da4a2d32c6093dda00a1e0e3b7c4))
+* **workflow:** Specify owner and repositories for GitHub App authentication ([1227dc3](https://github.com/inference-gateway/ui/commit/1227dc363166597c2e0dc51f1829bc45a7b76692))
+* **workflow:** Update container build environment to Ubuntu 24.04 ([acbef78](https://github.com/inference-gateway/ui/commit/acbef78118d81eb7afa58e1a426c72aa39c52bce))
+* **workflow:** Update release workflow to use GitHub App for authentication ([7b05671](https://github.com/inference-gateway/ui/commit/7b056711b6711e444e7411cb308be7b3714e728d))
+
+### 📦 Miscellaneous
+
+* **devcontainer:** Add GitHub Actions extension to development container ([8ba9b3d](https://github.com/inference-gateway/ui/commit/8ba9b3d11a0e900ee97c76fc9f50bed0e3c5dda4))
+
 ## [0.1.4](https://github.com/inference-gateway/ui/compare/v0.1.3...v0.1.4) (2025-03-29)
 
 ### 👷 CI
