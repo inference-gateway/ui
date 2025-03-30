@@ -219,11 +219,11 @@ export default function Home() {
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 flex flex-col">
       {/* Header */}
       <header className="border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4">
-        <div className="container mx-auto flex justify-between items-center">
+        <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <h1 className="text-xl font-bold text-neutral-800 dark:text-white">
             Inference Gateway UI
           </h1>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 w-full md:w-auto">
             {/* Model Selector */}
             <ModelSelector
               selectedModel={selectedModel}

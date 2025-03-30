@@ -73,12 +73,12 @@ export default function ModelSelector({
       open={open}
       onOpenChange={setOpen}
     >
-      <SelectTrigger className="w-[380px]">
+      <SelectTrigger className="w-full max-w-[380px]">
         <SelectValue
           placeholder={isLoading ? "Loading..." : "Select a model"}
         />
       </SelectTrigger>
-      <SelectContent className="w-[380px] max-h-[300px]">
+      <SelectContent className="w-[var(--radix-select-trigger-width)] max-h-[300px]">
         <div className="flex items-center px-3 pb-2 sticky top-0 bg-background z-10">
           <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
           <Input
@@ -104,9 +104,9 @@ export default function ModelSelector({
                 className="flex justify-between"
               >
                 <div className="flex justify-between w-full items-center">
-                  <span>{model.id}</span>
+                  <span className="truncate">{model.id}</span>
                   {selectedModel === model.id && (
-                    <Check className="h-4 w-4 ml-2" />
+                    <Check className="h-4 w-4 ml-2 flex-shrink-0" />
                   )}
                 </div>
               </SelectItem>
