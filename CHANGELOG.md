@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0](https://github.com/inference-gateway/ui/compare/v0.1.8...v0.2.0) (2025-03-30)
+
+### ✨ Features
+
+* Implement Streaming Responses ([#10](https://github.com/inference-gateway/ui/issues/10)) ([bf04a6b](https://github.com/inference-gateway/ui/commit/bf04a6baf69c8c7a7c36ffb579caff594d3a4867))
+
 ## [0.1.8](https://github.com/inference-gateway/ui/compare/v0.1.7...v0.1.8) (2025-03-30)
 
 ### ♻️ Improvements
