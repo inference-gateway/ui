@@ -12,8 +12,12 @@ import type {
   Message,
 } from "@/types/chat";
 
+interface InternalMessage extends Message {
+  id: string;
+}
+
 export default function Home() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<InternalMessage[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [selectedModel, setSelectedModel] = useState("");
@@ -32,7 +36,7 @@ export default function Home() {
       }
     }
 
-    const userMessage: Message = {
+    const userMessage: InternalMessage = {
       role: "user",
       content: inputValue,
       id: Date.now().toString(),
@@ -45,7 +49,7 @@ export default function Home() {
     latestMessageRef.current = "";
 
     const assistantMessageId = Date.now().toString();
-    const assistantMessage: Message = {
+    const assistantMessage: InternalMessage = {
       role: "assistant",
       content: "",
       id: assistantMessageId,
@@ -160,7 +164,7 @@ export default function Home() {
     } catch (error) {
       console.error("Failed to get response:", error);
 
-      const errorMessage: Message = {
+      const errorMessage: InternalMessage = {
         role: "assistant",
         content: "Sorry, I encountered an error. Please try again later.",
         id: Date.now().toString(),
@@ -232,7 +236,7 @@ export default function Home() {
                 const isUser = message.role === "user";
                 return (
                   <div
-                    key={message.id}
+                    key={`${message.role + message.id}`}
                     className={`flex items-start gap-4 rounded-lg p-4 ${
                       isUser
                         ? "bg-blue-50 dark:bg-blue-950/20"
