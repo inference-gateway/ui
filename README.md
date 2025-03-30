@@ -4,6 +4,18 @@
   <a href="https://github.com/inference-gateway/ui/actions/workflows/ci.yml">
     <img src="https://github.com/inference-gateway/ui/actions/workflows/ci.yml/badge.svg" alt="CI Status">
   </a>
+  <a href="https://github.com/inference-gateway/ui/actions/workflows/release.yml">
+    <img src="https://github.com/inference-gateway/ui/actions/workflows/release.yml/badge.svg" alt="Release Status">
+  </a>
+  <a href="https://github.com/inference-gateway/ui/actions/workflows/artifacts.yml">
+    <img src="https://github.com/inference-gateway/ui/actions/workflows/artifacts.yml/badge.svg" alt="Artifacts Status">
+  </a>
+  <a href="https://github.com/inference-gateway/ui/releases/latest">
+    <img src="https://img.shields.io/github/v/release/inference-gateway/ui" alt="Latest Release">
+  </a>
+  <a href="https://github.com/inference-gateway/ui/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/inference-gateway/ui" alt="License">
+  </a>
 </p>
 
 The UI for the inference-gateway, providing a user-friendly interface to interact with and visualize inference results and manage models.
