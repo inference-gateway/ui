@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { User, Bot, Moon, Sun, Trash2, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import ModelSelector from "@/components/model-selector";
@@ -14,6 +14,8 @@ export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [selectedModel, setSelectedModel] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [, setIsStreaming] = useState(false);
+  const latestMessageRef = useRef<string>("");
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
@@ -35,6 +37,8 @@ export default function Home() {
     setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
     setIsLoading(true);
+    setIsStreaming(true);
+    latestMessageRef.current = "";
 
     try {
       const chatRequest: CreateChatCompletionRequest = {
@@ -44,7 +48,16 @@ export default function Home() {
           content,
           id: "",
         })),
+        stream: true,
       };
+
+      const assistantMessageId = Date.now().toString();
+      const assistantMessage: Message = {
+        role: "assistant",
+        content: "",
+        id: assistantMessageId,
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
 
       const response = await fetch("/api/v1/chat/completions", {
         method: "POST",
@@ -58,15 +71,53 @@ export default function Home() {
         throw new Error(`API call failed with status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
 
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: data.choices[0].message.content,
-        id: data.id || Date.now().toString(),
-      };
+      if (!reader) {
+        throw new Error("Response body is null");
+      }
 
-      setMessages((prev) => [...prev, assistantMessage]);
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split("\n").filter((line) => line.trim() !== "");
+
+        for (const line of lines) {
+          if (line.startsWith("data:")) {
+            const data = line.slice(5).trim();
+
+            if (data === "[DONE]") continue;
+
+            try {
+              const parsed = JSON.parse(data);
+              const content = parsed.choices[0]?.delta?.content || "";
+
+              if (content) {
+                latestMessageRef.current += content;
+
+                setMessages((prev) => {
+                  const updated = [...prev];
+                  const lastIndex = updated.length - 1;
+                  if (updated[lastIndex].id === assistantMessageId) {
+                    updated[lastIndex] = {
+                      ...updated[lastIndex],
+                      content: latestMessageRef.current,
+                    };
+                  }
+                  return updated;
+                });
+
+                await new Promise((resolve) => setTimeout(resolve, 10));
+              }
+            } catch (e) {
+              console.error("Error parsing SSE data:", e);
+            }
+          }
+        }
+      }
     } catch (error) {
       console.error("Failed to get response:", error);
 
@@ -79,6 +130,7 @@ export default function Home() {
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+      setIsStreaming(false);
     }
   };
 
