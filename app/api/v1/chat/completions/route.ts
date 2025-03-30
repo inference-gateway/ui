@@ -1,4 +1,9 @@
+import {
+  CreateChatCompletionResponse,
+  CreateChatCompletionStreamResponse,
+} from "@/types/chat";
 import { NextResponse } from "next/server";
+import { TransformStream } from "stream/web";
 
 export async function POST(req: Request) {
   try {
@@ -40,8 +45,101 @@ export async function POST(req: Request) {
     }
 
     if (stream) {
-      const responseStream = response.body;
-      return new Response(responseStream, {
+      let inThinkTag = false;
+      let thinkContent = "";
+      let contentBuffer = "";
+
+      const { readable, writable } = new TransformStream({
+        transform(chunk, controller) {
+          try {
+            const text = new TextDecoder().decode(chunk);
+            const messages = text.split("\n\n").filter(Boolean);
+
+            for (const message of messages) {
+              if (!message.startsWith("data: ")) continue;
+              const data = message.substring(6);
+              if (data === "[DONE]") {
+                controller.enqueue(
+                  new TextEncoder().encode(`data: [DONE]\n\n`)
+                );
+                continue;
+              }
+
+              try {
+                // TODO: Normalize the reasoning on the backend on the inference-gateway
+                // Groq pass the reasoning different than DeepSeek does and for DeepSeek models 😅
+                // Better would be to transform their response on the backend and use the proper reasoning_content attribute, which is an optional attribute.
+                const parsed: CreateChatCompletionStreamResponse =
+                  JSON.parse(data);
+
+                if (parsed.choices?.[0]?.delta?.content) {
+                  let content = parsed.choices[0].delta.content;
+
+                  if (content.includes("<think>")) {
+                    inThinkTag = true;
+                    const parts = content.split("<think>");
+                    contentBuffer += parts[0];
+                    content = parts[0];
+
+                    if (parts.length > 1) {
+                      thinkContent += parts[1];
+                    }
+                  } else if (inThinkTag && content.includes("</think>")) {
+                    const parts = content.split("</think>");
+                    thinkContent += parts[0];
+                    inThinkTag = false;
+
+                    if (parts.length > 1) {
+                      contentBuffer += parts[1];
+                      content = contentBuffer;
+                      contentBuffer = "";
+                    } else {
+                      content = contentBuffer;
+                      contentBuffer = "";
+                    }
+
+                    if (
+                      !parsed.choices[0].delta.reasoning_content &&
+                      thinkContent.trim()
+                    ) {
+                      parsed.choices[0].delta.reasoning_content =
+                        thinkContent.trim();
+                    }
+                    thinkContent = "";
+                  } else if (inThinkTag) {
+                    thinkContent += content;
+                    content = "";
+                  } else {
+                    contentBuffer += content;
+                    content = contentBuffer;
+                    contentBuffer = "";
+                  }
+
+                  parsed.choices[0].delta.content = content;
+                }
+
+                controller.enqueue(
+                  new TextEncoder().encode(
+                    `data: ${JSON.stringify(parsed)}\n\n`
+                  )
+                );
+              } catch (error) {
+                console.error("Error processing chunk:", error);
+                controller.enqueue(new TextEncoder().encode(`${message}\n\n`));
+              }
+            }
+          } catch (error) {
+            console.error("Error transforming stream:", error);
+            controller.enqueue(chunk);
+          }
+        },
+      });
+
+      response.body?.pipeTo(writable).catch((err) => {
+        console.error("Error piping response:", err);
+      });
+
+      return new Response(readable as unknown as ReadableStream, {
         headers: {
           "Content-Type": "text/event-stream",
           "Cache-Control": "no-cache",
@@ -49,7 +147,26 @@ export async function POST(req: Request) {
         },
       });
     } else {
-      const completionData = await response.json();
+      const completionData: CreateChatCompletionResponse =
+        await response.json();
+
+      if (completionData.choices?.[0]?.message?.content) {
+        const content = completionData.choices[0].message.content;
+        const thinkMatch = content.match(/<think>([\s\S]*?)<\/think>/);
+
+        if (thinkMatch) {
+          const reasoning = thinkMatch[1].trim();
+
+          completionData.choices[0].message.content = content
+            .replace(/<think>[\s\S]*?<\/think>/, "")
+            .trim();
+
+          if (!completionData.choices[0].message.reasoning_content) {
+            completionData.choices[0].message.reasoning_content = reasoning;
+          }
+        }
+      }
+
       return NextResponse.json(completionData);
     }
   } catch (error) {
