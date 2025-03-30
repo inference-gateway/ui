@@ -64,7 +64,7 @@ export async function POST(req: Request) {
 
               try {
                 // TODO: Normalize the reasoning on the backend on the inference-gateway
-                // Groq pass the reasoning different then DeepSeek does and for DeepSeek models 😅
+                // Groq pass the reasoning different than DeepSeek does and for DeepSeek models 😅
                 // Better would be to transform their response on the backend and use the proper reasoning_content attribute, which is an optional attribute.
                 const parsed = JSON.parse(data);
 
