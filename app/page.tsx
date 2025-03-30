@@ -6,7 +6,11 @@ import { useState, useEffect, useRef } from "react";
 import { User, Bot, Moon, Sun, Trash2, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import ModelSelector from "@/components/model-selector";
-import type { CreateChatCompletionRequest, Message } from "@/types/chat";
+import type {
+  CreateChatCompletionRequest,
+  CreateChatCompletionStreamResponse,
+  Message,
+} from "@/types/chat";
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -40,6 +44,14 @@ export default function Home() {
     setIsStreaming(true);
     latestMessageRef.current = "";
 
+    const assistantMessageId = Date.now().toString();
+    const assistantMessage: Message = {
+      role: "assistant",
+      content: "",
+      id: assistantMessageId,
+    };
+    setMessages((prev) => [...prev, assistantMessage]);
+
     try {
       const chatRequest: CreateChatCompletionRequest = {
         model: selectedModel,
@@ -50,14 +62,6 @@ export default function Home() {
         })),
         stream: true,
       };
-
-      const assistantMessageId = Date.now().toString();
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: "",
-        id: assistantMessageId,
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
 
       const response = await fetch("/api/v1/chat/completions", {
         method: "POST",
@@ -72,18 +76,21 @@ export default function Home() {
       }
 
       const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-
       if (!reader) {
         throw new Error("Response body is null");
       }
+
+      const decoder = new TextDecoder();
+      let buffer = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n").filter((line) => line.trim() !== "");
+        buffer += decoder.decode(value, { stream: true });
+
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
 
         for (const line of lines) {
           if (line.startsWith("data:")) {
@@ -92,7 +99,9 @@ export default function Home() {
             if (data === "[DONE]") continue;
 
             try {
-              const parsed = JSON.parse(data);
+              const parsed = JSON.parse(
+                data
+              ) as CreateChatCompletionStreamResponse;
               const content = parsed.choices[0]?.delta?.content || "";
 
               if (content) {
@@ -110,11 +119,41 @@ export default function Home() {
                   return updated;
                 });
 
-                await new Promise((resolve) => setTimeout(resolve, 10));
+                await new Promise((resolve) => setTimeout(resolve, 1));
               }
             } catch (e) {
               console.error("Error parsing SSE data:", e);
             }
+          }
+        }
+      }
+
+      if (buffer.startsWith("data:")) {
+        const data = buffer.slice(5).trim();
+        if (data && data !== "[DONE]") {
+          try {
+            const parsed = JSON.parse(
+              data
+            ) as CreateChatCompletionStreamResponse;
+            const content = parsed.choices[0]?.delta?.content || "";
+
+            if (content) {
+              latestMessageRef.current += content;
+
+              setMessages((prev) => {
+                const updated = [...prev];
+                const lastIndex = updated.length - 1;
+                if (updated[lastIndex].id === assistantMessageId) {
+                  updated[lastIndex] = {
+                    ...updated[lastIndex],
+                    content: latestMessageRef.current,
+                  };
+                }
+                return updated;
+              });
+            }
+          } catch (e) {
+            console.error("Error parsing final SSE data:", e);
           }
         }
       }
