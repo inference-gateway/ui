@@ -11,6 +11,7 @@ import type {
   CreateChatCompletionStreamResponse,
   Message,
 } from "@/types/chat";
+import ThinkingBubble from "@/components/thinking-bubble";
 
 interface InternalMessage extends Message {
   id: string;
@@ -24,6 +25,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [, setIsStreaming] = useState(false);
   const latestMessageRef = useRef<string>("");
+  const reasoningContentRef = useRef<string>("");
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
@@ -47,6 +49,7 @@ export default function Home() {
     setIsLoading(true);
     setIsStreaming(true);
     latestMessageRef.current = "";
+    reasoningContentRef.current = "";
 
     const assistantMessageId = Date.now().toString();
     const assistantMessage: InternalMessage = {
@@ -107,9 +110,17 @@ export default function Home() {
                 data
               ) as CreateChatCompletionStreamResponse;
               const content = parsed.choices[0]?.delta?.content || "";
+              const reasoning =
+                parsed.choices[0]?.delta?.reasoning_content || "";
 
-              if (content) {
-                latestMessageRef.current += content;
+              if (content || reasoning) {
+                if (content) {
+                  latestMessageRef.current += content;
+                }
+
+                if (reasoning) {
+                  reasoningContentRef.current += reasoning;
+                }
 
                 setMessages((prev) => {
                   const updated = [...prev];
@@ -118,6 +129,8 @@ export default function Home() {
                     updated[lastIndex] = {
                       ...updated[lastIndex],
                       content: latestMessageRef.current,
+                      reasoning_content:
+                        reasoningContentRef.current || undefined,
                     };
                   }
                   return updated;
@@ -140,22 +153,28 @@ export default function Home() {
               data
             ) as CreateChatCompletionStreamResponse;
             const content = parsed.choices[0]?.delta?.content || "";
+            const reasoning = parsed.choices[0]?.delta?.reasoning_content || "";
 
             if (content) {
               latestMessageRef.current += content;
-
-              setMessages((prev) => {
-                const updated = [...prev];
-                const lastIndex = updated.length - 1;
-                if (updated[lastIndex].id === assistantMessageId) {
-                  updated[lastIndex] = {
-                    ...updated[lastIndex],
-                    content: latestMessageRef.current,
-                  };
-                }
-                return updated;
-              });
             }
+
+            if (reasoning) {
+              reasoningContentRef.current += reasoning;
+            }
+
+            setMessages((prev) => {
+              const updated = [...prev];
+              const lastIndex = updated.length - 1;
+              if (updated[lastIndex].id === assistantMessageId) {
+                updated[lastIndex] = {
+                  ...updated[lastIndex],
+                  content: latestMessageRef.current,
+                  reasoning_content: reasoningContentRef.current || undefined,
+                };
+              }
+              return updated;
+            });
           } catch (e) {
             console.error("Error parsing final SSE data:", e);
           }
@@ -232,36 +251,49 @@ export default function Home() {
         <div className="container mx-auto max-w-4xl">
           {messages.length > 0 ? (
             <div className="flex flex-col gap-4">
-              {messages.map((message) => {
+              {messages.map((message, index) => {
                 const isUser = message.role === "user";
+                const nextMessage = messages[index + 1];
+                const showReasoning =
+                  !isUser &&
+                  message.reasoning_content &&
+                  nextMessage?.role !== "user";
+
                 return (
-                  <div
-                    key={`${message.role + message.id}`}
-                    className={`flex items-start gap-4 rounded-lg p-4 ${
-                      isUser
-                        ? "bg-blue-50 dark:bg-blue-950/20"
-                        : "bg-neutral-100 dark:bg-neutral-800"
-                    }`}
-                  >
+                  <div key={`${message.role + message.id}`}>
+                    {!isUser && showReasoning && (
+                      <ThinkingBubble
+                        content={message.reasoning_content || ""}
+                        isVisible={!!message.reasoning_content}
+                      />
+                    )}
                     <div
-                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md border ${
+                      className={`flex items-start gap-4 rounded-lg p-4 ${
                         isUser
-                          ? "border-blue-200 bg-blue-100 text-blue-600 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300"
-                          : "border-neutral-200 bg-neutral-100 text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+                          ? "bg-blue-50 dark:bg-blue-950/20"
+                          : "bg-neutral-100 dark:bg-neutral-800"
                       }`}
                     >
-                      {isUser ? (
-                        <User className="h-4 w-4" />
-                      ) : (
-                        <Bot className="h-4 w-4" />
-                      )}
-                    </div>
-                    <div className="flex-1 space-y-2">
-                      <div className="font-medium">
-                        {isUser ? "You" : "Assistant"}
+                      <div
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md border ${
+                          isUser
+                            ? "border-blue-200 bg-blue-100 text-blue-600 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300"
+                            : "border-neutral-200 bg-neutral-100 text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+                        }`}
+                      >
+                        {isUser ? (
+                          <User className="h-4 w-4" />
+                        ) : (
+                          <Bot className="h-4 w-4" />
+                        )}
                       </div>
-                      <div className="prose prose-sm dark:prose-invert max-w-none">
-                        <ReactMarkdown>{message.content}</ReactMarkdown>
+                      <div className="flex-1 space-y-2">
+                        <div className="font-medium">
+                          {isUser ? "You" : "Assistant"}
+                        </div>
+                        <div className="prose prose-sm dark:prose-invert max-w-none">
+                          <ReactMarkdown>{message.content}</ReactMarkdown>
+                        </div>
                       </div>
                     </div>
                   </div>

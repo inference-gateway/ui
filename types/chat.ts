@@ -1,6 +1,7 @@
 export interface Message {
   role: "user" | "assistant" | "system" | "tool";
-  content: string;
+  content?: string;
+  reasoning_content?: string;
 }
 
 export interface CreateChatCompletionRequest {
@@ -47,10 +48,7 @@ export interface CreateChatCompletionStreamResponse {
   system_fingerprint?: string;
   choices: Array<{
     index: number;
-    delta: {
-      role?: string;
-      content?: string;
-    };
+    delta: Message;
     finish_reason: string | null;
   }>;
   usage: {
