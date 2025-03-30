@@ -227,7 +227,7 @@ export default function Home() {
             {/* Model Selector */}
             <ModelSelector
               selectedModel={selectedModel}
-              onSelectModel={setSelectedModel}
+              onSelectModelAction={setSelectedModel}
             />
 
             {/* Theme Toggle */}
