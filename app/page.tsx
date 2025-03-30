@@ -66,6 +66,7 @@ export default function Home() {
       role: "assistant",
       content: "",
       id: assistantMessageId,
+      model: selectedModel,
     };
     setMessages((prev) => [...prev, assistantMessage]);
 
@@ -321,8 +322,19 @@ export default function Home() {
                         )}
                       </div>
                       <div className="flex-1 space-y-2">
-                        <div className="font-medium">
-                          {isUser ? "You" : "Assistant"}
+                        <div className="font-medium flex items-center gap-2">
+                          {isUser ? (
+                            "You"
+                          ) : (
+                            <>
+                              Assistant
+                              {!isUser && message.model && (
+                                <span className="text-xs bg-neutral-200 dark:bg-neutral-700 px-2 py-0.5 rounded-full font-normal">
+                                  {message.model}
+                                </span>
+                              )}
+                            </>
+                          )}
                         </div>
                         <div className="prose prose-sm dark:prose-invert max-w-none">
                           <ReactMarkdown>{message.content}</ReactMarkdown>
@@ -379,7 +391,14 @@ export default function Home() {
             </button>
             {messages.length > 0 && (
               <button
-                onClick={() => setMessages([])}
+                onClick={() => {
+                  setMessages([]);
+                  setTokenUsage({
+                    promptTokens: 0,
+                    completionTokens: 0,
+                    totalTokens: 0,
+                  });
+                }}
                 disabled={isLoading}
                 title="Clear chat"
                 className="h-10 w-10 rounded-md border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 flex items-center justify-center disabled:opacity-50"
