@@ -41,6 +41,10 @@ export async function POST(req: Request) {
     }
 
     if (stream) {
+      let inThinkTag = false;
+      let thinkContent = "";
+      let contentBuffer = "";
+
       const { readable, writable } = new TransformStream({
         transform(chunk, controller) {
           try {
@@ -59,25 +63,55 @@ export async function POST(req: Request) {
               }
 
               try {
+                // TODO: Normalize the reasoning on the backend on the inference-gateway
+                // Groq pass the reasoning different then DeepSeek does and for DeepSeek models 😅
+                // Better would be to transform their response on the backend and use the proper reasoning_content attribute, which is an optional attribute.
                 const parsed = JSON.parse(data);
 
                 if (parsed.choices?.[0]?.delta?.content) {
-                  const content = parsed.choices[0].delta.content;
-                  const thinkMatch = content.match(
-                    /<think>([\s\S]*?)<\/think>/
-                  );
+                  let content = parsed.choices[0].delta.content;
 
-                  if (thinkMatch) {
-                    const reasoning = thinkMatch[1].trim();
+                  if (content.includes("<think>")) {
+                    inThinkTag = true;
+                    const parts = content.split("<think>");
+                    contentBuffer += parts[0];
+                    content = parts[0];
 
-                    parsed.choices[0].delta.content = content
-                      .replace(/<think>[\s\S]*?<\/think>/, "")
-                      .trim();
-
-                    if (!parsed.choices[0].delta.reasoning_content) {
-                      parsed.choices[0].delta.reasoning_content = reasoning;
+                    if (parts.length > 1) {
+                      thinkContent += parts[1];
                     }
+                  } else if (inThinkTag && content.includes("</think>")) {
+                    const parts = content.split("</think>");
+                    thinkContent += parts[0];
+                    inThinkTag = false;
+
+                    if (parts.length > 1) {
+                      contentBuffer += parts[1];
+                      content = contentBuffer;
+                      contentBuffer = "";
+                    } else {
+                      content = contentBuffer;
+                      contentBuffer = "";
+                    }
+
+                    if (
+                      !parsed.choices[0].delta.reasoning_content &&
+                      thinkContent.trim()
+                    ) {
+                      parsed.choices[0].delta.reasoning_content =
+                        thinkContent.trim();
+                    }
+                    thinkContent = "";
+                  } else if (inThinkTag) {
+                    thinkContent += content;
+                    content = "";
+                  } else {
+                    contentBuffer += content;
+                    content = contentBuffer;
+                    contentBuffer = "";
                   }
+
+                  parsed.choices[0].delta.content = content;
                 }
 
                 controller.enqueue(
@@ -85,7 +119,8 @@ export async function POST(req: Request) {
                     `data: ${JSON.stringify(parsed)}\n\n`
                   )
                 );
-              } catch {
+              } catch (error) {
+                console.error("Error processing chunk:", error);
                 controller.enqueue(new TextEncoder().encode(`${message}\n\n`));
               }
             }
