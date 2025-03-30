@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.8](https://github.com/inference-gateway/ui/compare/v0.1.7...v0.1.8) (2025-03-30)
+
+### ♻️ Improvements
+
+* Remove default model selection and disable the input text field when no model is selected ([#8](https://github.com/inference-gateway/ui/issues/8)) ([4e40536](https://github.com/inference-gateway/ui/commit/4e40536e49285780a666916b6ba1f8956a342240))
+
+### 📚 Documentation
+
+* Update README to include additional badges for release and artifacts status ([#9](https://github.com/inference-gateway/ui/issues/9)) ([0e38600](https://github.com/inference-gateway/ui/commit/0e3860025d67ada57ac8879e76b567733fa86bff))
+
 ## [0.1.7](https://github.com/inference-gateway/ui/compare/v0.1.6...v0.1.7) (2025-03-29)
 
 ### ♻️ Improvements
