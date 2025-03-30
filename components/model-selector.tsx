@@ -73,7 +73,7 @@ export default function ModelSelector({
       open={open}
       onOpenChange={setOpen}
     >
-      <SelectTrigger className="w-full max-w-[380px]">
+      <SelectTrigger className="w-full min-w-[320px] max-w-[380px]">
         <SelectValue
           placeholder={isLoading ? "Loading..." : "Select a model"}
         />
