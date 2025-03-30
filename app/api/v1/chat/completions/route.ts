@@ -1,3 +1,7 @@
+import {
+  CreateChatCompletionResponse,
+  CreateChatCompletionStreamResponse,
+} from "@/types/chat";
 import { NextResponse } from "next/server";
 import { TransformStream } from "stream/web";
 
@@ -53,7 +57,6 @@ export async function POST(req: Request) {
 
             for (const message of messages) {
               if (!message.startsWith("data: ")) continue;
-
               const data = message.substring(6);
               if (data === "[DONE]") {
                 controller.enqueue(
@@ -66,7 +69,8 @@ export async function POST(req: Request) {
                 // TODO: Normalize the reasoning on the backend on the inference-gateway
                 // Groq pass the reasoning different than DeepSeek does and for DeepSeek models 😅
                 // Better would be to transform their response on the backend and use the proper reasoning_content attribute, which is an optional attribute.
-                const parsed = JSON.parse(data);
+                const parsed: CreateChatCompletionStreamResponse =
+                  JSON.parse(data);
 
                 if (parsed.choices?.[0]?.delta?.content) {
                   let content = parsed.choices[0].delta.content;
@@ -143,7 +147,8 @@ export async function POST(req: Request) {
         },
       });
     } else {
-      const completionData = await response.json();
+      const completionData: CreateChatCompletionResponse =
+        await response.json();
 
       if (completionData.choices?.[0]?.message?.content) {
         const content = completionData.choices[0].message.content;

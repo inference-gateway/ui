@@ -26,17 +26,27 @@ export interface CreateChatCompletionResponse {
   model: string;
   choices: Array<{
     index: number;
-    message: {
-      role: string;
-      content: string;
-    };
+    message: Message;
     finish_reason: string | null;
   }>;
-  usage: {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
-  };
+  usage?: CompletionUsage;
+  prompt_tokens_details?: CompletionPromptTokensDetails;
+}
+
+export interface CompletionUsage {
+  prompt_tokens: number;
+  completion_tokens: number;
+  total_tokens: number;
+  queue_time?: number;
+  prompt_time?: number;
+  completion_time?: number;
+  total_time?: number;
+}
+
+export interface CompletionPromptTokensDetails {
+  cached_tokens: number;
+  prompt_cache_hit_tokens: number;
+  prompt_cache_miss_tokens: number;
 }
 
 export interface CreateChatCompletionStreamResponse {
@@ -51,9 +61,6 @@ export interface CreateChatCompletionStreamResponse {
     delta: Message;
     finish_reason: string | null;
   }>;
-  usage: {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
-  };
+  usage?: CompletionUsage;
+  prompt_tokens_details?: CompletionPromptTokensDetails;
 }

@@ -22,6 +22,15 @@ export default function Home() {
   const [, setIsStreaming] = useState(false);
   const latestMessageRef = useRef<string>("");
   const reasoningContentRef = useRef<string>("");
+  const [tokenUsage, setTokenUsage] = useState<{
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+  }>({
+    promptTokens: 0,
+    completionTokens: 0,
+    totalTokens: 0,
+  });
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
@@ -30,6 +39,11 @@ export default function Home() {
       if (inputValue.trim() === "/reset" || inputValue.trim() === "/clear") {
         setMessages([]);
         setInputValue("");
+        setTokenUsage({
+          promptTokens: 0,
+          completionTokens: 0,
+          totalTokens: 0,
+        });
         return;
       }
     }
@@ -134,6 +148,21 @@ export default function Home() {
 
                 await new Promise((resolve) => setTimeout(resolve, 1));
               }
+
+              if (parsed.usage) {
+                if (
+                  parsed.usage &&
+                  parsed.usage.prompt_tokens &&
+                  parsed.usage.completion_tokens &&
+                  parsed.usage.total_tokens
+                ) {
+                  setTokenUsage({
+                    promptTokens: parsed.usage.prompt_tokens,
+                    completionTokens: parsed.usage.completion_tokens,
+                    totalTokens: parsed.usage.total_tokens,
+                  });
+                }
+              }
             } catch (e) {
               console.error("Error parsing SSE data:", e);
             }
@@ -171,6 +200,14 @@ export default function Home() {
               }
               return updated;
             });
+
+            if (parsed.usage) {
+              setTokenUsage({
+                promptTokens: parsed.usage.prompt_tokens,
+                completionTokens: parsed.usage.completion_tokens,
+                totalTokens: parsed.usage.total_tokens,
+              });
+            }
           } catch (e) {
             console.error("Error parsing final SSE data:", e);
           }
@@ -350,6 +387,21 @@ export default function Home() {
                 <Trash2 className="h-4 w-4 text-neutral-800 dark:text-neutral-200" />
               </button>
             )}
+          </div>
+          <div className="mt-4 p-2 border border-neutral-200 dark:border-neutral-700 rounded-md bg-neutral-50 dark:bg-neutral-800">
+            <div className="container mx-auto max-w-4xl">
+              <div className="flex justify-between items-center text-xs text-neutral-500 dark:text-neutral-400">
+                <span className="bg-blue-50 dark:bg-blue-900/20 p-1 px-2 rounded">
+                  Prompt: {tokenUsage.promptTokens || 0} tokens
+                </span>
+                <span className="bg-green-50 dark:bg-green-900/20 p-1 px-2 rounded">
+                  Completion: {tokenUsage.completionTokens || 0} tokens
+                </span>
+                <span className="font-medium bg-neutral-100 dark:bg-neutral-700 p-1 px-2 rounded">
+                  Total: {tokenUsage.totalTokens || 0} tokens
+                </span>
+              </div>
+            </div>
           </div>
           <div className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
             <span>
