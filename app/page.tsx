@@ -9,16 +9,12 @@ import ModelSelector from "@/components/model-selector";
 import type {
   CreateChatCompletionRequest,
   CreateChatCompletionStreamResponse,
-  Message,
 } from "@/types/chat";
+import type { Message } from "@/types/chat-extra";
 import ThinkingBubble from "@/components/thinking-bubble";
 
-interface InternalMessage extends Message {
-  id: string;
-}
-
 export default function Home() {
-  const [messages, setMessages] = useState<InternalMessage[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [selectedModel, setSelectedModel] = useState("");
@@ -38,7 +34,7 @@ export default function Home() {
       }
     }
 
-    const userMessage: InternalMessage = {
+    const userMessage: Message = {
       role: "user",
       content: inputValue,
       id: Date.now().toString(),
@@ -52,7 +48,7 @@ export default function Home() {
     reasoningContentRef.current = "";
 
     const assistantMessageId = Date.now().toString();
-    const assistantMessage: InternalMessage = {
+    const assistantMessage: Message = {
       role: "assistant",
       content: "",
       id: assistantMessageId,
@@ -183,7 +179,7 @@ export default function Home() {
     } catch (error) {
       console.error("Failed to get response:", error);
 
-      const errorMessage: InternalMessage = {
+      const errorMessage: Message = {
         role: "assistant",
         content: "Sorry, I encountered an error. Please try again later.",
         id: Date.now().toString(),

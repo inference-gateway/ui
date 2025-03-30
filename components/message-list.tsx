@@ -1,8 +1,8 @@
-import type { Message } from "@/types/chat"
-import MessageItem from "./message-item"
+import type { Message } from "@/types/chat-extra";
+import MessageItem from "./message-item";
 
 interface MessageListProps {
-  messages: Message[]
+  messages: Message[];
 }
 
 export default function MessageList({ messages }: MessageListProps) {
@@ -12,6 +12,5 @@ export default function MessageList({ messages }: MessageListProps) {
         <MessageItem key={message.id} message={message} />
       ))}
     </div>
-  )
+  );
 }
-
