@@ -5,7 +5,7 @@ import type React from "react";
 import { useState, useRef, useEffect } from "react";
 import MessageList from "./message-list";
 import MessageInput from "./message-input";
-import type { Message } from "@/types/chat-extra";
+import type { Message } from "@/types/chat";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 
