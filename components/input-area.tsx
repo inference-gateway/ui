@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, Trash2 } from "lucide-react";
+import { Trash2, Loader2 } from "lucide-react";
 import type { Message } from "@/types/chat";
 
 interface InputAreaProps {

@@ -4,6 +4,7 @@ import { Bot, User } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import ThinkingBubble from "@/components/thinking-bubble";
 import type { Message } from "@/types/chat";
+import { CodeBlock } from "@/components/code-block";
 
 interface ChatAreaProps {
   messages: Message[];
@@ -75,7 +76,13 @@ export function ChatArea({ messages, isStreaming }: ChatAreaProps) {
                           </div>
                         ) : (
                           <>
-                            <ReactMarkdown>{message.content}</ReactMarkdown>
+                            <ReactMarkdown
+                              components={{
+                                code: CodeBlock,
+                              }}
+                            >
+                              {message.content}
+                            </ReactMarkdown>
                             {isStreaming &&
                               index === messages.length - 1 &&
                               !isUser && (
