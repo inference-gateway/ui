@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.1](https://github.com/inference-gateway/ui/compare/v0.2.0...v0.2.1) (2025-03-31)
+
+### ♻️ Improvements
+
+* Use Inference-Gateway TypeScript SDK ([#12](https://github.com/inference-gateway/ui/issues/12)) ([e5c93b3](https://github.com/inference-gateway/ui/commit/e5c93b3376c73c9afebc22df05de6afa57a9c1d3))
+
 ## [0.2.0](https://github.com/inference-gateway/ui/compare/v0.1.8...v0.2.0) (2025-03-30)
 
 ### ✨ Features
