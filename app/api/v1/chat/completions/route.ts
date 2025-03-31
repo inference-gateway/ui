@@ -1,7 +1,3 @@
-import {
-  CreateChatCompletionResponse,
-  CreateChatCompletionStreamResponse,
-} from "@/types/chat";
 import { InferenceGatewayClient } from "@inference-gateway/sdk";
 import { NextResponse } from "next/server";
 import { TransformStream } from "stream/web";
@@ -84,11 +80,8 @@ export async function POST(req: Request) {
               if (isWriterClosed) return;
 
               try {
-                const typedChunk =
-                  chunk as unknown as CreateChatCompletionStreamResponse;
-
-                if (typedChunk.choices?.[0]?.delta?.content) {
-                  let content = typedChunk.choices[0].delta.content;
+                if (chunk.choices?.[0]?.delta?.content) {
+                  let content = chunk.choices[0].delta.content;
 
                   if (content.includes("<think>")) {
                     inThinkTag = true;
@@ -114,10 +107,10 @@ export async function POST(req: Request) {
                     }
 
                     if (
-                      !typedChunk.choices[0].delta.reasoning_content &&
+                      !chunk.choices[0].delta.reasoning_content &&
                       thinkContent.trim()
                     ) {
-                      typedChunk.choices[0].delta.reasoning_content =
+                      chunk.choices[0].delta.reasoning_content =
                         thinkContent.trim();
                     }
                     thinkContent = "";
@@ -130,10 +123,10 @@ export async function POST(req: Request) {
                     contentBuffer = "";
                   }
 
-                  typedChunk.choices[0].delta.content = content;
+                  chunk.choices[0].delta.content = content;
                 }
 
-                await safeWrite(`data: ${JSON.stringify(typedChunk)}\n\n`);
+                await safeWrite(`data: ${JSON.stringify(chunk)}\n\n`);
 
                 await safeWrite(": keep-alive\n\n");
               } catch (error) {
@@ -175,9 +168,7 @@ export async function POST(req: Request) {
       return response;
     } else {
       try {
-        const completionData = (await clientWithAuth.createChatCompletion(
-          body
-        )) as unknown as CreateChatCompletionResponse;
+        const completionData = await clientWithAuth.createChatCompletion(body);
 
         if (completionData.choices?.[0]?.message?.content) {
           const content = completionData.choices[0].message.content || "";

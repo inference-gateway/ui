@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { Copy } from "lucide-react";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { atomDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import SyntaxHighlighter from "react-syntax-highlighter";
+import { dark } from "react-syntax-highlighter/dist/esm/styles/hljs";
 
 interface CodeBlockProps {
   inline?: boolean;
@@ -40,7 +40,7 @@ export function CodeBlock({
       </div>
       <SyntaxHighlighter
         language={match?.[1] || "text"}
-        style={atomDark}
+        style={dark}
         PreTag="div"
         className="rounded-b-md"
         {...props}
