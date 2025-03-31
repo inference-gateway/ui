@@ -8,7 +8,7 @@ import ModelSelector from "@/components/model-selector";
 import { ChatArea } from "@/components/chat-area";
 import { InputArea } from "@/components/input-area";
 import {
-  ChatCompletionStreamResponse,
+  SchemaCreateChatCompletionStreamResponse,
   InferenceGatewayClient,
   MessageRole,
 } from "@inference-gateway/sdk";
@@ -60,7 +60,7 @@ export default function Home() {
     }
 
     const userMessage: Message = {
-      role: MessageRole.User,
+      role: MessageRole.user,
       content: inputValue,
       id: Date.now().toString(),
     };
@@ -75,7 +75,7 @@ export default function Home() {
     const assistantMessageId = Date.now().toString();
 
     const assistantMessage: Message = {
-      role: MessageRole.Assistant,
+      role: MessageRole.assistant,
       content: "",
       id: assistantMessageId,
       model: selectedModel,
@@ -94,7 +94,7 @@ export default function Home() {
           stream: true,
         },
         {
-          onChunk: (chunk: ChatCompletionStreamResponse) => {
+          onChunk: (chunk: SchemaCreateChatCompletionStreamResponse) => {
             const content = chunk.choices[0]?.delta?.content || "";
             console.log("Received chunk:", chunk);
             interface DeltaWithReasoning {
@@ -146,7 +146,7 @@ export default function Home() {
       console.error("Failed to get response:", error);
 
       const errorMessage: Message = {
-        role: MessageRole.Assistant,
+        role: MessageRole.assistant,
         content: "Sorry, I encountered an error. Please try again later.",
         id: Date.now().toString(),
       };
