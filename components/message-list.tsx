@@ -1,4 +1,4 @@
-import type { Message } from "@/types/chat-extra";
+import type { Message } from "@/types/chat";
 import MessageItem from "./message-item";
 
 interface MessageListProps {

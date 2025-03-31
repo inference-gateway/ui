@@ -1,4 +1,4 @@
-import type { ListModelsResponse } from "@/types/model";
+import { InferenceGatewayClient } from "@inference-gateway/sdk";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -13,25 +13,25 @@ export async function GET() {
       );
     }
 
-    const modelsEndpoint = `${gatewayUrl}/models`;
-    const response = await fetch(modelsEndpoint, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+    const client = new InferenceGatewayClient({
+      baseURL: gatewayUrl,
+      fetch: fetch.bind(globalThis),
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Error fetching models from gateway: ${errorText}`);
+    try {
+      const models = await client.listModels();
+      return NextResponse.json(models);
+    } catch (error) {
+      console.error(
+        `Error fetching models from gateway: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
       return NextResponse.json(
         { error: "Failed to fetch models from inference gateway" },
-        { status: response.status }
+        { status: 500 }
       );
     }
-
-    const models: ListModelsResponse = await response.json();
-    return NextResponse.json(models);
   } catch (error) {
     console.error("Error connecting to inference gateway:", error);
     return NextResponse.json(
