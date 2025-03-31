@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type React from "react";
 
@@ -6,10 +7,7 @@ import { useState, useEffect, useRef } from "react";
 import { User, Bot, Moon, Sun, Trash2, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import ModelSelector from "@/components/model-selector";
-import type {
-  CreateChatCompletionRequest,
-  CreateChatCompletionStreamResponse,
-} from "@/types/chat";
+import { InferenceGatewayClient } from "@inference-gateway/sdk";
 import type { Message } from "@/types/chat-extra";
 import ThinkingBubble from "@/components/thinking-bubble";
 
@@ -30,6 +28,11 @@ export default function Home() {
     promptTokens: 0,
     completionTokens: 0,
     totalTokens: 0,
+  });
+
+  const client = new InferenceGatewayClient({
+    baseURL: "/api/v1",
+    fetch: window.fetch.bind(window),
   });
 
   const handleSendMessage = async () => {
@@ -71,149 +74,64 @@ export default function Home() {
     setMessages((prev) => [...prev, assistantMessage]);
 
     try {
-      const chatRequest: CreateChatCompletionRequest = {
-        model: selectedModel,
-        messages: [...messages, userMessage].map(({ role, content }) => ({
-          role,
-          content,
-          id: "",
-        })),
-        stream: true,
-      };
-
-      const response = await fetch("/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      await client.streamChatCompletion(
+        {
+          model: selectedModel,
+          messages: [...messages, userMessage].map(({ role, content }) => ({
+            role: role as "user" | "assistant" | "system" | "tool",
+            content: content || "",
+          })) as any,
+          stream: true,
         },
-        body: JSON.stringify(chatRequest),
-      });
+        {
+          onChunk: (chunk) => {
+            const content = chunk.choices[0]?.delta?.content || "";
 
-      if (!response.ok) {
-        throw new Error(`API call failed with status: ${response.status}`);
-      }
-
-      const reader = response.body?.getReader();
-      if (!reader) {
-        throw new Error("Response body is null");
-      }
-
-      const decoder = new TextDecoder();
-      let buffer = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-
-        const lines = buffer.split("\n");
-        buffer = lines.pop() || "";
-
-        for (const line of lines) {
-          if (line.startsWith("data:")) {
-            const data = line.slice(5).trim();
-
-            if (data === "[DONE]") continue;
-
-            try {
-              const parsed = JSON.parse(
-                data
-              ) as CreateChatCompletionStreamResponse;
-              const content = parsed.choices[0]?.delta?.content || "";
-              const reasoning =
-                parsed.choices[0]?.delta?.reasoning_content || "";
-
-              if (content || reasoning) {
-                if (content) {
-                  latestMessageRef.current += content;
-                }
-
-                if (reasoning) {
-                  reasoningContentRef.current += reasoning;
-                }
-
-                setMessages((prev) => {
-                  const updated = [...prev];
-                  const lastIndex = updated.length - 1;
-                  if (updated[lastIndex].id === assistantMessageId) {
-                    updated[lastIndex] = {
-                      ...updated[lastIndex],
-                      content: latestMessageRef.current,
-                      reasoning_content:
-                        reasoningContentRef.current || undefined,
-                    };
-                  }
-                  return updated;
-                });
-
-                await new Promise((resolve) => setTimeout(resolve, 1));
-              }
-
-              if (parsed.usage) {
-                if (
-                  parsed.usage &&
-                  parsed.usage.prompt_tokens &&
-                  parsed.usage.completion_tokens &&
-                  parsed.usage.total_tokens
-                ) {
-                  setTokenUsage({
-                    promptTokens: parsed.usage.prompt_tokens,
-                    completionTokens: parsed.usage.completion_tokens,
-                    totalTokens: parsed.usage.total_tokens,
-                  });
-                }
-              }
-            } catch (e) {
-              console.error("Error parsing SSE data:", e);
-            }
-          }
-        }
-      }
-
-      if (buffer.startsWith("data:")) {
-        const data = buffer.slice(5).trim();
-        if (data && data !== "[DONE]") {
-          try {
-            const parsed = JSON.parse(
-              data
-            ) as CreateChatCompletionStreamResponse;
-            const content = parsed.choices[0]?.delta?.content || "";
-            const reasoning = parsed.choices[0]?.delta?.reasoning_content || "";
-
-            if (content) {
-              latestMessageRef.current += content;
+            interface DeltaWithReasoning {
+              content?: string;
+              reasoning_content?: string;
             }
 
-            if (reasoning) {
-              reasoningContentRef.current += reasoning;
-            }
+            const delta = chunk.choices[0]?.delta as DeltaWithReasoning;
+            const reasoning = delta?.reasoning_content || "";
 
-            setMessages((prev) => {
-              const updated = [...prev];
-              const lastIndex = updated.length - 1;
-              if (updated[lastIndex].id === assistantMessageId) {
-                updated[lastIndex] = {
-                  ...updated[lastIndex],
-                  content: latestMessageRef.current,
-                  reasoning_content: reasoningContentRef.current || undefined,
-                };
+            if (content || reasoning) {
+              if (content) {
+                latestMessageRef.current += content;
               }
-              return updated;
-            });
 
-            if (parsed.usage) {
-              setTokenUsage({
-                promptTokens: parsed.usage.prompt_tokens,
-                completionTokens: parsed.usage.completion_tokens,
-                totalTokens: parsed.usage.total_tokens,
+              if (reasoning) {
+                reasoningContentRef.current += reasoning;
+              }
+
+              setMessages((prev) => {
+                const updated = [...prev];
+                const lastIndex = updated.length - 1;
+                if (updated[lastIndex].id === assistantMessageId) {
+                  updated[lastIndex] = {
+                    ...updated[lastIndex],
+                    content: latestMessageRef.current,
+                    reasoning_content: reasoningContentRef.current || undefined,
+                  };
+                }
+                return updated;
               });
             }
-          } catch (e) {
-            console.error("Error parsing final SSE data:", e);
-          }
+
+            if (chunk.usage) {
+              setTokenUsage({
+                promptTokens: chunk.usage.prompt_tokens,
+                completionTokens: chunk.usage.completion_tokens,
+                totalTokens: chunk.usage.total_tokens,
+              });
+            }
+          },
+          onError: (error) => {
+            console.error("Stream error:", error);
+            throw error;
+          },
         }
-      }
+      );
     } catch (error) {
       console.error("Failed to get response:", error);
 

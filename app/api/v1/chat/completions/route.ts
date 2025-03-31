@@ -2,6 +2,7 @@ import {
   CreateChatCompletionResponse,
   CreateChatCompletionStreamResponse,
 } from "@/types/chat";
+import { InferenceGatewayClient } from "@inference-gateway/sdk";
 import { NextResponse } from "next/server";
 import { TransformStream } from "stream/web";
 
@@ -17,127 +18,122 @@ export async function POST(req: Request) {
       );
     }
 
-    const completionsEndpoint = `${gatewayUrl}/chat/completions`;
+    const client = new InferenceGatewayClient({
+      baseURL: gatewayUrl,
+      fetch: fetch.bind(globalThis),
+    });
 
-    const headers = new Headers();
+    let apiKey: string | undefined;
     for (const [key, value] of req.headers.entries()) {
-      if (key.toLowerCase() !== "host") {
-        headers.set(key, value);
+      if (key.toLowerCase() === "authorization") {
+        apiKey = value.replace("Bearer ", "");
+        break;
       }
     }
+
+    const clientWithAuth = apiKey ? client.withOptions({ apiKey }) : client;
 
     const body = await req.json();
     const { stream } = body;
 
-    const response = await fetch(completionsEndpoint, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Error from inference gateway: ${errorText}`);
-      return NextResponse.json(
-        { error: "Failed to get completion from inference gateway" },
-        { status: response.status }
-      );
-    }
-
     if (stream) {
+      const { readable, writable } = new TransformStream();
+      const encoder = new TextEncoder();
+      const writer = writable.getWriter();
+
       let inThinkTag = false;
       let thinkContent = "";
       let contentBuffer = "";
 
-      const { readable, writable } = new TransformStream({
-        transform(chunk, controller) {
-          try {
-            const text = new TextDecoder().decode(chunk);
-            const messages = text.split("\n\n").filter(Boolean);
+      try {
+        await clientWithAuth.streamChatCompletion(body, {
+          onChunk: (chunk) => {
+            try {
+              const typedChunk =
+                chunk as unknown as CreateChatCompletionStreamResponse;
 
-            for (const message of messages) {
-              if (!message.startsWith("data: ")) continue;
-              const data = message.substring(6);
-              if (data === "[DONE]") {
-                controller.enqueue(
-                  new TextEncoder().encode(`data: [DONE]\n\n`)
-                );
-                continue;
-              }
+              if (typedChunk.choices?.[0]?.delta?.content) {
+                let content = typedChunk.choices[0].delta.content;
 
-              try {
-                // TODO: Normalize the reasoning on the backend on the inference-gateway
-                // Groq pass the reasoning different than DeepSeek does and for DeepSeek models 😅
-                // Better would be to transform their response on the backend and use the proper reasoning_content attribute, which is an optional attribute.
-                const parsed: CreateChatCompletionStreamResponse =
-                  JSON.parse(data);
+                if (content.includes("<think>")) {
+                  inThinkTag = true;
+                  const parts = content.split("<think>");
+                  contentBuffer += parts[0];
+                  content = parts[0];
 
-                if (parsed.choices?.[0]?.delta?.content) {
-                  let content = parsed.choices[0].delta.content;
+                  if (parts.length > 1) {
+                    thinkContent += parts[1];
+                  }
+                } else if (inThinkTag && content.includes("</think>")) {
+                  const parts = content.split("</think>");
+                  thinkContent += parts[0];
+                  inThinkTag = false;
 
-                  if (content.includes("<think>")) {
-                    inThinkTag = true;
-                    const parts = content.split("<think>");
-                    contentBuffer += parts[0];
-                    content = parts[0];
-
-                    if (parts.length > 1) {
-                      thinkContent += parts[1];
-                    }
-                  } else if (inThinkTag && content.includes("</think>")) {
-                    const parts = content.split("</think>");
-                    thinkContent += parts[0];
-                    inThinkTag = false;
-
-                    if (parts.length > 1) {
-                      contentBuffer += parts[1];
-                      content = contentBuffer;
-                      contentBuffer = "";
-                    } else {
-                      content = contentBuffer;
-                      contentBuffer = "";
-                    }
-
-                    if (
-                      !parsed.choices[0].delta.reasoning_content &&
-                      thinkContent.trim()
-                    ) {
-                      parsed.choices[0].delta.reasoning_content =
-                        thinkContent.trim();
-                    }
-                    thinkContent = "";
-                  } else if (inThinkTag) {
-                    thinkContent += content;
-                    content = "";
+                  if (parts.length > 1) {
+                    contentBuffer += parts[1];
+                    content = contentBuffer;
+                    contentBuffer = "";
                   } else {
-                    contentBuffer += content;
                     content = contentBuffer;
                     contentBuffer = "";
                   }
 
-                  parsed.choices[0].delta.content = content;
+                  if (
+                    !typedChunk.choices[0].delta.reasoning_content &&
+                    thinkContent.trim()
+                  ) {
+                    typedChunk.choices[0].delta.reasoning_content =
+                      thinkContent.trim();
+                  }
+                  thinkContent = "";
+                } else if (inThinkTag) {
+                  thinkContent += content;
+                  content = "";
+                } else {
+                  contentBuffer += content;
+                  content = contentBuffer;
+                  contentBuffer = "";
                 }
 
-                controller.enqueue(
-                  new TextEncoder().encode(
-                    `data: ${JSON.stringify(parsed)}\n\n`
-                  )
-                );
-              } catch (error) {
-                console.error("Error processing chunk:", error);
-                controller.enqueue(new TextEncoder().encode(`${message}\n\n`));
+                typedChunk.choices[0].delta.content = content;
               }
-            }
-          } catch (error) {
-            console.error("Error transforming stream:", error);
-            controller.enqueue(chunk);
-          }
-        },
-      });
 
-      response.body?.pipeTo(writable).catch((err) => {
-        console.error("Error piping response:", err);
-      });
+              writer.write(
+                encoder.encode(`data: ${JSON.stringify(typedChunk)}\n\n`)
+              );
+            } catch (error) {
+              console.error("Error processing chunk:", error);
+            }
+          },
+          onError: (error) => {
+            console.error("Stream error:", error);
+            writer.write(
+              encoder.encode(
+                `data: ${JSON.stringify({
+                  error: error.error || "Unknown error",
+                })}\n\n`
+              )
+            );
+          },
+          onOpen: () => {
+            // Stream opened
+          },
+          onFinish: () => {
+            writer.write(encoder.encode("data: [DONE]\n\n"));
+            writer.close();
+          },
+        });
+      } catch (error) {
+        console.error("Error in streaming completion:", error);
+        writer.write(
+          encoder.encode(
+            `data: ${JSON.stringify({
+              error: error instanceof Error ? error.message : "Unknown error",
+            })}\n\n`
+          )
+        );
+        writer.close();
+      }
 
       return new Response(readable as unknown as ReadableStream, {
         headers: {
@@ -147,27 +143,38 @@ export async function POST(req: Request) {
         },
       });
     } else {
-      const completionData: CreateChatCompletionResponse =
-        await response.json();
+      try {
+        const completionData = (await clientWithAuth.createChatCompletion(
+          body
+        )) as unknown as CreateChatCompletionResponse;
 
-      if (completionData.choices?.[0]?.message?.content) {
-        const content = completionData.choices[0].message.content;
-        const thinkMatch = content.match(/<think>([\s\S]*?)<\/think>/);
+        if (completionData.choices?.[0]?.message?.content) {
+          const content = completionData.choices[0].message.content || "";
+          const thinkMatch = content.match(/<think>([\s\S]*?)<\/think>/);
 
-        if (thinkMatch) {
-          const reasoning = thinkMatch[1].trim();
+          if (thinkMatch) {
+            const reasoning = thinkMatch[1].trim();
 
-          completionData.choices[0].message.content = content
-            .replace(/<think>[\s\S]*?<\/think>/, "")
-            .trim();
+            completionData.choices[0].message.content = content
+              .replace(/<think>[\s\S]*?<\/think>/, "")
+              .trim();
 
-          if (!completionData.choices[0].message.reasoning_content) {
-            completionData.choices[0].message.reasoning_content = reasoning;
+            if (!completionData.choices[0].message.reasoning_content) {
+              completionData.choices[0].message.reasoning_content = reasoning;
+            }
           }
         }
-      }
 
-      return NextResponse.json(completionData);
+        return NextResponse.json(completionData);
+      } catch (error) {
+        console.error("Error in chat completion:", error);
+        return NextResponse.json(
+          {
+            error: error instanceof Error ? error.message : "Unknown error",
+          },
+          { status: 500 }
+        );
+      }
     }
   } catch (error) {
     console.error("Error in chat completions API:", error);
