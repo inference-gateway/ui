@@ -7,7 +7,10 @@ import { useState, useEffect, useRef } from "react";
 import { User, Bot, Moon, Sun, Trash2, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import ModelSelector from "@/components/model-selector";
-import { InferenceGatewayClient } from "@inference-gateway/sdk";
+import {
+  ChatCompletionStreamResponse,
+  InferenceGatewayClient,
+} from "@inference-gateway/sdk";
 import type { Message } from "@/types/chat-extra";
 import ThinkingBubble from "@/components/thinking-bubble";
 
@@ -17,7 +20,7 @@ export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [selectedModel, setSelectedModel] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [, setIsStreaming] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
   const latestMessageRef = useRef<string>("");
   const reasoningContentRef = useRef<string>("");
   const [tokenUsage, setTokenUsage] = useState<{
@@ -29,14 +32,19 @@ export default function Home() {
     completionTokens: 0,
     totalTokens: 0,
   });
+  const [clientInstance, setClientInstance] =
+    useState<InferenceGatewayClient | null>(null);
 
-  const client = new InferenceGatewayClient({
-    baseURL: "/api/v1",
-    fetch: window.fetch.bind(window),
-  });
+  useEffect(() => {
+    const newClient = new InferenceGatewayClient({
+      baseURL: "/api/v1",
+      fetch: window.fetch.bind(window),
+    });
+    setClientInstance(newClient);
+  }, []);
 
   const handleSendMessage = async () => {
-    if (!inputValue.trim() || isLoading) return;
+    if (!inputValue.trim() || isLoading || !clientInstance) return;
 
     if (inputValue.startsWith("/")) {
       if (inputValue.trim() === "/reset" || inputValue.trim() === "/clear") {
@@ -60,11 +68,12 @@ export default function Home() {
     setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
     setIsLoading(true);
-    setIsStreaming(true);
+
     latestMessageRef.current = "";
     reasoningContentRef.current = "";
 
     const assistantMessageId = Date.now().toString();
+
     const assistantMessage: Message = {
       role: "assistant",
       content: "",
@@ -72,9 +81,10 @@ export default function Home() {
       model: selectedModel,
     };
     setMessages((prev) => [...prev, assistantMessage]);
+    setIsStreaming(true);
 
     try {
-      await client.streamChatCompletion(
+      await clientInstance.streamChatCompletion(
         {
           model: selectedModel,
           messages: [...messages, userMessage].map(({ role, content }) => ({
@@ -84,9 +94,9 @@ export default function Home() {
           stream: true,
         },
         {
-          onChunk: (chunk) => {
+          onChunk: (chunk: ChatCompletionStreamResponse) => {
             const content = chunk.choices[0]?.delta?.content || "";
-
+            console.log("Received chunk:", chunk);
             interface DeltaWithReasoning {
               content?: string;
               reasoning_content?: string;
@@ -213,10 +223,10 @@ export default function Home() {
 
                 return (
                   <div key={`${message.role + message.id}`}>
-                    {!isUser && showReasoning && (
+                    {!isUser && (
                       <ThinkingBubble
                         content={message.reasoning_content || ""}
-                        isVisible={!!message.reasoning_content}
+                        isVisible={!!showReasoning}
                       />
                     )}
                     <div
@@ -255,7 +265,21 @@ export default function Home() {
                           )}
                         </div>
                         <div className="prose prose-sm dark:prose-invert max-w-none">
-                          <ReactMarkdown>{message.content}</ReactMarkdown>
+                          {message.content === "" ? (
+                            <div className="animate-pulse space-y-2">
+                              <div className="h-3 bg-neutral-300 dark:bg-neutral-600 rounded w-3/4"></div>
+                              <div className="h-3 bg-neutral-300 dark:bg-neutral-600 rounded w-1/2"></div>
+                            </div>
+                          ) : (
+                            <>
+                              <ReactMarkdown>{message.content}</ReactMarkdown>
+                              {isStreaming &&
+                                index === messages.length - 1 &&
+                                !isUser && (
+                                  <span className="inline-block w-1 h-4 bg-current animate-pulse ml-1"></span>
+                                )}
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>

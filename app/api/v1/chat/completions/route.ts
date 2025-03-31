@@ -23,125 +23,156 @@ export async function POST(req: Request) {
       fetch: fetch.bind(globalThis),
     });
 
-    let apiKey: string | undefined;
-    for (const [key, value] of req.headers.entries()) {
-      if (key.toLowerCase() === "authorization") {
-        apiKey = value.replace("Bearer ", "");
-        break;
-      }
-    }
-
+    const apiKey = process.env.INFERENCE_GATEWAY_API_KEY;
     const clientWithAuth = apiKey ? client.withOptions({ apiKey }) : client;
-
     const body = await req.json();
     const { stream } = body;
 
     if (stream) {
-      const { readable, writable } = new TransformStream();
+      const { readable, writable } = new TransformStream({
+        flush(controller) {
+          controller.terminate();
+        },
+      });
+
       const encoder = new TextEncoder();
       const writer = writable.getWriter();
 
-      let inThinkTag = false;
-      let thinkContent = "";
-      let contentBuffer = "";
-
-      try {
-        await clientWithAuth.streamChatCompletion(body, {
-          onChunk: (chunk) => {
-            try {
-              const typedChunk =
-                chunk as unknown as CreateChatCompletionStreamResponse;
-
-              if (typedChunk.choices?.[0]?.delta?.content) {
-                let content = typedChunk.choices[0].delta.content;
-
-                if (content.includes("<think>")) {
-                  inThinkTag = true;
-                  const parts = content.split("<think>");
-                  contentBuffer += parts[0];
-                  content = parts[0];
-
-                  if (parts.length > 1) {
-                    thinkContent += parts[1];
-                  }
-                } else if (inThinkTag && content.includes("</think>")) {
-                  const parts = content.split("</think>");
-                  thinkContent += parts[0];
-                  inThinkTag = false;
-
-                  if (parts.length > 1) {
-                    contentBuffer += parts[1];
-                    content = contentBuffer;
-                    contentBuffer = "";
-                  } else {
-                    content = contentBuffer;
-                    contentBuffer = "";
-                  }
-
-                  if (
-                    !typedChunk.choices[0].delta.reasoning_content &&
-                    thinkContent.trim()
-                  ) {
-                    typedChunk.choices[0].delta.reasoning_content =
-                      thinkContent.trim();
-                  }
-                  thinkContent = "";
-                } else if (inThinkTag) {
-                  thinkContent += content;
-                  content = "";
-                } else {
-                  contentBuffer += content;
-                  content = contentBuffer;
-                  contentBuffer = "";
-                }
-
-                typedChunk.choices[0].delta.content = content;
-              }
-
-              writer.write(
-                encoder.encode(`data: ${JSON.stringify(typedChunk)}\n\n`)
-              );
-            } catch (error) {
-              console.error("Error processing chunk:", error);
-            }
-          },
-          onError: (error) => {
-            console.error("Stream error:", error);
-            writer.write(
-              encoder.encode(
-                `data: ${JSON.stringify({
-                  error: error.error || "Unknown error",
-                })}\n\n`
-              )
-            );
-          },
-          onOpen: () => {
-            // Stream opened
-          },
-          onFinish: () => {
-            writer.write(encoder.encode("data: [DONE]\n\n"));
-            writer.close();
-          },
-        });
-      } catch (error) {
-        console.error("Error in streaming completion:", error);
-        writer.write(
-          encoder.encode(
-            `data: ${JSON.stringify({
-              error: error instanceof Error ? error.message : "Unknown error",
-            })}\n\n`
-          )
-        );
-        writer.close();
-      }
-
-      return new Response(readable as unknown as ReadableStream, {
+      const response = new Response(readable as unknown as ReadableStream, {
         headers: {
           "Content-Type": "text/event-stream",
-          "Cache-Control": "no-cache",
+          "Cache-Control": "no-cache, no-transform",
           Connection: "keep-alive",
+          "Transfer-Encoding": "chunked",
+          "X-Accel-Buffering": "no",
         },
       });
+
+      (async () => {
+        let inThinkTag = false;
+        let thinkContent = "";
+        let contentBuffer = "";
+        let isWriterClosed = false;
+
+        const safeWrite = async (data: string) => {
+          if (isWriterClosed) return;
+          try {
+            writer.write(encoder.encode(data));
+            await writer.ready;
+          } catch (error) {
+            console.error("Error writing to stream:", error);
+            isWriterClosed = true;
+          }
+        };
+
+        const safeClose = () => {
+          if (isWriterClosed) return;
+          try {
+            writer.close();
+            isWriterClosed = true;
+          } catch (error) {
+            console.error("Error closing stream:", error);
+            isWriterClosed = true;
+          }
+        };
+
+        try {
+          await safeWrite(": ping\n\n");
+
+          await clientWithAuth.streamChatCompletion(body, {
+            onChunk: async (chunk) => {
+              if (isWriterClosed) return;
+
+              try {
+                const typedChunk =
+                  chunk as unknown as CreateChatCompletionStreamResponse;
+
+                if (typedChunk.choices?.[0]?.delta?.content) {
+                  let content = typedChunk.choices[0].delta.content;
+
+                  if (content.includes("<think>")) {
+                    inThinkTag = true;
+                    const parts = content.split("<think>");
+                    contentBuffer += parts[0];
+                    content = parts[0];
+
+                    if (parts.length > 1) {
+                      thinkContent += parts[1];
+                    }
+                  } else if (inThinkTag && content.includes("</think>")) {
+                    const parts = content.split("</think>");
+                    thinkContent += parts[0];
+                    inThinkTag = false;
+
+                    if (parts.length > 1) {
+                      contentBuffer += parts[1];
+                      content = contentBuffer;
+                      contentBuffer = "";
+                    } else {
+                      content = contentBuffer;
+                      contentBuffer = "";
+                    }
+
+                    if (
+                      !typedChunk.choices[0].delta.reasoning_content &&
+                      thinkContent.trim()
+                    ) {
+                      typedChunk.choices[0].delta.reasoning_content =
+                        thinkContent.trim();
+                    }
+                    thinkContent = "";
+                  } else if (inThinkTag) {
+                    thinkContent += content;
+                    content = "";
+                  } else {
+                    contentBuffer += content;
+                    content = contentBuffer;
+                    contentBuffer = "";
+                  }
+
+                  typedChunk.choices[0].delta.content = content;
+                }
+
+                await safeWrite(`data: ${JSON.stringify(typedChunk)}\n\n`);
+
+                await safeWrite(": keep-alive\n\n");
+              } catch (error) {
+                console.error("Error processing chunk:", error);
+              }
+            },
+            onError: (error) => {
+              console.error("Stream error:", error);
+              if (!isWriterClosed) {
+                safeWrite(
+                  `data: ${JSON.stringify({
+                    error: error.error || "Unknown error",
+                  })}\n\n`
+                );
+                safeClose();
+              }
+            },
+            onFinish: () => {
+              if (!isWriterClosed) {
+                safeWrite("data: [DONE]\n\n");
+                safeClose();
+              }
+            },
+          });
+        } catch (error) {
+          console.error("Error in streaming completion:", error);
+          if (!isWriterClosed) {
+            safeWrite(
+              `data: ${JSON.stringify({
+                error: error instanceof Error ? error.message : "Unknown error",
+              })}\n\n`
+            );
+            safeClose();
+          }
+        }
+      })();
+
+      // Return the response immediately while processing continues in background
+      return response;
     } else {
       try {
         const completionData = (await clientWithAuth.createChatCompletion(
