@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { Message } from "@/types/chat";
+import { Trash2 } from "lucide-react";
 
 interface ChatHistoryProps {
   chatSessions: {
@@ -12,6 +13,7 @@ interface ChatHistoryProps {
   activeChatId: string;
   onNewChatAction: () => void;
   onSelectChatAction: (id: string) => void;
+  onDeleteChatAction?: (id: string) => void;
   isMobileOpen?: boolean;
   setIsMobileOpen?: (isOpen: boolean) => void;
 }
@@ -21,16 +23,16 @@ export function ChatHistory({
   activeChatId,
   onNewChatAction,
   onSelectChatAction,
+  onDeleteChatAction,
   isMobileOpen: externalMobileOpen,
   setIsMobileOpen: externalSetMobileOpen,
 }: ChatHistoryProps) {
   const [internalMobileOpen, setInternalMobileOpen] = useState(false);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
 
-  // Check if we're on a mobile device
   useEffect(() => {
     const checkIfMobile = () => {
-      setIsMobileDevice(window.innerWidth < 768); // 768px is the md breakpoint in Tailwind
+      setIsMobileDevice(window.innerWidth < 768);
     };
 
     checkIfMobile();
@@ -95,7 +97,25 @@ export function ChatHistory({
                   : ""
               }`}
             >
-              <p className="truncate text-sm md:text-base">{chat.title}</p>
+              <div className="flex items-center justify-between w-full group">
+                <p className="truncate text-sm md:text-base">{chat.title}</p>
+                {onDeleteChatAction && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (
+                        confirm("Are you sure you want to delete this chat?")
+                      ) {
+                        onDeleteChatAction(chat.id);
+                      }
+                    }}
+                    className="text-neutral-400 hover:text-red-500 transition-colors p-1 -mr-1 opacity-0 group-hover:opacity-100 focus:opacity-100"
+                    aria-label="Delete chat"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>

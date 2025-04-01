@@ -278,10 +278,40 @@ export default function Home() {
           activeChatId={activeChatId}
           onNewChatAction={handleNewChat}
           onSelectChatAction={(id) => {
-            setActiveChatId(id);
-            setMessages(
-              chatSessions.find((chat) => chat.id === id)?.messages || []
-            );
+            setChatSessions((prev) => {
+              const updated = prev.map((chat) =>
+                chat.id === activeChatId
+                  ? { ...chat, messages: [...messages] }
+                  : chat
+              );
+
+              setActiveChatId(id);
+              const newMessages =
+                updated.find((chat) => chat.id === id)?.messages || [];
+              setMessages([...newMessages]);
+
+              return updated;
+            });
+          }}
+          onDeleteChatAction={(id) => {
+            setChatSessions((prev) => {
+              const newSessions = prev.filter((chat) => chat.id !== id);
+              if (id === activeChatId && newSessions.length > 0) {
+                setActiveChatId(newSessions[0].id);
+                setMessages(newSessions[0].messages);
+              } else if (newSessions.length === 0) {
+                const newChatId = Date.now().toString();
+                const newChat = {
+                  id: newChatId,
+                  title: "New Chat",
+                  messages: [],
+                };
+                setActiveChatId(newChatId);
+                setMessages([]);
+                return [newChat];
+              }
+              return newSessions;
+            });
           }}
           isMobileOpen={showSidebar}
           setIsMobileOpen={setShowSidebar}
