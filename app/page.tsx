@@ -3,6 +3,7 @@
 import type React from "react";
 import { useState, useEffect, useRef } from "react";
 import { Moon, Sun, Menu } from "lucide-react";
+import { StorageServiceFactory } from "@/lib/storage";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import ModelSelector from "@/components/model-selector";
@@ -17,6 +18,12 @@ import {
 import type { Message } from "@/types/chat";
 
 export default function Home() {
+  const [storageService] = useState(() =>
+    StorageServiceFactory.createService({
+      storageType: "local",
+      userId: undefined, // TODO - parse a JWT and get the UserId
+    })
+  );
   const [chatSessions, setChatSessions] = useState<
     {
       id: string;
@@ -25,6 +32,16 @@ export default function Home() {
     }[]
   >([{ id: "1", title: "New Chat", messages: [] }]);
   const [activeChatId, setActiveChatId] = useState<string>("1");
+
+  useEffect(() => {
+    const loadData = async () => {
+      const sessions = await storageService.getChatSessions();
+      const activeId = await storageService.getActiveChatId();
+      setChatSessions(sessions);
+      setActiveChatId(activeId);
+    };
+    loadData();
+  }, [storageService]);
   const activeChat =
     chatSessions.find((chat) => chat.id === activeChatId) || chatSessions[0];
   const [messages, setMessages] = useState<Message[]>(activeChat.messages);
@@ -79,6 +96,14 @@ export default function Home() {
       if (scrollInterval) clearInterval(scrollInterval);
     };
   }, [isStreaming]);
+
+  useEffect(() => {
+    const saveData = async () => {
+      await storageService.saveChatSessions(chatSessions);
+      await storageService.saveActiveChatId(activeChatId);
+    };
+    saveData();
+  }, [chatSessions, activeChatId, storageService]);
 
   const handleNewChat = () => {
     const newChatId = Date.now().toString();
