@@ -20,8 +20,11 @@ export interface StorageService {
   clear(): Promise<void>;
 }
 
+export enum StorageType {
+  LOCAL = "local",
+}
+
 export interface StorageOptions {
+  storageType?: StorageType;
   userId?: string;
-  storageType?: "local" | "redis";
-  redisOptions?: import("ioredis").RedisOptions;
 }

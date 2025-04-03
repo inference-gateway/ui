@@ -76,9 +76,7 @@ export default function Home() {
         )}
       >
         <ChatHistory
-          chatSessions={[...chatSessions].sort(
-            (a, b) => Number(b.id) - Number(a.id)
-          )}
+          chatSessions={chatSessions}
           activeChatId={activeChatId}
           onNewChatAction={handleNewChat}
           onSelectChatAction={handleSelectChat}

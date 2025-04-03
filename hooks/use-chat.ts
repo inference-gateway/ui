@@ -1,5 +1,5 @@
 import { StorageServiceFactory } from "@/lib/storage";
-import type { ChatSession, Message } from "@/types/chat";
+import { StorageType, type ChatSession, type Message } from "@/types/chat";
 import { InferenceGatewayClient, MessageRole } from "@inference-gateway/sdk";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -22,14 +22,14 @@ interface TokenUsage {
 }
 
 export function useChat(initialDarkMode = true) {
-  const storageService = useMemo(
-    () =>
-      StorageServiceFactory.createService({
-        storageType: "local",
-        userId: undefined,
-      }),
-    []
-  );
+  const storageService = useMemo(() => {
+    const storageType = StorageType.LOCAL;
+
+    return StorageServiceFactory.createService({
+      storageType,
+      userId: undefined,
+    });
+  }, []);
 
   const [chatState, setChatState] = useState<ChatState>({
     sessions: [],
@@ -72,17 +72,36 @@ export function useChat(initialDarkMode = true) {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const sessions = await storageService.getChatSessions();
-        const activeId = await storageService.getActiveChatId();
+        let sessions = (await storageService.getChatSessions()) || [];
+        // Handle case where sessions might be in {sessions: []} format
+        interface SessionsWrapper {
+          sessions: ChatSession[];
+        }
+        if (
+          sessions &&
+          typeof sessions === "object" &&
+          !Array.isArray(sessions) &&
+          "sessions" in sessions &&
+          Array.isArray((sessions as SessionsWrapper).sessions)
+        ) {
+          sessions = (sessions as SessionsWrapper).sessions;
+        }
+        const activeId = (await storageService.getActiveChatId()) || "";
 
         setChatState({
-          sessions,
+          sessions: Array.isArray(sessions) ? sessions : [],
           activeId,
-          messages:
-            sessions.find((chat) => chat.id === activeId)?.messages || [],
+          messages: Array.isArray(sessions)
+            ? sessions.find((chat) => chat.id === activeId)?.messages || []
+            : [],
         });
       } catch (error) {
         console.error("Failed to load chat data:", error);
+        setChatState({
+          sessions: [],
+          activeId: "",
+          messages: [],
+        });
       }
     };
     loadData();
