@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0](https://github.com/inference-gateway/ui/compare/v0.2.1...v0.3.0) (2025-04-03)
+
+### ✨ Features
+
+* Add reasoning content to chunk message in OpenAPI specification ([c40067e](https://github.com/inference-gateway/ui/commit/c40067ecaa32823c7ce208cdba197f5ad295913d))
+* Implement local storage for chat history ([#13](https://github.com/inference-gateway/ui/issues/13)) ([0ea4e9f](https://github.com/inference-gateway/ui/commit/0ea4e9f1e20f308c330965cc3aead1b5ff2523d5))
+
 ## [0.2.1](https://github.com/inference-gateway/ui/compare/v0.2.0...v0.2.1) (2025-03-31)
 
 ### ♻️ Improvements
