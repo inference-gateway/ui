@@ -69,27 +69,25 @@ export function ChatArea({ messages, isStreaming }: ChatAreaProps) {
                         )}
                       </div>
                       <div className="prose prose-sm dark:prose-invert max-w-none">
-                        {message.content === "" ? (
+                        {message.content ? (
+                          <ReactMarkdown
+                            components={{
+                              code: CodeBlock,
+                            }}
+                          >
+                            {message.content}
+                          </ReactMarkdown>
+                        ) : isStreaming && index === messages.length - 1 ? (
                           <div className="animate-pulse space-y-2">
                             <div className="h-3 bg-neutral-300 dark:bg-neutral-600 rounded w-3/4"></div>
                             <div className="h-3 bg-neutral-300 dark:bg-neutral-600 rounded w-1/2"></div>
                           </div>
-                        ) : (
-                          <>
-                            <ReactMarkdown
-                              components={{
-                                code: CodeBlock,
-                              }}
-                            >
-                              {message.content}
-                            </ReactMarkdown>
-                            {isStreaming &&
-                              index === messages.length - 1 &&
-                              !isUser && (
-                                <span className="inline-block w-1 h-4 bg-current animate-pulse ml-1"></span>
-                              )}
-                          </>
-                        )}
+                        ) : null}
+                        {isStreaming &&
+                          index === messages.length - 1 &&
+                          !isUser && (
+                            <span className="inline-block w-1 h-4 bg-current animate-pulse ml-1"></span>
+                          )}
                       </div>
                     </div>
                   </div>

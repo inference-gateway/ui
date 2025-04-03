@@ -1,167 +1,45 @@
 "use client";
 
-import type React from "react";
-
-import { useState, useEffect, useRef } from "react";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, Menu } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 import ModelSelector from "@/components/model-selector";
+import { ChatHistory } from "@/components/chat-history";
 import { ChatArea } from "@/components/chat-area";
 import { InputArea } from "@/components/input-area";
-import {
-  SchemaCreateChatCompletionStreamResponse,
-  InferenceGatewayClient,
-  MessageRole,
-} from "@inference-gateway/sdk";
-import type { Message } from "@/types/chat";
+import { useChat } from "@/hooks/use-chat";
+import { useState, useEffect } from "react";
 
 export default function Home() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const {
+    chatSessions,
+    activeChatId,
+    messages,
+    selectedModel,
+    isLoading,
+    isStreaming,
+    tokenUsage,
+    setSelectedModel,
+    handleNewChat,
+    handleSendMessage,
+    handleSelectChat,
+    handleDeleteChat,
+    clearMessages,
+    chatContainerRef,
+  } = useChat();
+
   const [inputValue, setInputValue] = useState("");
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [selectedModel, setSelectedModel] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isStreaming, setIsStreaming] = useState(false);
-  const latestMessageRef = useRef<string>("");
-  const reasoningContentRef = useRef<string>("");
-  const [tokenUsage, setTokenUsage] = useState<{
-    promptTokens: number;
-    completionTokens: number;
-    totalTokens: number;
-  }>({
-    promptTokens: 0,
-    completionTokens: 0,
-    totalTokens: 0,
-  });
-  const [clientInstance, setClientInstance] =
-    useState<InferenceGatewayClient | null>(null);
-
-  useEffect(() => {
-    const newClient = new InferenceGatewayClient({
-      baseURL: "/api/v1",
-      fetch: window.fetch.bind(window),
-    });
-    setClientInstance(newClient);
-  }, []);
-
-  const handleSendMessage = async () => {
-    if (!inputValue.trim() || isLoading || !clientInstance) return;
-
-    if (inputValue.startsWith("/")) {
-      if (inputValue.trim() === "/reset" || inputValue.trim() === "/clear") {
-        setMessages([]);
-        setInputValue("");
-        setTokenUsage({
-          promptTokens: 0,
-          completionTokens: 0,
-          totalTokens: 0,
-        });
-        return;
-      }
-    }
-
-    const userMessage: Message = {
-      role: MessageRole.user,
-      content: inputValue,
-      id: Date.now().toString(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setInputValue("");
-    setIsLoading(true);
-
-    latestMessageRef.current = "";
-    reasoningContentRef.current = "";
-
-    const assistantMessageId = Date.now().toString();
-
-    const assistantMessage: Message = {
-      role: MessageRole.assistant,
-      content: "",
-      id: assistantMessageId,
-      model: selectedModel,
-    };
-    setMessages((prev) => [...prev, assistantMessage]);
-    setIsStreaming(true);
-
-    try {
-      await clientInstance.streamChatCompletion(
-        {
-          model: selectedModel,
-          messages: [...messages, userMessage].map(({ role, content }) => ({
-            role,
-            content: content || "",
-          })),
-          stream: true,
-        },
-        {
-          onChunk: (chunk: SchemaCreateChatCompletionStreamResponse) => {
-            const content = chunk.choices[0]?.delta?.content || "";
-            console.log("Received chunk:", chunk);
-            interface DeltaWithReasoning {
-              content?: string;
-              reasoning_content?: string;
-            }
-
-            const delta = chunk.choices[0]?.delta as DeltaWithReasoning;
-            const reasoning = delta?.reasoning_content || "";
-
-            if (content || reasoning) {
-              if (content) {
-                latestMessageRef.current += content;
-              }
-
-              if (reasoning) {
-                reasoningContentRef.current += reasoning;
-              }
-
-              setMessages((prev) => {
-                const updated = [...prev];
-                const lastIndex = updated.length - 1;
-                if (updated[lastIndex].id === assistantMessageId) {
-                  updated[lastIndex] = {
-                    ...updated[lastIndex],
-                    content: latestMessageRef.current,
-                    reasoning_content: reasoningContentRef.current || undefined,
-                  };
-                }
-                return updated;
-              });
-            }
-
-            if (chunk.usage) {
-              setTokenUsage({
-                promptTokens: chunk.usage.prompt_tokens,
-                completionTokens: chunk.usage.completion_tokens,
-                totalTokens: chunk.usage.total_tokens,
-              });
-            }
-          },
-          onError: (error) => {
-            console.error("Stream error:", error);
-            throw error;
-          },
-        }
-      );
-    } catch (error) {
-      console.error("Failed to get response:", error);
-
-      const errorMessage: Message = {
-        role: MessageRole.assistant,
-        content: "Sorry, I encountered an error. Please try again later.",
-        id: Date.now().toString(),
-      };
-
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
-      setIsStreaming(false);
-    }
-  };
+  const isMobile = useIsMobile();
+  const [showSidebar, setShowSidebar] = useState(!isMobile);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSendMessage();
+      if (inputValue.trim()) {
+        handleSendMessage(inputValue);
+        setInputValue("");
+      }
     }
   };
 
@@ -178,58 +56,96 @@ export default function Home() {
   }, [isDarkMode]);
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 flex flex-col">
-      {/* Header */}
-      <header className="border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4">
-        <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-          <h1 className="text-xl font-bold text-neutral-800 dark:text-white">
-            Inference Gateway UI
-          </h1>
-          <div className="flex items-center gap-4 w-full md:w-auto">
-            {/* Model Selector */}
-            <ModelSelector
-              selectedModel={selectedModel}
-              onSelectModelAction={setSelectedModel}
-            />
+    <div className="h-screen bg-neutral-50 dark:bg-neutral-900 flex overflow-hidden">
+      {/* Mobile Menu Button */}
+      {isMobile && (
+        <button
+          onClick={() => setShowSidebar(!showSidebar)}
+          className="fixed top-4 left-4 z-50 h-10 w-10 rounded-md border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 flex items-center justify-center"
+        >
+          <Menu className="h-5 w-5 text-neutral-800 dark:text-neutral-200" />
+        </button>
+      )}
 
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="h-10 w-10 rounded-md border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 flex items-center justify-center"
-              title="Toggle theme"
-            >
-              {isDarkMode ? (
-                <Sun className="h-5 w-5 text-neutral-800 dark:text-neutral-200" />
-              ) : (
-                <Moon className="h-5 w-5 text-neutral-800 dark:text-neutral-200" />
-              )}
-            </button>
+      {/* Chat History Sidebar */}
+      <div
+        className={cn(
+          "transition-all duration-300 ease-in-out h-full bg-white dark:bg-neutral-800",
+          isMobile ? "fixed inset-y-0 z-40 w-64" : "w-64",
+          showSidebar ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        <ChatHistory
+          chatSessions={chatSessions}
+          activeChatId={activeChatId}
+          onNewChatAction={handleNewChat}
+          onSelectChatAction={handleSelectChat}
+          onDeleteChatAction={handleDeleteChat}
+          isMobileOpen={showSidebar}
+          setIsMobileOpen={setShowSidebar}
+        />
+      </div>
+
+      {/* Main Content */}
+      <div
+        className={cn(
+          "flex-1 flex flex-col h-full overflow-hidden transition-transform duration-300",
+          isMobile && showSidebar ? "translate-x-64" : ""
+        )}
+      >
+        {/* Header */}
+        <header className="border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4">
+          <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <h1 className="text-xl font-bold text-neutral-800 dark:text-white">
+              Inference Gateway UI
+            </h1>
+            <div className="flex items-center gap-4 w-full md:w-auto">
+              {/* Model Selector */}
+              <ModelSelector
+                selectedModel={selectedModel}
+                onSelectModelAction={setSelectedModel}
+              />
+
+              {/* Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                className="h-10 w-10 rounded-md border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 flex items-center justify-center"
+                title="Toggle theme"
+              >
+                {isDarkMode ? (
+                  <Sun className="h-5 w-5 text-neutral-800 dark:text-neutral-200" />
+                ) : (
+                  <Moon className="h-5 w-5 text-neutral-800 dark:text-neutral-200" />
+                )}
+              </button>
+            </div>
           </div>
+        </header>
+
+        {/* Chat Area */}
+        <div
+          ref={chatContainerRef}
+          className="flex-1 overflow-y-auto"
+          onClick={() => isMobile && setShowSidebar(false)}
+        >
+          <ChatArea messages={messages} isStreaming={isStreaming} />
         </div>
-      </header>
 
-      {/* Chat Area */}
-      <ChatArea messages={messages} isStreaming={isStreaming} />
-
-      {/* Input Area */}
-      <InputArea
-        inputValue={inputValue}
-        isLoading={isLoading}
-        selectedModel={selectedModel}
-        tokenUsage={tokenUsage}
-        messages={messages}
-        onInputChange={setInputValue}
-        onKeyDown={handleKeyDown}
-        onSendMessage={handleSendMessage}
-        onClearMessages={() => {
-          setMessages([]);
-          setTokenUsage({
-            promptTokens: 0,
-            completionTokens: 0,
-            totalTokens: 0,
-          });
-        }}
-      />
+        {/* Input Area */}
+        <div className="sticky bottom-0 w-full bg-neutral-50 dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700">
+          <InputArea
+            inputValue={inputValue}
+            isLoading={isLoading}
+            selectedModel={selectedModel}
+            tokenUsage={tokenUsage}
+            messages={messages}
+            onInputChange={setInputValue}
+            onKeyDown={handleKeyDown}
+            onSendMessage={() => handleSendMessage(inputValue)}
+            onClearMessages={clearMessages}
+          />
+        </div>
+      </div>
     </div>
   );
 }
