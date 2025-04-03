@@ -11,21 +11,21 @@ import { Trash2 } from "lucide-react";
 
 interface ChatInterfaceProps {
   messages: Message[];
-  onSendMessage: (content: string) => void;
-  onClearChat: () => void;
+  onSendMessageAction: (content: string) => void;
+  onClearChatAction: () => void;
 }
 
 export default function ChatInterface({
   messages,
-  onSendMessage,
-  onClearChat,
+  onSendMessageAction,
+  onClearChatAction,
 }: ChatInterfaceProps) {
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const handleSendMessage = () => {
     if (inputValue.trim()) {
-      onSendMessage(inputValue);
+      onSendMessageAction(inputValue);
       setInputValue("");
     }
   };
@@ -41,12 +41,12 @@ export default function ChatInterface({
     const trimmedInput = input.trim();
 
     if (trimmedInput === "/reset" || trimmedInput === "/clear") {
-      onClearChat();
+      onClearChatAction();
       return true;
     }
 
     if (trimmedInput === "/help") {
-      onSendMessage("/help");
+      onSendMessageAction("/help");
       return true;
     }
 
@@ -98,8 +98,8 @@ export default function ChatInterface({
             >
               <MessageInput
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={handleKeyDown}
+                onChangeAction={(e) => setInputValue(e.target.value)}
+                onKeyDownAction={handleKeyDown}
               />
               <Button type="submit" disabled={!inputValue.trim()}>
                 Send
@@ -109,7 +109,7 @@ export default function ChatInterface({
               <Button
                 variant="outline"
                 size="icon"
-                onClick={onClearChat}
+                onClick={onClearChatAction}
                 title="Clear chat"
               >
                 <Trash2 className="h-4 w-4" />

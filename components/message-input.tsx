@@ -7,14 +7,14 @@ import { Textarea } from "@/components/ui/textarea";
 
 interface MessageInputProps {
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  onChangeAction: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onKeyDownAction: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
 }
 
 export default function MessageInput({
   value,
-  onChange,
-  onKeyDown,
+  onChangeAction,
+  onKeyDownAction,
 }: MessageInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [rows, setRows] = useState(1);
@@ -37,8 +37,8 @@ export default function MessageInput({
     <Textarea
       ref={textareaRef}
       value={value}
-      onChange={onChange}
-      onKeyDown={onKeyDown}
+      onChange={onChangeAction}
+      onKeyDown={onKeyDownAction}
       placeholder="Type a message..."
       rows={rows}
       className="resize-none min-h-[38px] max-h-[200px] flex-1"
