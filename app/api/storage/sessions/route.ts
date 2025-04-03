@@ -1,43 +1,5 @@
-import { Redis } from "ioredis";
+import redis, { getKey, isRedisAvailable } from "@/lib/server/redis";
 import { NextResponse } from "next/server";
-
-// TODO - extract this to a common Server Side only file
-const MAX_ERRORS = 5;
-const RETRY_DELAY_MS = 5000;
-let errorCount = 0;
-let isAvailable = true;
-
-const redis = new Redis(process.env.REDIS_URL || "redis://localhost:6379", {
-  maxRetriesPerRequest: 20,
-  retryStrategy: (times) => {
-    return Math.min(times * 100, RETRY_DELAY_MS);
-  },
-});
-
-redis.on("error", (err) => {
-  console.error("Redis error:", err);
-  errorCount++;
-  if (errorCount >= MAX_ERRORS) {
-    isAvailable = false;
-    setTimeout(() => {
-      isAvailable = true;
-      errorCount = 0;
-    }, RETRY_DELAY_MS);
-  }
-});
-
-redis.on("connect", () => {
-  isAvailable = true;
-  errorCount = 0;
-});
-
-function isRedisAvailable() {
-  return isAvailable;
-}
-
-function getKey(userId: string | null | undefined, baseKey: string): string {
-  return userId ? `${userId}_${baseKey}` : baseKey;
-}
 
 export async function GET(request: Request) {
   // TODO - Parse the JWT to get the subject and store this in redis as a key
