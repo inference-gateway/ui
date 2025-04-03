@@ -132,7 +132,10 @@ export function useChat(initialDarkMode = true) {
   }, [isStreaming, scrollToBottom]);
 
   const handleNewChat = useCallback(async () => {
-    const newChatId = crypto.randomUUID();
+    const newChatId =
+      typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
     const newChat = {
       id: newChatId,
       title: "New Chat",

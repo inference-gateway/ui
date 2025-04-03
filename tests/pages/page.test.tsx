@@ -4,6 +4,23 @@ import Home from "@/app/page";
 import { useChat } from "@/hooks/use-chat";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+jest.mock("react-markdown", () => {
+  const MockReactMarkdown = ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  );
+  MockReactMarkdown.displayName = "MockReactMarkdown";
+  return MockReactMarkdown;
+});
+
+jest.mock("react-syntax-highlighter", () => ({
+  Prism: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+jest.mock("react-syntax-highlighter/dist/esm/styles/hljs", () => ({
+  dark: () => ({}),
+}));
+
 jest.mock("@/hooks/use-chat", () => ({
   useChat: jest.fn(),
 }));

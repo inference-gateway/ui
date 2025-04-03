@@ -162,20 +162,24 @@ export function ChatHistory({
                       >
                         {chat.title}
                       </p>
-                      {chat.messages.length > 0 && (
+                      {chat.messages?.length > 0 && (
                         <p
                           className="text-xs text-neutral-500 dark:text-neutral-400"
                           data-testid={`chat-model-${chat.id}`}
                         >
                           {(() => {
+                            if (!chat.messages) return null;
+
                             const lastAssistantMsg = [...chat.messages]
                               .reverse()
                               .find((m) => m.role === "assistant" && m.model);
+
                             if (!lastAssistantMsg?.model) return null;
 
                             const model = lastAssistantMsg.model
                               .split("/")
                               .pop();
+
                             return model === "gpt-4o"
                               ? "gpt-4o"
                               : model === "claude-3-opus"
@@ -184,7 +188,7 @@ export function ChatHistory({
                           })()}
                         </p>
                       )}
-                      {chat.messages.length === 0 && (
+                      {!chat.messages?.length && (
                         <p
                           className="text-xs text-neutral-400 dark:text-neutral-500"
                           data-testid="no-model-info"
