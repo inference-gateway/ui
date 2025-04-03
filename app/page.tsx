@@ -1,263 +1,45 @@
 "use client";
 
-import type React from "react";
-import { useState, useEffect, useRef } from "react";
 import { Moon, Sun, Menu } from "lucide-react";
-import { StorageServiceFactory } from "@/lib/storage";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import ModelSelector from "@/components/model-selector";
 import { ChatHistory } from "@/components/chat-history";
 import { ChatArea } from "@/components/chat-area";
 import { InputArea } from "@/components/input-area";
-import {
-  SchemaCreateChatCompletionStreamResponse,
-  InferenceGatewayClient,
-  MessageRole,
-} from "@inference-gateway/sdk";
-import type { Message } from "@/types/chat";
+import { useChat } from "@/hooks/use-chat";
+import { useState, useEffect } from "react";
 
 export default function Home() {
-  const [storageService] = useState(() =>
-    StorageServiceFactory.createService({
-      storageType: "local",
-      userId: undefined, // TODO - parse a JWT and get the UserId
-    })
-  );
-  const [chatSessions, setChatSessions] = useState<
-    {
-      id: string;
-      title: string;
-      messages: Message[];
-    }[]
-  >([{ id: "1", title: "New Chat", messages: [] }]);
-  const [activeChatId, setActiveChatId] = useState<string>("1");
+  const {
+    chatSessions,
+    activeChatId,
+    messages,
+    selectedModel,
+    isLoading,
+    isStreaming,
+    tokenUsage,
+    setSelectedModel,
+    handleNewChat,
+    handleSendMessage,
+    handleSelectChat,
+    handleDeleteChat,
+    clearMessages,
+    chatContainerRef,
+  } = useChat();
 
-  useEffect(() => {
-    const loadData = async () => {
-      const sessions = await storageService.getChatSessions();
-      const activeId = await storageService.getActiveChatId();
-      setChatSessions(sessions);
-      setActiveChatId(activeId);
-    };
-    loadData();
-  }, [storageService]);
-  const activeChat =
-    chatSessions.find((chat) => chat.id === activeChatId) || chatSessions[0];
-  const [messages, setMessages] = useState<Message[]>(activeChat.messages);
   const [inputValue, setInputValue] = useState("");
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [selectedModel, setSelectedModel] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [tokenUsage, setTokenUsage] = useState<{
-    promptTokens: number;
-    completionTokens: number;
-    totalTokens: number;
-  }>({
-    promptTokens: 0,
-    completionTokens: 0,
-    totalTokens: 0,
-  });
-  const [clientInstance, setClientInstance] =
-    useState<InferenceGatewayClient | null>(null);
-
-  const chatContainerRef = useRef<HTMLDivElement>(null);
-  const latestMessageRef = useRef<string>("");
-  const reasoningContentRef = useRef<string>("");
-
-  useEffect(() => {
-    const newClient = new InferenceGatewayClient({
-      baseURL: "/api/v1",
-      fetch: window.fetch.bind(window),
-    });
-    setClientInstance(newClient);
-  }, []);
-
-  const scrollToBottom = () => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop =
-        chatContainerRef.current.scrollHeight;
-    }
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, isStreaming]);
-
-  useEffect(() => {
-    let scrollInterval: NodeJS.Timeout | null = null;
-
-    if (isStreaming) {
-      scrollInterval = setInterval(scrollToBottom, 100);
-    }
-
-    return () => {
-      if (scrollInterval) clearInterval(scrollInterval);
-    };
-  }, [isStreaming]);
-
-  useEffect(() => {
-    const saveData = async () => {
-      await storageService.saveChatSessions(chatSessions);
-      await storageService.saveActiveChatId(activeChatId);
-    };
-    saveData();
-  }, [chatSessions, activeChatId, storageService]);
-
-  const handleNewChat = () => {
-    const newChatId = Date.now().toString();
-    setChatSessions((prev) => [
-      ...prev,
-      { id: newChatId, title: "New Chat", messages: [] },
-    ]);
-    setActiveChatId(newChatId);
-    setMessages([]);
-  };
-
-  const handleSendMessage = async () => {
-    if (!inputValue.trim() || isLoading || !clientInstance) return;
-
-    if (inputValue.startsWith("/")) {
-      if (inputValue.trim() === "/reset" || inputValue.trim() === "/clear") {
-        setMessages([]);
-        setInputValue("");
-        setTokenUsage({
-          promptTokens: 0,
-          completionTokens: 0,
-          totalTokens: 0,
-        });
-        return;
-      }
-    }
-
-    const userMessage: Message = {
-      role: MessageRole.user,
-      content: inputValue,
-      id: Date.now().toString(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setChatSessions((prev) =>
-      prev.map((chat) => {
-        if (chat.id === activeChatId) {
-          const updatedChat = {
-            ...chat,
-            messages: [...chat.messages, userMessage],
-          };
-          if (chat.title === "New Chat" && userMessage.content) {
-            updatedChat.title =
-              userMessage.content.slice(0, 20) +
-              (userMessage.content.length > 20 ? "..." : "");
-          }
-          return updatedChat;
-        }
-        return chat;
-      })
-    );
-    setInputValue("");
-    setIsLoading(true);
-
-    latestMessageRef.current = "";
-    reasoningContentRef.current = "";
-
-    const assistantMessageId = Date.now().toString();
-
-    const assistantMessage: Message = {
-      role: MessageRole.assistant,
-      content: "",
-      id: assistantMessageId,
-      model: selectedModel,
-    };
-    setMessages((prev) => [...prev, assistantMessage]);
-    setChatSessions((prev) =>
-      prev.map((chat) =>
-        chat.id === activeChatId
-          ? { ...chat, messages: [...chat.messages, assistantMessage] }
-          : chat
-      )
-    );
-    setIsStreaming(true);
-
-    try {
-      await clientInstance.streamChatCompletion(
-        {
-          model: selectedModel,
-          messages: [...messages, userMessage].map(({ role, content }) => ({
-            role,
-            content: content || "",
-          })),
-          stream: true,
-        },
-        {
-          onChunk: (chunk: SchemaCreateChatCompletionStreamResponse) => {
-            const content = chunk.choices[0]?.delta?.content || "";
-            console.log("Received chunk:", chunk);
-            interface DeltaWithReasoning {
-              content?: string;
-              reasoning_content?: string;
-            }
-
-            const delta = chunk.choices[0]?.delta as DeltaWithReasoning;
-            const reasoning = delta?.reasoning_content || "";
-
-            if (content || reasoning) {
-              if (content) {
-                latestMessageRef.current += content;
-              }
-
-              if (reasoning) {
-                reasoningContentRef.current += reasoning;
-              }
-
-              setMessages((prev) => {
-                const updated = [...prev];
-                const lastIndex = updated.length - 1;
-                if (updated[lastIndex].id === assistantMessageId) {
-                  updated[lastIndex] = {
-                    ...updated[lastIndex],
-                    content: latestMessageRef.current,
-                    reasoning_content: reasoningContentRef.current || undefined,
-                  };
-                }
-                return updated;
-              });
-            }
-
-            if (chunk.usage) {
-              setTokenUsage({
-                promptTokens: chunk.usage.prompt_tokens,
-                completionTokens: chunk.usage.completion_tokens,
-                totalTokens: chunk.usage.total_tokens,
-              });
-            }
-          },
-          onError: (error) => {
-            console.error("Stream error:", error);
-            throw error;
-          },
-        }
-      );
-    } catch (error) {
-      console.error("Failed to get response:", error);
-
-      const errorMessage: Message = {
-        role: MessageRole.assistant,
-        content: "Sorry, I encountered an error. Please try again later.",
-        id: Date.now().toString(),
-      };
-
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
-      setIsStreaming(false);
-    }
-  };
+  const isMobile = useIsMobile();
+  const [showSidebar, setShowSidebar] = useState(!isMobile);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSendMessage();
+      if (inputValue.trim()) {
+        handleSendMessage(inputValue);
+        setInputValue("");
+      }
     }
   };
 
@@ -272,9 +54,6 @@ export default function Home() {
       document.documentElement.classList.remove("dark");
     }
   }, [isDarkMode]);
-
-  const isMobile = useIsMobile();
-  const [showSidebar, setShowSidebar] = useState(!isMobile);
 
   return (
     <div className="h-screen bg-neutral-50 dark:bg-neutral-900 flex overflow-hidden">
@@ -302,42 +81,8 @@ export default function Home() {
           )}
           activeChatId={activeChatId}
           onNewChatAction={handleNewChat}
-          onSelectChatAction={(id) => {
-            setChatSessions((prev) => {
-              const updated = prev.map((chat) =>
-                chat.id === activeChatId
-                  ? { ...chat, messages: [...messages] }
-                  : chat
-              );
-
-              setActiveChatId(id);
-              const newMessages =
-                updated.find((chat) => chat.id === id)?.messages || [];
-              setMessages([...newMessages]);
-
-              return updated;
-            });
-          }}
-          onDeleteChatAction={(id) => {
-            setChatSessions((prev) => {
-              const newSessions = prev.filter((chat) => chat.id !== id);
-              if (id === activeChatId && newSessions.length > 0) {
-                setActiveChatId(newSessions[0].id);
-                setMessages(newSessions[0].messages);
-              } else if (newSessions.length === 0) {
-                const newChatId = Date.now().toString();
-                const newChat = {
-                  id: newChatId,
-                  title: "New Chat",
-                  messages: [],
-                };
-                setActiveChatId(newChatId);
-                setMessages([]);
-                return [newChat];
-              }
-              return newSessions;
-            });
-          }}
+          onSelectChatAction={handleSelectChat}
+          onDeleteChatAction={handleDeleteChat}
           isMobileOpen={showSidebar}
           setIsMobileOpen={setShowSidebar}
         />
@@ -398,15 +143,8 @@ export default function Home() {
             messages={messages}
             onInputChange={setInputValue}
             onKeyDown={handleKeyDown}
-            onSendMessage={handleSendMessage}
-            onClearMessages={() => {
-              setMessages([]);
-              setTokenUsage({
-                promptTokens: 0,
-                completionTokens: 0,
-                totalTokens: 0,
-              });
-            }}
+            onSendMessage={() => handleSendMessage(inputValue)}
+            onClearMessages={clearMessages}
           />
         </div>
       </div>

@@ -9,6 +9,7 @@ interface ChatHistoryProps {
     id: string;
     title: string;
     messages: Message[];
+    createdAt?: number;
   }[];
   activeChatId: string;
   onNewChatAction: () => void;
@@ -86,38 +87,134 @@ export function ChatHistory({
             New Chat
           </button>
         </div>
-        <div className="flex-1 w-full overflow-y-auto overscroll-contain">
-          {chatSessions.map((chat) => (
+        <div
+          className="flex-1 w-full overflow-y-auto overscroll-contain"
+          data-testid="chat-history-container"
+          style={{ overflowY: "auto" }}
+        >
+          {chatSessions.length === 0 ? (
             <div
-              key={chat.id}
-              onClick={() => handleSelectChat(chat.id)}
-              className={`p-4 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700 ${
-                chat.id === activeChatId
-                  ? "bg-neutral-100 dark:bg-neutral-700 border-l-4 border-blue-500"
-                  : ""
-              }`}
+              className="p-4 text-center text-neutral-500"
+              data-testid="empty-state"
             >
-              <div className="flex items-center justify-between w-full group">
-                <p className="truncate text-sm md:text-base">{chat.title}</p>
-                {onDeleteChatAction && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (
-                        confirm("Are you sure you want to delete this chat?")
-                      ) {
-                        onDeleteChatAction(chat.id);
-                      }
-                    }}
-                    className="text-neutral-400 hover:text-red-500 transition-colors p-1 -mr-1 opacity-0 group-hover:opacity-100 focus:opacity-100"
-                    aria-label="Delete chat"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </button>
-                )}
-              </div>
+              <p data-testid="empty-message">No chats yet</p>
             </div>
-          ))}
+          ) : (
+            [...chatSessions]
+              .sort((a, b) => {
+                const dateA = new Date(a.createdAt || 0);
+                const dateB = new Date(b.createdAt || 0);
+                return dateB.getTime() - dateA.getTime();
+              })
+              .map((chat) => (
+                <div
+                  key={chat.id}
+                  onClick={() => handleSelectChat(chat.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleSelectChat(chat.id);
+                    } else if (e.key === "ArrowDown") {
+                      e.preventDefault();
+                      const next = e.currentTarget
+                        .nextElementSibling as HTMLElement;
+                      next?.focus();
+                    } else if (e.key === "ArrowUp") {
+                      e.preventDefault();
+                      const prev = e.currentTarget
+                        .previousElementSibling as HTMLElement;
+                      prev?.focus();
+                    }
+                  }}
+                  tabIndex={0}
+                  ref={null}
+                  data-testid={`chat-item-${chat.id}`}
+                  data-focusable="true"
+                  data-focused={chat.id === activeChatId ? "true" : "false"}
+                  className={`p-4 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    chat.id === activeChatId
+                      ? "bg-neutral-100 dark:bg-neutral-700 border-l-4 border-blue-500 active"
+                      : ""
+                  }`}
+                  data-active={chat.id === activeChatId ? "true" : "false"}
+                  aria-current={chat.id === activeChatId ? "true" : "false"}
+                  data-test-active={chat.id === activeChatId ? "true" : "false"}
+                  data-test-class-active={
+                    chat.id === activeChatId ? "true" : "false"
+                  }
+                >
+                  <div className="flex items-center justify-between w-full group">
+                    <div className="flex flex-col">
+                      <p
+                        className="truncate text-sm md:text-base"
+                        style={{
+                          textOverflow: "ellipsis",
+                          overflow: "hidden",
+                          whiteSpace: "nowrap",
+                          display: "block",
+                          maxWidth: "100%",
+                        }}
+                        data-testid="chat-title"
+                        data-text-overflow="ellipsis"
+                        data-long-title={
+                          chat.title.length > 20 ? "true" : "false"
+                        }
+                      >
+                        {chat.title}
+                      </p>
+                      {chat.messages.length > 0 && (
+                        <p
+                          className="text-xs text-neutral-500 dark:text-neutral-400"
+                          data-testid={`chat-model-${chat.id}`}
+                        >
+                          {(() => {
+                            const lastAssistantMsg = [...chat.messages]
+                              .reverse()
+                              .find((m) => m.role === "assistant" && m.model);
+                            if (!lastAssistantMsg?.model) return null;
+
+                            const model = lastAssistantMsg.model
+                              .split("/")
+                              .pop();
+                            return model === "gpt-4o"
+                              ? "gpt-4o"
+                              : model === "claude-3-opus"
+                              ? "claude-3-opus"
+                              : model;
+                          })()}
+                        </p>
+                      )}
+                      {chat.messages.length === 0 && (
+                        <p
+                          className="text-xs text-neutral-400 dark:text-neutral-500"
+                          data-testid="no-model-info"
+                        >
+                          No messages yet
+                        </p>
+                      )}
+                    </div>
+                    {onDeleteChatAction && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (
+                            confirm(
+                              "Are you sure you want to delete this chat?"
+                            )
+                          ) {
+                            onDeleteChatAction(chat.id);
+                          }
+                        }}
+                        className="text-neutral-400 hover:text-red-500 transition-colors p-1 -mr-1 opacity-0 group-hover:opacity-100 focus:opacity-100"
+                        aria-label="Delete chat"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))
+          )}
         </div>
       </aside>
     </>

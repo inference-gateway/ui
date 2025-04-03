@@ -164,7 +164,6 @@ export async function POST(req: Request) {
         }
       })();
 
-      // Return the response immediately while processing continues in background
       return response;
     } else {
       try {

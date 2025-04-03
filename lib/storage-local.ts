@@ -14,9 +14,14 @@ export class LocalStorageService implements StorageService {
 
   async getChatSessions(): Promise<ChatSession[]> {
     const saved = localStorage.getItem(this.getStorageKey("chatSessions"));
-    return saved
-      ? JSON.parse(saved)
-      : [{ id: "1", title: "New Chat", messages: [] }];
+    if (!saved) {
+      return [];
+    }
+    try {
+      return JSON.parse(saved);
+    } catch {
+      return [];
+    }
   }
 
   async saveChatSessions(sessions: ChatSession[]): Promise<void> {
@@ -28,7 +33,15 @@ export class LocalStorageService implements StorageService {
 
   async getActiveChatId(): Promise<string> {
     const saved = localStorage.getItem(this.getStorageKey("activeChatId"));
-    return saved || "1";
+    if (!saved) {
+      const sessions = await this.getChatSessions();
+      const firstSessionId = sessions[0]?.id;
+      if (firstSessionId) {
+        await this.saveActiveChatId(firstSessionId);
+        return firstSessionId;
+      }
+    }
+    return saved || "";
   }
 
   async saveActiveChatId(id: string): Promise<void> {

@@ -37,7 +37,6 @@ export default function ChatInterface({
     }
   };
 
-  // Process commands
   const processCommand = (input: string) => {
     const trimmedInput = input.trim();
 
@@ -68,7 +67,6 @@ export default function ChatInterface({
     handleSendMessage();
   };
 
-  // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);

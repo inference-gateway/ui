@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
     webpackBuildWorker: true,
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
+    forceSwcTransforms: true,
   },
 };
 
