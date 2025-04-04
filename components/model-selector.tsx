@@ -56,9 +56,10 @@ export default function ModelSelector({
     }
   }, [open]);
 
-  const filteredModels = models.filter((model) =>
-    model.id.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredModels =
+    models?.filter((model) =>
+      model.id.toLowerCase().includes(searchQuery.toLowerCase())
+    ) || [];
 
   const handleModelSelect = (modelId: string) => {
     onSelectModelAction(modelId);

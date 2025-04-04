@@ -1,0 +1,89 @@
+---
+services:
+  ui:
+    build:
+      context: ../../..
+      target: dev
+      dockerfile: Dockerfile
+    volumes:
+      - ../../..:/app
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.frontend
+    depends_on:
+      - inference-gateway
+      - keycloak
+    deploy:
+      resources:
+        limits:
+          cpus: "2.5"
+          memory: 1512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    pull_policy: always
+    restart: unless-stopped
+    extra_hosts:
+      - "localhost:host-gateway"
+    networks:
+      - app-network
+
+  inference-gateway:
+    image: ghcr.io/inference-gateway/inference-gateway:latest
+    env_file:
+      - .env.backend
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 100M
+    pull_policy: always
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1
+    command:
+      - start-dev
+      - --import-realm
+      - --verbose
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KC_HOSTNAME: localhost
+      KC_LOG_LEVEL: info
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./keycloak/import:/opt/keycloak/data/import
+    depends_on:
+      - keycloak-db
+    networks:
+      - app-network
+
+  keycloak-db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+    volumes:
+      - keycloak-db-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+volumes:
+  keycloak-db-data:
+
+networks:
+  app-network:
+    driver: bridge

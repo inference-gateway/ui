@@ -7,6 +7,7 @@ import MessageList from "./message-list";
 import MessageInput from "./message-input";
 import type { Message } from "@/types/chat";
 import { Button } from "@/components/ui/button";
+import { signIn } from "next-auth/react";
 import { Trash2 } from "lucide-react";
 
 interface ChatInterfaceProps {
@@ -105,6 +106,9 @@ export default function ChatInterface({
                 Send
               </Button>
             </form>
+            <Button variant="outline" onClick={() => signIn("oidc")}>
+              Login
+            </Button>
             {messages.length > 0 && (
               <Button
                 variant="outline"
