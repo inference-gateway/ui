@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0-rc.1](https://github.com/inference-gateway/ui/compare/v0.3.0...v0.4.0-rc.1) (2025-04-04)
+
+### ✨ Features
+
+* Add authentication support with NextAuth and Keycloak integration ([71b1910](https://github.com/inference-gateway/ui/commit/71b19100b81238de1e6fde562eab8c3b3b430fc8))
+* Upgrade NextAuth to v5 and refactor authentication handling ([6102266](https://github.com/inference-gateway/ui/commit/61022660369e1bfa28df3e451b223519f944a63b))
+
+### ♻️ Improvements
+
+* Change environment variable for authentication from NEXT_PUBLIC_AUTH_ENABLED to AUTH_ENABLED since it's only running on the server ([c52d477](https://github.com/inference-gateway/ui/commit/c52d4778e66fcf7ceb46dd45b3bbb5cc9a8906b5))
+* Cleanup - remove redundant error logging in model fetching ([ba62749](https://github.com/inference-gateway/ui/commit/ba627499cd6465a46463764cb2585fade3cff7ca))
+* Remove commented code for session handling in useChat hook ([d7dd99e](https://github.com/inference-gateway/ui/commit/d7dd99e93c86ccdb9003c855b8f3d7f1e7fc9be4))
+* Remove Keycloak test route implementation ([03db017](https://github.com/inference-gateway/ui/commit/03db017bd06915d8e38387157570ddc42458efeb))
+* Rename callback props in ChatInterface and MessageInput components ([c3687a7](https://github.com/inference-gateway/ui/commit/c3687a7cf9b9548e72738aedc97065cb64a89702))
+
+### 🔧 Miscellaneous
+
+* Add TODO for additional storage type implementation ([a1aa88a](https://github.com/inference-gateway/ui/commit/a1aa88a9f0edb28d4fe7939504181c6564db7f89))
+* Update @auth/core and related dependencies to latest versions ([f3da2fa](https://github.com/inference-gateway/ui/commit/f3da2fabd44324c2514adc7bbcd89bfbebefe43f))
+
+### ✅ Miscellaneous
+
+* Mock NextAuth session in Jest setup for testing ([dc3a0a4](https://github.com/inference-gateway/ui/commit/dc3a0a435e4b5197d6ee15ed30859e540a7113d2))
+
 ## [0.3.0](https://github.com/inference-gateway/ui/compare/v0.2.1...v0.3.0) (2025-04-03)
 
 ### ✨ Features
