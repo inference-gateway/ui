@@ -40,7 +40,7 @@ const log = (message: string): void => {
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  const authEnabled = process.env.NEXT_PUBLIC_AUTH_ENABLED === "true";
+  const authEnabled = process.env.AUTH_ENABLED === "true";
 
   log(`Path: ${pathname} | Auth Enabled: ${authEnabled}`);
 

@@ -16,7 +16,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const isAuthEnabled = process.env.NEXT_PUBLIC_AUTH_ENABLED === "true";
+  const isAuthEnabled = process.env.AUTH_ENABLED === "true";
   const session = isAuthEnabled ? await auth() : null;
 
   return (

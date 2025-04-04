@@ -3,7 +3,7 @@ import { InferenceGatewayClient } from "@inference-gateway/sdk";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const isAuthEnabled = process.env.NEXT_PUBLIC_AUTH_ENABLED === "true";
+  const isAuthEnabled = process.env.AUTH_ENABLED === "true";
   const session = isAuthEnabled ? await auth() : null;
 
   if (isAuthEnabled && !session) {
