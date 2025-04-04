@@ -35,8 +35,7 @@ GITHUB_CLIENT_SECRET="your-github-client-secret"
 3. Configure frontend environment (.env.frontend):
 
 ```ini
-NEXT_PUBLIC_API_BASE_URL="http://localhost:3000/api/v1"
-NEXT_PUBLIC_AUTH_ENABLED="true"
+AUTH_ENABLED="true"
 ```
 
 4. Start the services:

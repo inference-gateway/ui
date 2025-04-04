@@ -34,7 +34,7 @@ export const authConfig: NextAuthConfig = {
   ],
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
-      if (process.env.NEXT_PUBLIC_AUTH_ENABLED !== "true") return true;
+      if (process.env.AUTH_ENABLED !== "true") return true;
 
       const isLoggedIn = !!auth?.user;
       const isOnDashboard = nextUrl.pathname.startsWith("/dashboard");
@@ -70,7 +70,7 @@ type AuthHandlers = {
 };
 
 const createAuthHandlers = (): AuthHandlers => {
-  if (process.env.NEXT_PUBLIC_AUTH_ENABLED !== "true") {
+  if (process.env.AUTH_ENABLED !== "true") {
     return {
       GET: async () => new Response(null, { status: 404 }),
       POST: async () => new Response(null, { status: 404 }),
