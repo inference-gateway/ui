@@ -33,7 +33,6 @@ export async function GET() {
       const models = await client.listModels();
       return NextResponse.json(models);
     } catch (error) {
-      console.error(error);
       console.error(
         `Error fetching models from gateway: ${
           error instanceof Error ? error.message : String(error)
