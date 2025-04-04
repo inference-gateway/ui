@@ -1,8 +1,19 @@
+import { auth } from "@/lib/auth";
 import logger from "@/lib/logger";
 import { InferenceGatewayClient } from "@inference-gateway/sdk";
 import { NextResponse } from "next/server";
 
 export async function GET() {
+  const isAuthEnabled = process.env.NEXT_PUBLIC_AUTH_ENABLED === "true";
+  const session = isAuthEnabled ? await auth() : null;
+
+  if (isAuthEnabled && !session) {
+    return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   try {
     logger.debug("Starting models list request");
     const gatewayUrl = process.env.INFERENCE_GATEWAY_URL;

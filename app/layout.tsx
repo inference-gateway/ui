@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options";
+import { auth } from "@/lib/auth";
 import Providers from "@/app/auth-providers";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -17,7 +16,8 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerSession(authOptions);
+  const isAuthEnabled = process.env.NEXT_PUBLIC_AUTH_ENABLED === "true";
+  const session = isAuthEnabled ? await auth() : null;
 
   return (
     <html lang="en" className="light" style={{ colorScheme: "light" }}>

@@ -1,14 +1,14 @@
+import { auth } from "@/lib/auth";
 import logger from "@/lib/logger";
 import { InferenceGatewayClient } from "@inference-gateway/sdk";
 import { NextResponse } from "next/server";
 import { TransformStream } from "stream/web";
 
-import { authOptions } from "@/lib/auth-options";
-import { getServerSession } from "next-auth";
-
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
+  const isAuthEnabled = process.env.NEXT_PUBLIC_AUTH_ENABLED === "true";
+  const session = isAuthEnabled ? await auth() : null;
+
+  if (isAuthEnabled && !session) {
     return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" },
