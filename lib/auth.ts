@@ -3,8 +3,7 @@ import type {
   NextApiRequest,
   NextApiResponse,
 } from "next";
-import type { Session } from "next-auth";
-import NextAuth, { type NextAuthConfig } from "next-auth";
+import NextAuth, { type NextAuthConfig, Session } from "next-auth";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import Keycloak from "next-auth/providers/keycloak";
@@ -16,6 +15,7 @@ export const authConfig: NextAuthConfig = {
     error: "/auth/error",
     signIn: "/auth/signin",
   },
+  trustHost: true,
   providers: [
     Keycloak({
       clientId: process.env.KEYCLOAK_ID!,
