@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0-rc.2](https://github.com/inference-gateway/ui/compare/v0.4.0-rc.1...v0.4.0-rc.2) (2025-04-04)
+
+### ✨ Features
+
+* Add trustHost option to NextAuth configuration ([baf4a0f](https://github.com/inference-gateway/ui/commit/baf4a0fdfc710c2d820703e2e08999dfd5591edc))
+
+### 🔧 Miscellaneous
+
+* Update Docker Compose to use pre-built UI image instead of local build ([44e1503](https://github.com/inference-gateway/ui/commit/44e150397c764a52efe00bdc9f57b133bf584a6a))
+
 ## [0.4.0-rc.1](https://github.com/inference-gateway/ui/compare/v0.3.0...v0.4.0-rc.1) (2025-04-04)
 
 ### ✨ Features
