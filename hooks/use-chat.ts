@@ -74,7 +74,6 @@ export function useChat(initialDarkMode = true) {
     const loadData = async () => {
       try {
         let sessions = (await storageService.getChatSessions()) || [];
-        // Handle case where sessions might be in {sessions: []} format
         interface SessionsWrapper {
           sessions: ChatSession[];
         }

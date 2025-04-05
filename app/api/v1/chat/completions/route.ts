@@ -1,9 +1,20 @@
+import { auth } from "@/lib/auth";
 import logger from "@/lib/logger";
 import { InferenceGatewayClient } from "@inference-gateway/sdk";
 import { NextResponse } from "next/server";
 import { TransformStream } from "stream/web";
 
 export async function POST(req: Request) {
+  const isAuthEnabled = process.env.AUTH_ENABLED === "true";
+  const session = isAuthEnabled ? await auth() : null;
+
+  if (isAuthEnabled && !session) {
+    return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   try {
     logger.debug("Starting chat completions request");
     const gatewayUrl = process.env.INFERENCE_GATEWAY_URL;

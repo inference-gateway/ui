@@ -1,8 +1,8 @@
-import type React from "react";
-import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { ThemeProvider } from "@/components/theme-provider";
+import "./globals.css";
+import { auth } from "@/lib/auth";
+import Providers from "@/app/auth-providers";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -11,17 +11,18 @@ export const metadata: Metadata = {
   description: "A conversational UI for OpenAI-compatible APIs",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const isAuthEnabled = process.env.AUTH_ENABLED === "true";
+  const session = isAuthEnabled ? await auth() : null;
+
   return (
-    <html lang="en" className="dark" style={{ colorScheme: "dark" }}>
+    <html lang="en" className="light" style={{ colorScheme: "light" }}>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
-        </ThemeProvider>
+        <Providers session={session}>{children}</Providers>
       </body>
     </html>
   );
