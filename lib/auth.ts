@@ -16,6 +16,7 @@ export const authConfig: NextAuthConfig = {
     error: "/auth/error",
     signIn: "/auth/signin",
   },
+  trustHost: true,
   providers: [
     Keycloak({
       clientId: process.env.KEYCLOAK_ID!,

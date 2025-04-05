@@ -2,6 +2,70 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0-rc.4](https://github.com/inference-gateway/ui/compare/v0.4.0-rc.3...v0.4.0-rc.4) (2025-04-05)
+
+### ♻️ Improvements
+
+* Implement a new logging system with Winston and a simple logger for browser and Edge runtime ([3df26fb](https://github.com/inference-gateway/ui/commit/3df26fb65d86bd019a663de80f969ed4ad96aee0))
+
+## [0.4.0-rc.3](https://github.com/inference-gateway/ui/compare/v0.4.0-rc.2...v0.4.0-rc.3) (2025-04-05)
+
+### ✨ Features
+
+* Add authentication support with NextAuth and Keycloak integration ([a143e7e](https://github.com/inference-gateway/ui/commit/a143e7e29dd122257d03f78509b0bcb9c22cbb52))
+* Add Structured Logging ([#16](https://github.com/inference-gateway/ui/issues/16)) ([371b4fe](https://github.com/inference-gateway/ui/commit/371b4fef58011bd93a5a55c60f9f00807bfc8831))
+* Upgrade NextAuth to v5 and refactor authentication handling ([6e5f93b](https://github.com/inference-gateway/ui/commit/6e5f93bedbfe0813f7a69177858f2b105842202a))
+
+### ♻️ Improvements
+
+* Change environment variable for authentication from NEXT_PUBLIC_AUTH_ENABLED to AUTH_ENABLED since it's only running on the server ([501a3f3](https://github.com/inference-gateway/ui/commit/501a3f3346911970f6739cb4e4b88daa4ba09347))
+* Remove commented code for session handling in useChat hook ([a50ef76](https://github.com/inference-gateway/ui/commit/a50ef761dbf660844842e942cede4ade92b2d15a))
+* Remove Keycloak test route implementation ([d603c65](https://github.com/inference-gateway/ui/commit/d603c65cccfdf83869de5b327f96c7da611956e1))
+* Update import path for Home component in page tests ([c530090](https://github.com/inference-gateway/ui/commit/c53009014a14a1661a66cf5254ffe23bba35953b))
+
+### 🔧 Miscellaneous
+
+* Add logging for session data in Home component ([ff07fb6](https://github.com/inference-gateway/ui/commit/ff07fb6d362ec688a00152f01477d6a4da256950))
+* Update @auth/core and related dependencies to latest versions ([44b654e](https://github.com/inference-gateway/ui/commit/44b654ed7bb9f807d9a51ccb1486e695de8f2e5f))
+
+### ✅ Miscellaneous
+
+* Mock NextAuth session in Jest setup for testing ([6837bdf](https://github.com/inference-gateway/ui/commit/6837bdfa5fe4f556249e118e5a00cf3ed0d37f42))
+
+## [0.4.0-rc.2](https://github.com/inference-gateway/ui/compare/v0.4.0-rc.1...v0.4.0-rc.2) (2025-04-04)
+
+### ✨ Features
+
+* Add trustHost option to NextAuth configuration ([baf4a0f](https://github.com/inference-gateway/ui/commit/baf4a0fdfc710c2d820703e2e08999dfd5591edc))
+
+### 🔧 Miscellaneous
+
+* Update Docker Compose to use pre-built UI image instead of local build ([44e1503](https://github.com/inference-gateway/ui/commit/44e150397c764a52efe00bdc9f57b133bf584a6a))
+
+## [0.4.0-rc.1](https://github.com/inference-gateway/ui/compare/v0.3.0...v0.4.0-rc.1) (2025-04-04)
+
+### ✨ Features
+
+* Add authentication support with NextAuth and Keycloak integration ([71b1910](https://github.com/inference-gateway/ui/commit/71b19100b81238de1e6fde562eab8c3b3b430fc8))
+* Upgrade NextAuth to v5 and refactor authentication handling ([6102266](https://github.com/inference-gateway/ui/commit/61022660369e1bfa28df3e451b223519f944a63b))
+
+### ♻️ Improvements
+
+* Change environment variable for authentication from NEXT_PUBLIC_AUTH_ENABLED to AUTH_ENABLED since it's only running on the server ([c52d477](https://github.com/inference-gateway/ui/commit/c52d4778e66fcf7ceb46dd45b3bbb5cc9a8906b5))
+* Cleanup - remove redundant error logging in model fetching ([ba62749](https://github.com/inference-gateway/ui/commit/ba627499cd6465a46463764cb2585fade3cff7ca))
+* Remove commented code for session handling in useChat hook ([d7dd99e](https://github.com/inference-gateway/ui/commit/d7dd99e93c86ccdb9003c855b8f3d7f1e7fc9be4))
+* Remove Keycloak test route implementation ([03db017](https://github.com/inference-gateway/ui/commit/03db017bd06915d8e38387157570ddc42458efeb))
+* Rename callback props in ChatInterface and MessageInput components ([c3687a7](https://github.com/inference-gateway/ui/commit/c3687a7cf9b9548e72738aedc97065cb64a89702))
+
+### 🔧 Miscellaneous
+
+* Add TODO for additional storage type implementation ([a1aa88a](https://github.com/inference-gateway/ui/commit/a1aa88a9f0edb28d4fe7939504181c6564db7f89))
+* Update @auth/core and related dependencies to latest versions ([f3da2fa](https://github.com/inference-gateway/ui/commit/f3da2fabd44324c2514adc7bbcd89bfbebefe43f))
+
+### ✅ Miscellaneous
+
+* Mock NextAuth session in Jest setup for testing ([dc3a0a4](https://github.com/inference-gateway/ui/commit/dc3a0a435e4b5197d6ee15ed30859e540a7113d2))
+
 ## [0.3.0](https://github.com/inference-gateway/ui/compare/v0.2.1...v0.3.0) (2025-04-03)
 
 ### ✨ Features

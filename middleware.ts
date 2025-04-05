@@ -1,3 +1,4 @@
+import logger from "@/lib/logger";
 import { getToken } from "next-auth/jwt";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -34,7 +35,7 @@ const isPublicPath = (pathname: string): boolean =>
 
 const log = (message: string): void => {
   if (process.env.NODE_ENV !== "production") {
-    console.log(`[Middleware] ${message}`);
+    logger.debug(`[Middleware] ${message}`);
   }
 };
 
