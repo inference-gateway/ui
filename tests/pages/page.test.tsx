@@ -1,5 +1,8 @@
 import React from "react";
 import { render, screen, fireEvent, act } from "@testing-library/react";
+import Home from "@/app/home/page";
+import { useChat } from "@/hooks/use-chat";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MockModelSelectorProps {
   selectedModel: string;
@@ -20,9 +23,6 @@ jest.mock("@/components/model-selector", () => {
     );
   };
 });
-import Home from "@/app/page";
-import { useChat } from "@/hooks/use-chat";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 jest.mock("react-markdown", () => {
   const MockReactMarkdown = ({ children }: { children: React.ReactNode }) => (
