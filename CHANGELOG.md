@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0-rc.4](https://github.com/inference-gateway/ui/compare/v0.4.0-rc.3...v0.4.0-rc.4) (2025-04-05)
+
+### ♻️ Improvements
+
+* Implement a new logging system with Winston and a simple logger for browser and Edge runtime ([3df26fb](https://github.com/inference-gateway/ui/commit/3df26fb65d86bd019a663de80f969ed4ad96aee0))
+
 ## [0.4.0-rc.3](https://github.com/inference-gateway/ui/compare/v0.4.0-rc.2...v0.4.0-rc.3) (2025-04-05)
 
 ### ✨ Features
