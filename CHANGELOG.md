@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0-rc.3](https://github.com/inference-gateway/ui/compare/v0.4.0-rc.2...v0.4.0-rc.3) (2025-04-05)
+
+### ✨ Features
+
+* Add authentication support with NextAuth and Keycloak integration ([a143e7e](https://github.com/inference-gateway/ui/commit/a143e7e29dd122257d03f78509b0bcb9c22cbb52))
+* Add Structured Logging ([#16](https://github.com/inference-gateway/ui/issues/16)) ([371b4fe](https://github.com/inference-gateway/ui/commit/371b4fef58011bd93a5a55c60f9f00807bfc8831))
+* Upgrade NextAuth to v5 and refactor authentication handling ([6e5f93b](https://github.com/inference-gateway/ui/commit/6e5f93bedbfe0813f7a69177858f2b105842202a))
+
+### ♻️ Improvements
+
+* Change environment variable for authentication from NEXT_PUBLIC_AUTH_ENABLED to AUTH_ENABLED since it's only running on the server ([501a3f3](https://github.com/inference-gateway/ui/commit/501a3f3346911970f6739cb4e4b88daa4ba09347))
+* Remove commented code for session handling in useChat hook ([a50ef76](https://github.com/inference-gateway/ui/commit/a50ef761dbf660844842e942cede4ade92b2d15a))
+* Remove Keycloak test route implementation ([d603c65](https://github.com/inference-gateway/ui/commit/d603c65cccfdf83869de5b327f96c7da611956e1))
+* Update import path for Home component in page tests ([c530090](https://github.com/inference-gateway/ui/commit/c53009014a14a1661a66cf5254ffe23bba35953b))
+
+### 🔧 Miscellaneous
+
+* Add logging for session data in Home component ([ff07fb6](https://github.com/inference-gateway/ui/commit/ff07fb6d362ec688a00152f01477d6a4da256950))
+* Update @auth/core and related dependencies to latest versions ([44b654e](https://github.com/inference-gateway/ui/commit/44b654ed7bb9f807d9a51ccb1486e695de8f2e5f))
+
+### ✅ Miscellaneous
+
+* Mock NextAuth session in Jest setup for testing ([6837bdf](https://github.com/inference-gateway/ui/commit/6837bdfa5fe4f556249e118e5a00cf3ed0d37f42))
+
 ## [0.4.0-rc.2](https://github.com/inference-gateway/ui/compare/v0.4.0-rc.1...v0.4.0-rc.2) (2025-04-04)
 
 ### ✨ Features
