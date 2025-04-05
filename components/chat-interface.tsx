@@ -1,6 +1,5 @@
 "use client";
 
-import logger from "@/lib/logger";
 import type React from "react";
 
 import { useState, useRef, useEffect } from "react";
@@ -10,6 +9,7 @@ import type { Message } from "@/types/chat";
 import { Button } from "@/components/ui/button";
 import { signIn } from "next-auth/react";
 import { Trash2 } from "lucide-react";
+import logger from "@/lib/logger";
 
 interface ChatInterfaceProps {
   messages: Message[];

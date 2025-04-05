@@ -1,21 +1,5 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-jest.mock("react-markdown", () => {
-  const MockReactMarkdown = ({ children }: { children: React.ReactNode }) => (
-    <>{children}</>
-  );
-  MockReactMarkdown.displayName = "MockReactMarkdown";
-  return MockReactMarkdown;
-});
-
-jest.mock("react-syntax-highlighter", () => ({
-  Prism: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-
-jest.mock("react-syntax-highlighter/dist/esm/styles/hljs", () => ({
-  dark: () => ({}),
-}));
 import { ChatArea } from "@/components/chat-area";
 import type { Message } from "@/types/chat";
 import { MessageRole } from "@inference-gateway/sdk";

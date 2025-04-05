@@ -12,11 +12,7 @@ import {
   mockModels,
   mockFetchModelsSuccess,
   mockFetchModelsError,
-} from "../mocks/api";
-
-jest.mock("@/lib/api", () => ({
-  fetchModels: jest.fn(),
-}));
+} from "@/tests/mocks/api";
 
 describe("ModelSelector Component", () => {
   const mockOnSelectModelAction = jest.fn();
@@ -84,7 +80,6 @@ describe("ModelSelector Component", () => {
       );
     });
 
-    // Wait for loading to complete and error state to be set
     await act(async () => {
       await waitFor(() => {
         expect(screen.queryByText("Loading...")).not.toBeInTheDocument();

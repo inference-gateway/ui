@@ -1,8 +1,8 @@
-import logger from "@/lib/logger";
 import type { Message } from "@/types/chat";
 import { cn } from "@/lib/utils";
 import { User, Bot } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import logger from "@/lib/logger";
 
 interface MessageItemProps {
   message: Message;

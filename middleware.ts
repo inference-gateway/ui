@@ -33,25 +33,19 @@ const PUBLIC_PATHS = [
 const isPublicPath = (pathname: string): boolean =>
   PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(path));
 
-const log = (message: string): void => {
-  if (process.env.NODE_ENV !== "production") {
-    logger.debug(`[Middleware] ${message}`);
-  }
-};
-
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const authEnabled = process.env.AUTH_ENABLED === "true";
 
-  log(`Path: ${pathname} | Auth Enabled: ${authEnabled}`);
+  logger.debug(`[Middleware] Path: ${pathname} | Auth Enabled: ${authEnabled}`);
 
   if (pathname === ROUTES.ROOT) {
-    log("Redirecting root path to home page");
+    logger.debug("[Middleware] Redirecting root path to home page");
     return NextResponse.redirect(new URL(ROUTES.HOME, request.url));
   }
 
   if (!authEnabled || isPublicPath(pathname)) {
-    log(`Skipping auth check: ${pathname}`);
+    logger.debug(`[Middleware] Skipping auth check: ${pathname}`);
     return NextResponse.next();
   }
 
@@ -60,28 +54,25 @@ export async function middleware(request: NextRequest) {
     secret: process.env.NEXTAUTH_SECRET,
   });
 
-  log(`Token exists: ${!!token}`);
+  logger.debug(`[Middleware] Token exists: ${!!token}`);
 
   if (
     token &&
     (pathname === ROUTES.AUTH.SIGNIN || pathname === ROUTES.AUTH.ROOT)
   ) {
-    log("Redirecting authenticated user from auth page");
+    logger.debug("[Middleware] Redirecting authenticated user from auth page");
     return NextResponse.redirect(new URL(ROUTES.HOME, request.url));
   }
 
   if (!token) {
-    log("Redirecting unauthenticated user to signin");
+    logger.debug("[Middleware] Redirecting unauthenticated user to signin");
     return NextResponse.redirect(new URL(ROUTES.AUTH.SIGNIN, request.url));
   }
 
-  log(`Access granted to protected route: ${pathname}`);
+  logger.debug(`[Middleware] Access granted to protected route: ${pathname}`);
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    ROUTES.ROOT,
-    "/((?!_next/static|_next/image|images|favicon.ico|api/v1).*)",
-  ],
+  matcher: ["/", "/((?!_next/static|_next/image|images|favicon.ico|api/v1).*)"],
 };

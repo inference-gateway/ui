@@ -1,9 +1,31 @@
-import winston from "winston";
-
 type LogLevel = "error" | "warn" | "info" | "debug";
 
-// Simple logger for browser and Edge runtime
-const createSimpleLogger = (logLevel: LogLevel) => {
+// Define interface for consistent logger shape
+interface Logger {
+  error: (...args: unknown[]) => void;
+  warn: (...args: unknown[]) => void;
+  info: (...args: unknown[]) => void;
+  debug: (...args: unknown[]) => void;
+}
+
+const getLogLevel = (): LogLevel => {
+  if (typeof window === "undefined") {
+    // Server-side - use environment variables if available
+    const env = process.env.NODE_ENV || "production";
+    return (
+      process.env.LOG_LEVEL ||
+      process.env.NEXT_PUBLIC_LOG_LEVEL ||
+      (env === "production" ? "info" : "debug")
+    ).toLowerCase() as LogLevel;
+  } else {
+    // Client-side - use NEXT_PUBLIC_LOG_LEVEL or default
+    return (
+      process.env.NEXT_PUBLIC_LOG_LEVEL || "info"
+    ).toLowerCase() as LogLevel;
+  }
+};
+
+const createLogger = (logLevel: LogLevel): Logger => {
   const levels = {
     error: 0,
     warn: 1,
@@ -14,7 +36,8 @@ const createSimpleLogger = (logLevel: LogLevel) => {
   const log = (level: LogLevel, ...args: unknown[]) => {
     if (levels[level] > levels[logLevel]) return;
     const consoleMethod = level === "debug" ? "log" : level;
-    console[consoleMethod](`[${level}]`, ...args);
+    const timestamp = new Date().toISOString();
+    console[consoleMethod](`[${timestamp}] [${level}]`, ...args);
   };
 
   return {
@@ -25,38 +48,6 @@ const createSimpleLogger = (logLevel: LogLevel) => {
   };
 };
 
-// Winston-based logger for Node.js
-const createWinstonLogger = (logLevel: LogLevel) => {
-  return winston.createLogger({
-    level: logLevel,
-    format: winston.format.combine(
-      winston.format.colorize(),
-      winston.format.timestamp(),
-      winston.format.printf(
-        ({ timestamp, level, message }) => `${timestamp} [${level}]: ${message}`
-      )
-    ),
-    transports: [new winston.transports.Console()],
-    exceptionHandlers: [new winston.transports.Console()],
-  });
-};
+const logger = createLogger(getLogLevel());
 
-const getLogger = () => {
-  const env = process.env.NODE_ENV || "development";
-  const logLevel = (
-    process.env.LOG_LEVEL ||
-    process.env.NEXT_PUBLIC_LOG_LEVEL ||
-    (env === "production" ? "info" : "debug")
-  ).toLowerCase() as LogLevel;
-
-  if (
-    typeof window !== "undefined" ||
-    (typeof process !== "undefined" && process.env?.NEXT_RUNTIME === "edge")
-  ) {
-    return createSimpleLogger(logLevel);
-  }
-
-  return createWinstonLogger(logLevel);
-};
-
-export default getLogger();
+export default logger;

@@ -1,6 +1,5 @@
 "use client";
 
-import logger from "@/lib/logger";
 import { useEffect, useState, useRef } from "react";
 import type { Model } from "@/types/model";
 import {
@@ -14,6 +13,7 @@ import {
 import { fetchModels } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Check, Search } from "lucide-react";
+import logger from "@/lib/logger";
 
 interface ModelSelectorProps {
   selectedModel: string;
