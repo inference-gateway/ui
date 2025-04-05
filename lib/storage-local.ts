@@ -1,3 +1,4 @@
+import logger from "@/lib/logger";
 import type { StorageOptions, StorageService } from "@/types/chat";
 import { ChatSession } from "@/types/chat";
 
@@ -13,43 +14,67 @@ export class LocalStorageService implements StorageService {
   }
 
   async getChatSessions(): Promise<ChatSession[]> {
-    const saved = localStorage.getItem(this.getStorageKey("chatSessions"));
+    const key = this.getStorageKey("chatSessions");
+    const saved = localStorage.getItem(key);
     if (!saved) {
+      logger.debug("No chat sessions found in storage", { key });
       return [];
     }
     try {
-      return JSON.parse(saved);
-    } catch {
+      const sessions = JSON.parse(saved);
+      logger.debug("Loaded chat sessions from storage", {
+        key,
+        count: sessions.length,
+      });
+      return sessions;
+    } catch (error) {
+      logger.error("Failed to parse chat sessions", {
+        key,
+        error: error instanceof Error ? error.message : error,
+      });
       return [];
     }
   }
 
   async saveChatSessions(sessions: ChatSession[]): Promise<void> {
-    localStorage.setItem(
-      this.getStorageKey("chatSessions"),
-      JSON.stringify(sessions)
-    );
+    const key = this.getStorageKey("chatSessions");
+    logger.debug("Saving chat sessions to storage", {
+      key,
+      count: sessions.length,
+    });
+    localStorage.setItem(key, JSON.stringify(sessions));
   }
 
   async getActiveChatId(): Promise<string> {
-    const saved = localStorage.getItem(this.getStorageKey("activeChatId"));
+    const key = this.getStorageKey("activeChatId");
+    const saved = localStorage.getItem(key);
     if (!saved) {
+      logger.debug("No active chat ID found, checking sessions", { key });
       const sessions = await this.getChatSessions();
       const firstSessionId = sessions[0]?.id;
       if (firstSessionId) {
+        logger.debug("Setting first session as active", { id: firstSessionId });
         await this.saveActiveChatId(firstSessionId);
         return firstSessionId;
       }
+      logger.debug("No sessions available to set as active");
+      return "";
     }
-    return saved || "";
+    logger.debug("Found active chat ID in storage", { key, id: saved });
+    return saved;
   }
 
   async saveActiveChatId(id: string): Promise<void> {
-    localStorage.setItem(this.getStorageKey("activeChatId"), id);
+    const key = this.getStorageKey("activeChatId");
+    logger.debug("Saving active chat ID", { key, id });
+    localStorage.setItem(key, id);
   }
 
   async clear(): Promise<void> {
-    localStorage.removeItem(this.getStorageKey("chatSessions"));
-    localStorage.removeItem(this.getStorageKey("activeChatId"));
+    const sessionsKey = this.getStorageKey("chatSessions");
+    const activeKey = this.getStorageKey("activeChatId");
+    logger.debug("Clearing storage", { sessionsKey, activeKey });
+    localStorage.removeItem(sessionsKey);
+    localStorage.removeItem(activeKey);
   }
 }

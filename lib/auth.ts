@@ -3,7 +3,8 @@ import type {
   NextApiRequest,
   NextApiResponse,
 } from "next";
-import NextAuth, { type NextAuthConfig, Session } from "next-auth";
+import type { Session } from "next-auth";
+import NextAuth, { type NextAuthConfig } from "next-auth";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import Keycloak from "next-auth/providers/keycloak";
