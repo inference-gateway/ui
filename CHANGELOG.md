@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0-rc.5](https://github.com/inference-gateway/ui/compare/v0.4.0-rc.4...v0.4.0-rc.5) (2025-04-05)
+
+### ♻️ Improvements
+
+* Refactor logger, use standard logger for both server and client side code ([618ada2](https://github.com/inference-gateway/ui/commit/618ada2692d364d84c5aed530a926a12881dc0db))
+
+### 🔧 Miscellaneous
+
+* Update UI image version to 0.4.0-rc.4 in Docker Compose ([1330bcd](https://github.com/inference-gateway/ui/commit/1330bcda2d1618fc85b91145fbf95e714bd94bd0))
+
 ## [0.4.0-rc.4](https://github.com/inference-gateway/ui/compare/v0.4.0-rc.3...v0.4.0-rc.4) (2025-04-05)
 
 ### ♻️ Improvements
