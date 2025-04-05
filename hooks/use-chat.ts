@@ -1,3 +1,4 @@
+import logger from "@/lib/logger";
 import { StorageServiceFactory } from "@/lib/storage";
 import { StorageType, type ChatSession, type Message } from "@/types/chat";
 import { InferenceGatewayClient, MessageRole } from "@inference-gateway/sdk";
@@ -96,7 +97,10 @@ export function useChat(initialDarkMode = true) {
             : [],
         });
       } catch (error) {
-        console.error("Failed to load chat data:", error);
+        logger.error("Failed to load chat data", {
+          error: error instanceof Error ? error.message : error,
+          stack: error instanceof Error ? error.stack : undefined,
+        });
         setChatState({
           sessions: [],
           activeId: "",
@@ -113,7 +117,10 @@ export function useChat(initialDarkMode = true) {
         await storageService.saveChatSessions(sessions);
         await storageService.saveActiveChatId(activeId);
       } catch (error) {
-        console.error("Failed to save chat data:", error);
+        logger.error("Failed to save chat data", {
+          error: error instanceof Error ? error.message : error,
+          stack: error instanceof Error ? error.stack : undefined,
+        });
       }
     };
     saveData();
@@ -161,6 +168,7 @@ export function useChat(initialDarkMode = true) {
       messages: [],
       createdAt: new Date().getTime(),
     };
+    logger.debug("Creating new chat session", { id: newChatId });
 
     setChatState((prev) => ({
       ...prev,
@@ -175,7 +183,10 @@ export function useChat(initialDarkMode = true) {
       await storageService.saveChatSessions(updatedSessions);
       await storageService.saveActiveChatId(newChatId);
     } catch (error) {
-      console.error("Failed to create new chat:", error);
+      logger.error("Failed to create new chat", {
+        error: error instanceof Error ? error.message : error,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
     }
   }, [storageService]);
 
@@ -184,6 +195,7 @@ export function useChat(initialDarkMode = true) {
       if (!model.includes("/")) {
         throw new Error("Model must be in provider/name format");
       }
+      logger.debug("Changing selected model", { model });
       _setSelectedModel(model);
 
       if (!activeId) {
@@ -262,6 +274,10 @@ export function useChat(initialDarkMode = true) {
       }));
 
       try {
+        logger.debug("Starting chat completion stream", {
+          model: selectedModel,
+          messageCount: updatedMessages.length,
+        });
         await clientInstance.streamChatCompletion(
           {
             model: selectedModel,
@@ -302,13 +318,19 @@ export function useChat(initialDarkMode = true) {
               }
             },
             onError: (error) => {
-              console.error("Stream error:", error);
+              logger.error("Stream error", {
+                error: error instanceof Error ? error.message : error,
+                stack: error instanceof Error ? error.stack : undefined,
+              });
               throw error;
             },
           }
         );
       } catch (error) {
-        console.error("Failed to get response:", error);
+        logger.error("Failed to get chat response", {
+          error: error instanceof Error ? error.message : error,
+          stack: error instanceof Error ? error.stack : undefined,
+        });
 
         setChatState((prev) => {
           const updated = [...prev.messages];
@@ -358,13 +380,17 @@ export function useChat(initialDarkMode = true) {
             updatedSessions.find((chat) => chat.id === id)?.messages || [],
         }));
       } catch (error) {
-        console.error("Failed to select chat:", error);
+        logger.error("Failed to select chat", {
+          error: error instanceof Error ? error.message : error,
+          stack: error instanceof Error ? error.stack : undefined,
+        });
       }
     },
     [activeId, messages, sessions, storageService]
   );
 
   const handleDeleteChat = useCallback((id: string) => {
+    logger.debug("Deleting chat session", { id });
     setChatState((prev) => {
       const newSessions = prev.sessions.filter((chat) => chat.id !== id);
 
@@ -399,6 +425,7 @@ export function useChat(initialDarkMode = true) {
   }, []);
 
   const clearMessages = useCallback(() => {
+    logger.debug("Clearing messages in current chat");
     setChatState((prev) => ({ ...prev, messages: [] }));
     setTokenUsage({
       promptTokens: 0,
