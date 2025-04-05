@@ -152,7 +152,9 @@ describe("useChat Hook", () => {
 
     const initialChatId = result.current.activeChatId;
 
-    result.current.handleNewChat();
+    await act(async () => {
+      result.current.handleNewChat();
+    });
 
     await waitFor(() => {
       expect(mockSaveChatSessions).toHaveBeenCalled();
@@ -196,7 +198,9 @@ describe("useChat Hook", () => {
       expect(result.current.chatSessions.length).toBe(2);
     });
 
-    result.current.handleSelectChat("2");
+    await act(async () => {
+      result.current.handleSelectChat("2");
+    });
 
     await waitFor(() => {
       expect(result.current.activeChatId).toBe("2");
@@ -227,7 +231,9 @@ describe("useChat Hook", () => {
       expect(result.current.chatSessions.length).toBe(2);
     });
 
-    result.current.handleDeleteChat("1");
+    await act(async () => {
+      result.current.handleDeleteChat("1");
+    });
 
     await waitFor(() => {
       expect(result.current.activeChatId).toBe("2");
@@ -248,7 +254,9 @@ describe("useChat Hook", () => {
       expect(result.current.chatSessions.length).toBeGreaterThan(0);
     });
 
-    result.current.setSelectedModel("openai/gpt-4o");
+    await act(async () => {
+      result.current.setSelectedModel("openai/gpt-4o");
+    });
 
     await waitFor(() => {
       expect(result.current.selectedModel).toBe("openai/gpt-4o");
@@ -282,7 +290,6 @@ describe("useChat Hook", () => {
         try {
           callbacks.onError(new Error("Stream interrupted"));
         } catch {
-          // Catch the error and mark that it was called
           errorWasCalled = true;
         }
       }, 20);
@@ -326,7 +333,9 @@ describe("useChat Hook", () => {
       expect(result.current.messages.length).toBeGreaterThan(0);
     });
 
-    result.current.clearMessages();
+    await act(async () => {
+      result.current.clearMessages();
+    });
 
     await waitFor(() => {
       expect(result.current.messages).toEqual([]);
@@ -344,7 +353,9 @@ describe("useChat Hook", () => {
 
     expect(result.current.isDarkMode).toBe(true);
 
-    result.current.toggleTheme();
+    await act(async () => {
+      result.current.toggleTheme();
+    });
 
     await waitFor(() => {
       expect(result.current.isDarkMode).toBe(false);
@@ -352,7 +363,9 @@ describe("useChat Hook", () => {
 
     expect(document.documentElement.classList.contains("dark")).toBe(false);
 
-    result.current.toggleTheme();
+    await act(async () => {
+      result.current.toggleTheme();
+    });
 
     await waitFor(() => {
       expect(result.current.isDarkMode).toBe(true);

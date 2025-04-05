@@ -1,5 +1,6 @@
 "use client";
 
+import logger from "@/lib/logger";
 import { useEffect, useState, useRef } from "react";
 import type { Model } from "@/types/model";
 import {
@@ -36,10 +37,15 @@ export default function ModelSelector({
       setError(null);
       try {
         const response = await fetchModels();
+        logger.debug("Successfully loaded models", {
+          count: response.data.length,
+        });
         setModels(response.data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load models");
-        console.error("Error loading models:", err);
+        const error =
+          err instanceof Error ? err.message : "Failed to load models";
+        logger.error("Error loading models", { error });
+        setError(error);
       } finally {
         setIsLoading(false);
       }
@@ -61,6 +67,7 @@ export default function ModelSelector({
   );
 
   const handleModelSelect = (modelId: string) => {
+    logger.debug("User selected model", { modelId });
     onSelectModelAction(modelId);
     setOpen(false);
   };
@@ -86,7 +93,11 @@ export default function ModelSelector({
             placeholder="Search models..."
             className="h-9"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              const query = e.target.value;
+              logger.debug("Searching models", { query });
+              setSearchQuery(query);
+            }}
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
           />

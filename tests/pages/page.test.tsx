@@ -1,5 +1,25 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
+
+interface MockModelSelectorProps {
+  selectedModel: string;
+  onSelectModelAction: (modelId: string) => void;
+}
+
+jest.mock("@/components/model-selector", () => {
+  return function MockModelSelector(props: MockModelSelectorProps) {
+    return (
+      <div data-testid="mock-model-selector">
+        <select
+          value={props.selectedModel}
+          onChange={(e) => props.onSelectModelAction(e.target.value)}
+        >
+          <option value="gpt-4o">gpt-4o</option>
+        </select>
+      </div>
+    );
+  };
+});
 import Home from "@/app/page";
 import { useChat } from "@/hooks/use-chat";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -57,44 +77,61 @@ describe("Home Component", () => {
     (useIsMobile as jest.Mock).mockReturnValue(false);
   });
 
-  test("renders the main components", () => {
-    render(<Home />);
+  test("renders the main components", async () => {
+    await act(async () => {
+      render(<Home />);
+    });
 
     expect(screen.getByText("Inference Gateway UI")).toBeInTheDocument();
     expect(screen.getByTitle("Toggle theme")).toBeInTheDocument();
+    expect(screen.getByTestId("mock-model-selector")).toBeInTheDocument();
   });
 
-  test("toggles theme when clicked", () => {
-    render(<Home />);
+  test("toggles theme when clicked", async () => {
+    await act(async () => {
+      render(<Home />);
+    });
     const themeToggle = screen.getByTitle("Toggle theme");
 
-    fireEvent.click(themeToggle);
+    await act(async () => {
+      fireEvent.click(themeToggle);
+    });
     expect(screen.getByText("Inference Gateway UI")).toBeInTheDocument();
   });
 
-  test("sends message on enter key press", () => {
-    render(<Home />);
+  test("sends message on enter key press", async () => {
+    await act(async () => {
+      render(<Home />);
+    });
 
     const input = screen.getByPlaceholderText("Type a message...");
-    fireEvent.change(input, { target: { value: "Hello world" } });
-    fireEvent.keyDown(input, { key: "Enter" });
+    await act(async () => {
+      fireEvent.change(input, { target: { value: "Hello world" } });
+      fireEvent.keyDown(input, { key: "Enter" });
+    });
 
     expect(mockHandleSendMessage).toHaveBeenCalledWith("Hello world");
   });
 
-  test("does not send empty message", () => {
-    render(<Home />);
+  test("does not send empty message", async () => {
+    await act(async () => {
+      render(<Home />);
+    });
 
     const input = screen.getByPlaceholderText("Type a message...");
-    fireEvent.change(input, { target: { value: "" } });
-    fireEvent.keyDown(input, { key: "Enter" });
+    await act(async () => {
+      fireEvent.change(input, { target: { value: "" } });
+      fireEvent.keyDown(input, { key: "Enter" });
+    });
 
     expect(mockHandleSendMessage).not.toHaveBeenCalled();
   });
 
-  test("shows mobile menu button on mobile devices", () => {
+  test("shows mobile menu button on mobile devices", async () => {
     (useIsMobile as jest.Mock).mockReturnValue(true);
-    render(<Home />);
+    await act(async () => {
+      render(<Home />);
+    });
 
     const menuButton = screen.getByRole("button", { name: "" });
     expect(menuButton).toBeInTheDocument();

@@ -1,5 +1,6 @@
 "use client";
 
+import logger from "@/lib/logger";
 import { useState, useEffect } from "react";
 import type { Message } from "@/types/chat";
 import { Trash2 } from "lucide-react";
@@ -46,6 +47,7 @@ export function ChatHistory({
   const setIsMobileOpen = externalSetMobileOpen || setInternalMobileOpen;
 
   const handleSelectChat = (id: string) => {
+    logger.debug("Selected chat session", { id });
     onSelectChatAction(id);
     if (isMobileDevice) {
       setIsMobileOpen(false);
@@ -53,6 +55,7 @@ export function ChatHistory({
   };
 
   const handleNewChat = () => {
+    logger.debug("Creating new chat session");
     onNewChatAction();
     if (isMobileDevice) {
       setIsMobileOpen(false);
@@ -206,6 +209,9 @@ export function ChatHistory({
                               "Are you sure you want to delete this chat?"
                             )
                           ) {
+                            logger.debug("Deleting chat session", {
+                              id: chat.id,
+                            });
                             onDeleteChatAction(chat.id);
                           }
                         }}
