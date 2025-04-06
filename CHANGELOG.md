@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0-rc.7](https://github.com/inference-gateway/ui/compare/v0.4.0-rc.6...v0.4.0-rc.7) (2025-04-06)
+
+### ♻️ Improvements
+
+* Modularize sign-in logic by creating SigninClient component and streamline provider handling ([cebe9b0](https://github.com/inference-gateway/ui/commit/cebe9b04e18cef0528246fe12f36a469c1cc571e))
+* Remove logger.debug statements to clean up client logs ([7d4cbb5](https://github.com/inference-gateway/ui/commit/7d4cbb559346c276bd918b3c7fff3a336dd56db2))
+
 ## [0.4.0-rc.6](https://github.com/inference-gateway/ui/compare/v0.4.0-rc.5...v0.4.0-rc.6) (2025-04-06)
 
 ### ♻️ Improvements
