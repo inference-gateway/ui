@@ -1,7 +1,7 @@
 ---
 services:
   ui:
-    image: ghcr.io/inference-gateway/ui:0.4.0-rc.8
+    image: ghcr.io/inference-gateway/ui:latest
     ports:
       - "3000:3000"
     env_file:
