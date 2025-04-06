@@ -1,24 +1,23 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { useSession, signIn } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { Key, Lock } from "lucide-react";
 import { ProviderConfig } from "@/lib/auth";
+import { useEffect, useState } from "react";
+import logger from "@/lib/logger";
 
 interface SigninClientProps {
   providers: ProviderConfig[];
 }
 
 export function SigninClient({ providers }: SigninClientProps) {
-  const { data: session } = useSession();
-  const router = useRouter();
+  const [, setMounted] = useState(false);
 
   useEffect(() => {
-    if (session) {
-      router.push("/home");
-    }
-  }, [session, router]);
+    setMounted(true);
+  }, []);
+
+  logger.debug("[SigninClient] Mounted:", providers);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-900 dark:to-neutral-800 flex items-center justify-center p-4">

@@ -1,3 +1,5 @@
+"use client";
+
 import logger from "@/lib/logger";
 import { StorageServiceFactory } from "@/lib/storage";
 import { StorageType, type ChatSession, type Message } from "@/types/chat";

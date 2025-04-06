@@ -2,16 +2,9 @@
 
 import { Session } from "next-auth";
 import { useSession as useNextAuthSession } from "next-auth/react";
-import { useEffect } from "react";
 
 export function useSession() {
-  const { data: session, status, update } = useNextAuthSession();
-
-  // This is a workaround to ensure that the session is updated on the client side
-  // On next standalone, the session is not updated automatically
-  useEffect(() => {
-    update();
-  }, []);
+  const { data: session, status } = useNextAuthSession();
 
   return {
     session: session as Session | null,
