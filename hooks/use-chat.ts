@@ -167,7 +167,6 @@ export function useChat(initialDarkMode = true) {
       messages: [],
       createdAt: new Date().getTime(),
     };
-    logger.debug("Creating new chat session", { id: newChatId });
 
     setChatState((prev) => ({
       ...prev,
@@ -194,7 +193,6 @@ export function useChat(initialDarkMode = true) {
       if (!model.includes("/")) {
         throw new Error("Model must be in provider/name format");
       }
-      logger.debug("Changing selected model", { model });
       _setSelectedModel(model);
 
       if (!activeId) {
@@ -273,10 +271,6 @@ export function useChat(initialDarkMode = true) {
       }));
 
       try {
-        logger.debug("Starting chat completion stream", {
-          model: selectedModel,
-          messageCount: updatedMessages.length,
-        });
         await clientInstance.streamChatCompletion(
           {
             model: selectedModel,
@@ -389,7 +383,6 @@ export function useChat(initialDarkMode = true) {
   );
 
   const handleDeleteChat = useCallback((id: string) => {
-    logger.debug("Deleting chat session", { id });
     setChatState((prev) => {
       const newSessions = prev.sessions.filter((chat) => chat.id !== id);
 
@@ -424,7 +417,6 @@ export function useChat(initialDarkMode = true) {
   }, []);
 
   const clearMessages = useCallback(() => {
-    logger.debug("Clearing messages in current chat");
     setChatState((prev) => ({ ...prev, messages: [] }));
     setTokenUsage({
       promptTokens: 0,

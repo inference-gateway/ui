@@ -49,6 +49,12 @@ jest.mock("@/hooks/use-mobile", () => ({
   useIsMobile: jest.fn(),
 }));
 
+jest.mock("@/hooks/use-session", () => ({
+  useSession: jest.fn(() => ({
+    session: { user: { name: "Test User" } },
+  })),
+}));
+
 describe("Home Component", () => {
   const mockHandleSendMessage = jest.fn();
   const mockSetSelectedModel = jest.fn();

@@ -37,9 +37,6 @@ export default function ModelSelector({
       setError(null);
       try {
         const response = await fetchModels();
-        logger.debug("Successfully loaded models", {
-          count: response.data.length,
-        });
         setModels(response.data);
       } catch (err) {
         const error =
@@ -68,7 +65,6 @@ export default function ModelSelector({
     ) || [];
 
   const handleModelSelect = (modelId: string) => {
-    logger.debug("User selected model", { modelId });
     onSelectModelAction(modelId);
     setOpen(false);
   };
@@ -96,7 +92,6 @@ export default function ModelSelector({
             value={searchQuery}
             onChange={(e) => {
               const query = e.target.value;
-              logger.debug("Searching models", { query });
               setSearchQuery(query);
             }}
             onClick={(e) => e.stopPropagation()}

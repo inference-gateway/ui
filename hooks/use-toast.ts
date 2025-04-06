@@ -3,7 +3,6 @@
 import * as React from "react";
 
 import type { ToastActionElement, ToastProps } from "@/components/ui/toast";
-import logger from "@/lib/logger";
 
 const TOAST_LIMIT = 1;
 const TOAST_REMOVE_DELAY = 1000000;
@@ -140,25 +139,14 @@ type Toast = Omit<ToasterToast, "id">;
 
 function toast({ ...props }: Toast) {
   const id = genId();
-  logger.debug("Creating toast", {
-    id,
-    title: props.title?.toString().slice(0, 50),
-    variant: props.variant,
-  });
 
   const update = (props: ToasterToast) => {
-    logger.debug("Updating toast", {
-      id,
-      title: props.title?.toString().slice(0, 50),
-      variant: props.variant,
-    });
     return dispatch({
       type: "UPDATE_TOAST",
       toast: { ...props, id },
     });
   };
   const dismiss = () => {
-    logger.debug("Dismissing toast", { id });
     return dispatch({ type: "DISMISS_TOAST", toastId: id });
   };
 
@@ -183,7 +171,6 @@ function toast({ ...props }: Toast) {
 
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState);
-  logger.debug("Initializing useToast", { toastCount: state.toasts.length });
 
   React.useEffect(() => {
     listeners.push(setState);
