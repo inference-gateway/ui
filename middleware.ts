@@ -1,3 +1,4 @@
+import logger from "@/lib/logger";
 import { getToken } from "next-auth/jwt";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -32,55 +33,63 @@ const PUBLIC_PATHS = [
 const isPublicPath = (pathname: string): boolean =>
   PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(path));
 
-const log = (message: string): void => {
-  if (process.env.NODE_ENV !== "production") {
-    console.log(`[Middleware] ${message}`);
-  }
-};
-
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const authEnabled = process.env.AUTH_ENABLED === "true";
 
-  log(`Path: ${pathname} | Auth Enabled: ${authEnabled}`);
+  logger.debug(`[Middleware] Path: ${pathname} | Auth Enabled: ${authEnabled}`);
 
   if (pathname === ROUTES.ROOT) {
-    log("Redirecting root path to home page");
+    logger.debug("[Middleware] Redirecting root path to home page");
     return NextResponse.redirect(new URL(ROUTES.HOME, request.url));
   }
 
   if (!authEnabled || isPublicPath(pathname)) {
-    log(`Skipping auth check: ${pathname}`);
+    logger.debug(`[Middleware] Skipping auth check: ${pathname}`);
     return NextResponse.next();
   }
 
-  const token = await getToken({
-    req: request,
-    secret: process.env.NEXTAUTH_SECRET,
+  let token;
+  try {
+    token = await getToken({
+      req: request,
+      secret: process.env.NEXTAUTH_SECRET,
+      cookieName: "next-auth.session-token",
+      secureCookie: process.env.SECURE_COOKIES === "true",
+    });
+    logger.debug("Token retrieval result:", token);
+  } catch (error) {
+    logger.error("Error retrieving token:", error);
+    return NextResponse.redirect(new URL(ROUTES.AUTH.ERROR, request.url));
+  }
+
+  logger.debug("[Middleware] Request cookies:", {
+    cookies: request.cookies
+      .getAll()
+      .map((c) => ({ name: c.name, value: c.value })),
   });
 
-  log(`Token exists: ${!!token}`);
+  logger.debug(`[Middleware] Token exists: ${!!token}`);
 
   if (
     token &&
     (pathname === ROUTES.AUTH.SIGNIN || pathname === ROUTES.AUTH.ROOT)
   ) {
-    log("Redirecting authenticated user from auth page");
+    logger.debug("[Middleware] Redirecting authenticated user from auth page");
     return NextResponse.redirect(new URL(ROUTES.HOME, request.url));
   }
 
   if (!token) {
-    log("Redirecting unauthenticated user to signin");
+    logger.debug("[Middleware] Redirecting unauthenticated user to signin");
     return NextResponse.redirect(new URL(ROUTES.AUTH.SIGNIN, request.url));
   }
 
-  log(`Access granted to protected route: ${pathname}`);
+  logger.debug(`[Middleware] Access granted to protected route: ${pathname}`);
   return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    ROUTES.ROOT,
-    "/((?!_next/static|_next/image|images|favicon.ico|api/v1).*)",
+    "/((?!_next/static|_next/image|images|favicon.ico|api/v1|api/auth).*)",
   ],
 };

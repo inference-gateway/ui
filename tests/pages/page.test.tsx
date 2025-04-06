@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent, act } from "@testing-library/react";
-import Home from "@/app/home/page";
+import Home from "@/app/home/page-client";
 import { useChat } from "@/hooks/use-chat";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -47,6 +47,12 @@ jest.mock("@/hooks/use-chat", () => ({
 
 jest.mock("@/hooks/use-mobile", () => ({
   useIsMobile: jest.fn(),
+}));
+
+jest.mock("@/hooks/use-session", () => ({
+  useSession: jest.fn(() => ({
+    session: { user: { name: "Test User" } },
+  })),
 }));
 
 describe("Home Component", () => {

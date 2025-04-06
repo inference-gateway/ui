@@ -1,6 +1,5 @@
 "use client";
 
-import logger from "@/lib/logger";
 import type React from "react";
 
 import { useState, useRef, useEffect } from "react";
@@ -27,10 +26,6 @@ export default function ChatInterface({
 
   const handleSendMessage = () => {
     if (inputValue.trim()) {
-      logger.debug("Sending message", {
-        length: inputValue.length,
-        isCommand: inputValue.startsWith("/"),
-      });
       onSendMessageAction(inputValue);
       setInputValue("");
     }
@@ -47,13 +42,11 @@ export default function ChatInterface({
     const trimmedInput = input.trim();
 
     if (trimmedInput === "/reset" || trimmedInput === "/clear") {
-      logger.debug("Processing clear chat command");
       onClearChatAction();
       return true;
     }
 
     if (trimmedInput === "/help") {
-      logger.debug("Processing help command");
       onSendMessageAction("/help");
       return true;
     }
@@ -121,7 +114,6 @@ export default function ChatInterface({
                 variant="outline"
                 size="icon"
                 onClick={() => {
-                  logger.debug("User cleared chat");
                   onClearChatAction();
                 }}
                 title="Clear chat"

@@ -1,9 +1,8 @@
 "use client";
 
-import logger from "@/lib/logger";
 import { useState, useEffect } from "react";
 import type { Message } from "@/types/chat";
-import { Trash2 } from "lucide-react";
+import { Trash2, X, Menu } from "lucide-react";
 
 interface ChatHistoryProps {
   chatSessions: {
@@ -31,7 +30,6 @@ export function ChatHistory({
 }: ChatHistoryProps) {
   const [internalMobileOpen, setInternalMobileOpen] = useState(false);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
-
   useEffect(() => {
     const checkIfMobile = () => {
       setIsMobileDevice(window.innerWidth < 768);
@@ -47,7 +45,6 @@ export function ChatHistory({
   const setIsMobileOpen = externalSetMobileOpen || setInternalMobileOpen;
 
   const handleSelectChat = (id: string) => {
-    logger.debug("Selected chat session", { id });
     onSelectChatAction(id);
     if (isMobileDevice) {
       setIsMobileOpen(false);
@@ -55,7 +52,6 @@ export function ChatHistory({
   };
 
   const handleNewChat = () => {
-    logger.debug("Creating new chat session");
     onNewChatAction();
     if (isMobileDevice) {
       setIsMobileOpen(false);
@@ -69,8 +65,13 @@ export function ChatHistory({
         onClick={() => setIsMobileOpen(!isMobileOpen)}
         className="md:hidden fixed z-30 top-3 left-3 p-2 bg-white dark:bg-neutral-800 rounded-md shadow-md"
         aria-label="Toggle menu"
+        aria-expanded={isMobileOpen}
       >
-        {isMobileOpen ? "✕" : "☰"}
+        {isMobileOpen ? (
+          <X className="h-5 w-5" />
+        ) : (
+          <Menu className="h-5 w-5" />
+        )}
       </button>
 
       {/* Chat history sidebar */}
@@ -209,9 +210,6 @@ export function ChatHistory({
                               "Are you sure you want to delete this chat?"
                             )
                           ) {
-                            logger.debug("Deleting chat session", {
-                              id: chat.id,
-                            });
                             onDeleteChatAction(chat.id);
                           }
                         }}
