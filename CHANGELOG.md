@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0-rc.6](https://github.com/inference-gateway/ui/compare/v0.4.0-rc.5...v0.4.0-rc.6) (2025-04-06)
+
+### ♻️ Improvements
+
+* Enhance authentication handling and session management ([2214c54](https://github.com/inference-gateway/ui/commit/2214c54694c6c7c0c1d63d7db40f23ab55edfa2f))
+* Simplify authentication handling by replacing custom AuthProvider with SessionProvider and enhance session logging ([3307d54](https://github.com/inference-gateway/ui/commit/3307d548136f611d423c74d6b64d996875d9c6f9))
+
+### 🔧 Miscellaneous
+
+* Update UI image version to 0.4.0-rc.5 in Docker Compose ([58aefc9](https://github.com/inference-gateway/ui/commit/58aefc9e04a9ed1bbd11094bb960ed54dafadd26))
+
 ## [0.4.0-rc.5](https://github.com/inference-gateway/ui/compare/v0.4.0-rc.4...v0.4.0-rc.5) (2025-04-05)
 
 ### ♻️ Improvements
