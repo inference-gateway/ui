@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0](https://github.com/inference-gateway/ui/compare/v0.3.0...v0.4.0) (2025-04-06)
+
+### ✨ Features
+
+* Add authentication support with NextAuth and Keycloak integration ([#14](https://github.com/inference-gateway/ui/issues/14)) ([2db6754](https://github.com/inference-gateway/ui/commit/2db675439e3800eb13afeb60c4341248038619cf)), closes [#15](https://github.com/inference-gateway/ui/issues/15)
+* Add Structured Logging ([#16](https://github.com/inference-gateway/ui/issues/16)) ([371b4fe](https://github.com/inference-gateway/ui/commit/371b4fef58011bd93a5a55c60f9f00807bfc8831))
+
+### ♻️ Improvements
+
+* Rename callback props in ChatInterface and MessageInput components ([c3687a7](https://github.com/inference-gateway/ui/commit/c3687a7cf9b9548e72738aedc97065cb64a89702))
+
+### 🔧 Miscellaneous
+
+* Add TODO for additional storage type implementation ([a1aa88a](https://github.com/inference-gateway/ui/commit/a1aa88a9f0edb28d4fe7939504181c6564db7f89))
+
 ## [0.4.0-rc.8](https://github.com/inference-gateway/ui/compare/v0.4.0-rc.7...v0.4.0-rc.8) (2025-04-06)
 
 ### ♻️ Improvements
