@@ -20,16 +20,16 @@ cp .env.frontend.example .env.frontend
 2. Configure backend environment (.env.backend):
 
 ```ini
-NEXTAUTH_SECRET="your-secure-random-string"
-NEXTAUTH_URL="http://localhost:3000"
+AUTH_ENABLED=true
+SECURE_COOKIES=false # Set to true if you are using HTTPS for production
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-secure-random-salt
+NEXTAUTH_TRUST_HOST=true
 
-# Google OAuth
-GOOGLE_CLIENT_ID="your-google-client-id"
-GOOGLE_CLIENT_SECRET="your-google-client-secret"
-
-# GitHub OAuth
-GITHUB_CLIENT_ID="your-github-client-id"
-GITHUB_CLIENT_SECRET="your-github-client-secret"
+# Keycloak Configuration
+KEYCLOAK_ID=app-client
+KEYCLOAK_SECRET=very-secret
+KEYCLOAK_ISSUER=http://localhost:8080/realms/app-realm
 ```
 
 3. Configure frontend environment (.env.frontend):
