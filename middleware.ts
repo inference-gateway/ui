@@ -57,9 +57,9 @@ export async function middleware(request: NextRequest) {
       cookieName: "next-auth.session-token",
       secureCookie: process.env.SECURE_COOKIES === "true",
     });
-    console.debug("Token retrieval result:", token);
+    logger.debug("Token retrieval result:", token);
   } catch (error) {
-    console.error("Error retrieving token:", error);
+    logger.error("Error retrieving token:", error);
     return NextResponse.redirect(new URL(ROUTES.AUTH.ERROR, request.url));
   }
 

@@ -7,10 +7,11 @@ import { useEffect } from "react";
 export function useSession() {
   const { data: session, status, update } = useNextAuthSession();
 
+  // This is a workaround to ensure that the session is updated on the client side
+  // On next standalone, the session is not updated automatically
   useEffect(() => {
-    // Only update once when mounted
     update();
-  }, []); // Empty dependency array ensures it only runs once
+  }, []);
 
   return {
     session: session as Session | null,

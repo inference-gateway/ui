@@ -11,11 +11,12 @@ import { useChat } from "@/hooks/use-chat";
 import { useState, useEffect } from "react";
 import { useSession } from "@/hooks/use-session";
 import { signOut } from "next-auth/react";
+import logger from "@/lib/logger";
 
 export default function Home() {
   const { session } = useSession();
 
-  console.debug("Session data", {
+  logger.debug("Session data", {
     session,
     user: session?.user,
     expires: session?.expires,

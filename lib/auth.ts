@@ -1,3 +1,4 @@
+import logger from "@/lib/logger";
 import type {
   GetServerSidePropsContext,
   NextApiRequest,
@@ -15,13 +16,13 @@ export const authConfig: NextAuthConfig = {
   debug: true,
   logger: {
     error(error: Error) {
-      console.error("[Auth Error]", error);
+      logger.error("[Auth Error]", error);
     },
     warn(code: string) {
-      console.warn(`[Auth Warning] ${code}`);
+      logger.warn(`[Auth Warning] ${code}`);
     },
     debug(message: string, metadata?: unknown) {
-      console.log(`[Auth Debug] ${message}`, metadata);
+      logger.debug(`[Auth Debug] ${message}`, metadata);
     },
   },
   pages: {
@@ -90,12 +91,6 @@ export const authConfig: NextAuthConfig = {
         session.expires = token.exp?.toString();
       }
 
-      console.debug("Session callback - Final Session:", {
-        user: session.user,
-        expires: session.expires,
-        accessToken: !!session.accessToken,
-      });
-
       return {
         user: {
           id: session.user?.id,
@@ -159,3 +154,41 @@ const createAuthHandlers = (): AuthHandlers => {
 export const authHandlers = createAuthHandlers();
 
 export const { GET, POST, auth, signIn, signOut } = authHandlers;
+
+export type ProviderConfig = {
+  id: string;
+  name: string;
+  enabled: boolean;
+  signinUrl: string;
+  callbackUrl: string;
+};
+
+export function getEnabledProviders(): ProviderConfig[] {
+  return [
+    {
+      id: "keycloak",
+      name: "Keycloak",
+      enabled: Boolean(
+        process.env.KEYCLOAK_ID &&
+          process.env.KEYCLOAK_SECRET &&
+          process.env.KEYCLOAK_ISSUER
+      ),
+      signinUrl: `/api/auth/signin/keycloak`,
+      callbackUrl: `/api/auth/callback/keycloak`,
+    },
+    {
+      id: "github",
+      name: "GitHub",
+      enabled: Boolean(process.env.GITHUB_ID && process.env.GITHUB_SECRET),
+      signinUrl: `/api/auth/signin/github`,
+      callbackUrl: `/api/auth/callback/github`,
+    },
+    {
+      id: "google",
+      name: "Google",
+      enabled: Boolean(process.env.GOOGLE_ID && process.env.GOOGLE_SECRET),
+      signinUrl: `/api/auth/signin/google`,
+      callbackUrl: `/api/auth/callback/google`,
+    },
+  ].filter((provider) => provider.enabled);
+}
