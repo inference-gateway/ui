@@ -1,8 +1,11 @@
+"use client";
+
 import logger from "@/lib/logger";
 import { StorageServiceFactory } from "@/lib/storage";
 import { StorageType, type ChatSession, type Message } from "@/types/chat";
 import { InferenceGatewayClient, MessageRole } from "@inference-gateway/sdk";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSession } from "./use-session";
 
 interface ChatState {
   sessions: ChatSession[];
@@ -62,19 +65,34 @@ export function useChat(initialDarkMode = true) {
   const { sessions, activeId, messages } = chatState;
   const { isLoading, isStreaming, isDarkMode } = uiState;
 
+  const { session } = useSession();
+
   useEffect(() => {
+    const fetchWithAuth = async (
+      input: RequestInfo | URL,
+      init?: RequestInit
+    ) => {
+      const headers = new Headers(init?.headers);
+      if (session?.accessToken) {
+        headers.set("Authorization", `Bearer ${session.accessToken}`);
+      }
+      return window.fetch(input, {
+        ...init,
+        headers,
+      });
+    };
+
     const newClient = new InferenceGatewayClient({
       baseURL: "/api/v1",
-      fetch: window.fetch.bind(window),
+      fetch: fetchWithAuth,
     });
     setClientInstance(newClient);
-  }, []);
+  }, [session?.accessToken]);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         let sessions = (await storageService.getChatSessions()) || [];
-        // Handle case where sessions might be in {sessions: []} format
         interface SessionsWrapper {
           sessions: ChatSession[];
         }
@@ -168,7 +186,6 @@ export function useChat(initialDarkMode = true) {
       messages: [],
       createdAt: new Date().getTime(),
     };
-    logger.debug("Creating new chat session", { id: newChatId });
 
     setChatState((prev) => ({
       ...prev,
@@ -195,7 +212,6 @@ export function useChat(initialDarkMode = true) {
       if (!model.includes("/")) {
         throw new Error("Model must be in provider/name format");
       }
-      logger.debug("Changing selected model", { model });
       _setSelectedModel(model);
 
       if (!activeId) {
@@ -274,10 +290,6 @@ export function useChat(initialDarkMode = true) {
       }));
 
       try {
-        logger.debug("Starting chat completion stream", {
-          model: selectedModel,
-          messageCount: updatedMessages.length,
-        });
         await clientInstance.streamChatCompletion(
           {
             model: selectedModel,
@@ -390,7 +402,6 @@ export function useChat(initialDarkMode = true) {
   );
 
   const handleDeleteChat = useCallback((id: string) => {
-    logger.debug("Deleting chat session", { id });
     setChatState((prev) => {
       const newSessions = prev.sessions.filter((chat) => chat.id !== id);
 
@@ -425,7 +436,6 @@ export function useChat(initialDarkMode = true) {
   }, []);
 
   const clearMessages = useCallback(() => {
-    logger.debug("Clearing messages in current chat");
     setChatState((prev) => ({ ...prev, messages: [] }));
     setTokenUsage({
       promptTokens: 0,

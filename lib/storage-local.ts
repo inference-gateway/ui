@@ -53,7 +53,9 @@ export class LocalStorageService implements StorageService {
       const sessions = await this.getChatSessions();
       const firstSessionId = sessions[0]?.id;
       if (firstSessionId) {
-        logger.debug("Setting first session as active", { id: firstSessionId });
+        logger.debug("Setting first session as active", {
+          id: firstSessionId,
+        });
         await this.saveActiveChatId(firstSessionId);
         return firstSessionId;
       }
@@ -73,7 +75,7 @@ export class LocalStorageService implements StorageService {
   async clear(): Promise<void> {
     const sessionsKey = this.getStorageKey("chatSessions");
     const activeKey = this.getStorageKey("activeChatId");
-    logger.debug("Clearing storage", { sessionsKey, activeKey });
+
     localStorage.removeItem(sessionsKey);
     localStorage.removeItem(activeKey);
   }

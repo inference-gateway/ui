@@ -4,20 +4,6 @@ import { StorageServiceFactory } from "@/lib/storage";
 import { InferenceGatewayClient, MessageRole } from "@inference-gateway/sdk";
 import { act } from "react";
 
-jest.mock("@/lib/storage", () => ({
-  StorageServiceFactory: {
-    createService: jest.fn(),
-  },
-}));
-
-jest.mock("@inference-gateway/sdk", () => {
-  const original = jest.requireActual("@inference-gateway/sdk");
-  return {
-    ...original,
-    InferenceGatewayClient: jest.fn(),
-  };
-});
-
 describe("useChat Hook", () => {
   const mockGetChatSessions = jest.fn();
   const mockSaveChatSessions = jest.fn();

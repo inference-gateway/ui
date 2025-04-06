@@ -1,6 +1,6 @@
 # Basic Docker Compose Example
 
-This example demonstrates how to set up and use the UI library with Docker Compose.
+This example demonstrates how to set up and use the Inference Gateway UI using Docker Compose.
 
 ## Prerequisites
 

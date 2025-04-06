@@ -1,31 +1,57 @@
+import { auth } from "@/lib/auth";
 import logger from "@/lib/logger";
 import { InferenceGatewayClient } from "@inference-gateway/sdk";
 import { NextResponse } from "next/server";
 import { TransformStream } from "stream/web";
 
 export async function POST(req: Request) {
+  const isAuthEnabled = process.env.AUTH_ENABLED === "true";
+  const session = isAuthEnabled ? await auth() : null;
+
+  if (isAuthEnabled && !session) {
+    return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   try {
-    logger.debug("Starting chat completions request");
+    logger.debug("[Chat Completions] Starting request");
     const gatewayUrl = process.env.INFERENCE_GATEWAY_URL;
 
     if (!gatewayUrl) {
-      logger.error("INFERENCE_GATEWAY_URL environment variable is not set");
+      logger.error(
+        "[Chat Completions] INFERENCE_GATEWAY_URL environment variable is not set"
+      );
       return NextResponse.json(
         { error: "Gateway URL configuration missing" },
         { status: 500 }
       );
     }
 
-    logger.debug("Creating InferenceGatewayClient", { gatewayUrl });
-    const client = new InferenceGatewayClient({
-      baseURL: gatewayUrl,
-      fetch: fetch.bind(globalThis),
+    logger.debug("[Chat Completions] Creating InferenceGatewayClient", {
+      gatewayUrl,
     });
+    const fetchWithAuth = async (
+      input: RequestInfo | URL,
+      init?: RequestInit
+    ) => {
+      const headers = new Headers(init?.headers);
+      if (session?.accessToken) {
+        headers.set("Authorization", `Bearer ${session.accessToken}`);
+      }
+      return fetch(input, {
+        ...init,
+        headers,
+      });
+    };
 
-    const apiKey = process.env.INFERENCE_GATEWAY_API_KEY;
-    const clientWithAuth = apiKey ? client.withOptions({ apiKey }) : client;
+    const clientWithAuth = new InferenceGatewayClient({
+      baseURL: gatewayUrl,
+      fetch: fetchWithAuth,
+    });
     const body = await req.json();
-    logger.debug("Request body received", {
+    logger.debug("[Chat Completions] Request body received", {
       stream: body.stream,
       model: body.model,
       messages: body.messages?.length,
@@ -64,7 +90,9 @@ export async function POST(req: Request) {
             writer.write(encoder.encode(data));
             await writer.ready;
           } catch (error) {
-            logger.error("Error writing to stream", { error });
+            logger.error("[Chat Completions] Error writing to stream", {
+              error,
+            });
             isWriterClosed = true;
           }
         };
@@ -75,7 +103,7 @@ export async function POST(req: Request) {
             writer.close();
             isWriterClosed = true;
           } catch (error) {
-            logger.error("Error closing stream:", error);
+            logger.error("[Chat Completions] Error closing stream", { error });
             isWriterClosed = true;
           }
         };
@@ -138,11 +166,13 @@ export async function POST(req: Request) {
 
                 await safeWrite(": keep-alive\n\n");
               } catch (error) {
-                logger.error("Error processing chunk", { error });
+                logger.error("[Chat Completions] Error processing chunk", {
+                  error,
+                });
               }
             },
             onError: (error) => {
-              logger.error("Stream error", { error });
+              logger.error("[Chat Completions] Stream error", { error });
               if (!isWriterClosed) {
                 safeWrite(
                   `data: ${JSON.stringify({
@@ -160,7 +190,9 @@ export async function POST(req: Request) {
             },
           });
         } catch (error) {
-          logger.error("Error in streaming completion", { error });
+          logger.error("[Chat Completions] Error in streaming completion", {
+            error,
+          });
           if (!isWriterClosed) {
             safeWrite(
               `data: ${JSON.stringify({
@@ -175,9 +207,9 @@ export async function POST(req: Request) {
       return response;
     } else {
       try {
-        logger.debug("Starting non-streaming chat completion");
+        logger.debug("[Chat Completions] Starting non-streaming completion");
         const completionData = await clientWithAuth.createChatCompletion(body);
-        logger.debug("Completed non-streaming chat completion", {
+        logger.debug("[Chat Completions] Completed non-streaming completion", {
           model: completionData.model,
           usage: completionData.usage,
         });
@@ -201,7 +233,7 @@ export async function POST(req: Request) {
 
         return NextResponse.json(completionData);
       } catch (error) {
-        logger.error("Error in chat completion", { error });
+        logger.error("[Chat Completions] Error in completion", { error });
         return NextResponse.json(
           {
             error: error instanceof Error ? error.message : "Unknown error",
@@ -211,7 +243,7 @@ export async function POST(req: Request) {
       }
     }
   } catch (error) {
-    logger.error("Error in chat completions API", { error });
+    logger.error("[Chat Completions] API error", { error });
     return NextResponse.json(
       { error: "Failed to connect to inference gateway" },
       { status: 500 }

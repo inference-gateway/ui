@@ -1,4 +1,3 @@
-import logger from "@/lib/logger";
 import type { Message } from "@/types/chat";
 import { cn } from "@/lib/utils";
 import { User, Bot } from "lucide-react";
@@ -10,11 +9,6 @@ interface MessageItemProps {
 
 export default function MessageItem({ message }: MessageItemProps) {
   const isUser = message.role === "user";
-  logger.debug("Rendering message", {
-    role: message.role,
-    contentLength: message.content.length,
-    id: message.id,
-  });
 
   return (
     <div
