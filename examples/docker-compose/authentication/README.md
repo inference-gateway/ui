@@ -47,7 +47,6 @@ docker compose -f examples/docker-compose/authentication/docker-compose.yaml up 
 ## Accessing the Application
 
 - UI: http://localhost:3000
-- API Docs: http://localhost:3000/api-docs
 
 ## Configuration Notes
 
