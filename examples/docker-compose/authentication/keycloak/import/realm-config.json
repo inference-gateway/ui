@@ -14,10 +14,24 @@
       "directAccessGrantsEnabled": true,
       "serviceAccountsEnabled": false,
       "publicClient": false,
-      "redirectUris": ["http://localhost:3000/*", "http://ui:3000/*"],
-      "webOrigins": ["http://localhost:3000", "http://ui:3000"],
+      "redirectUris": ["http://localhost:3000/*"],
+      "webOrigins": ["http://localhost:3000"],
       "clientAuthenticatorType": "client-secret",
-      "secret": "very-secret"
+      "secret": "very-secret",
+      "protocolMappers": [
+        {
+          "name": "audience-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.client.audience": "app-client",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "add.to.id.token": "true",
+            "add.to.access.token": "true"
+          }
+        }
+      ]
     }
   ],
   "users": [

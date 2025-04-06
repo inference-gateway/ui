@@ -3,22 +3,12 @@
 import { signIn } from "next-auth/react";
 import { Key, Lock } from "lucide-react";
 import { ProviderConfig } from "@/lib/auth";
-import { useEffect, useState } from "react";
-import logger from "@/lib/logger";
 
 interface SigninClientProps {
   providers: ProviderConfig[];
 }
 
 export function SigninClient({ providers }: SigninClientProps) {
-  const [, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  logger.debug("[SigninClient] Mounted:", providers);
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-900 dark:to-neutral-800 flex items-center justify-center p-4">
       <div className="bg-white dark:bg-neutral-800 p-8 rounded-xl shadow-xl max-w-md w-full space-y-8 border border-neutral-200/50 dark:border-neutral-700/50 transition-all duration-300 hover:shadow-2xl">

@@ -75,7 +75,7 @@ export class LocalStorageService implements StorageService {
   async clear(): Promise<void> {
     const sessionsKey = this.getStorageKey("chatSessions");
     const activeKey = this.getStorageKey("activeChatId");
-    logger.debug("Clearing storage", { sessionsKey, activeKey });
+
     localStorage.removeItem(sessionsKey);
     localStorage.removeItem(activeKey);
   }

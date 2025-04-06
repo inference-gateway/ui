@@ -28,10 +28,23 @@ export async function GET() {
       );
     }
 
-    logger.debug("[Models] Creating InferenceGatewayClient", { gatewayUrl });
+    const fetchWithAuth = async (
+      input: RequestInfo | URL,
+      init?: RequestInit
+    ) => {
+      const headers = new Headers(init?.headers);
+      if (session?.accessToken) {
+        headers.set("Authorization", `Bearer ${session.accessToken}`);
+      }
+      return fetch(input, {
+        ...init,
+        headers,
+      });
+    };
+
     const client = new InferenceGatewayClient({
       baseURL: gatewayUrl,
-      fetch: fetch.bind(globalThis),
+      fetch: fetchWithAuth,
     });
 
     try {

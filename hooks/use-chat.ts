@@ -5,6 +5,7 @@ import { StorageServiceFactory } from "@/lib/storage";
 import { StorageType, type ChatSession, type Message } from "@/types/chat";
 import { InferenceGatewayClient, MessageRole } from "@inference-gateway/sdk";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSession } from "./use-session";
 
 interface ChatState {
   sessions: ChatSession[];
@@ -64,13 +65,29 @@ export function useChat(initialDarkMode = true) {
   const { sessions, activeId, messages } = chatState;
   const { isLoading, isStreaming, isDarkMode } = uiState;
 
+  const { session } = useSession();
+
   useEffect(() => {
+    const fetchWithAuth = async (
+      input: RequestInfo | URL,
+      init?: RequestInit
+    ) => {
+      const headers = new Headers(init?.headers);
+      if (session?.accessToken) {
+        headers.set("Authorization", `Bearer ${session.accessToken}`);
+      }
+      return window.fetch(input, {
+        ...init,
+        headers,
+      });
+    };
+
     const newClient = new InferenceGatewayClient({
       baseURL: "/api/v1",
-      fetch: window.fetch.bind(window),
+      fetch: fetchWithAuth,
     });
     setClientInstance(newClient);
-  }, []);
+  }, [session?.accessToken]);
 
   useEffect(() => {
     const loadData = async () => {

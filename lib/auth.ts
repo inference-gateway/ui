@@ -91,14 +91,7 @@ export const authConfig: NextAuthConfig = {
         session.expires = token.exp?.toString();
       }
 
-      return {
-        user: {
-          id: session.user?.id,
-          name: session.user?.name,
-          email: session.user?.email,
-        },
-        expires: session.expires,
-      };
+      return session;
     },
   },
   cookies: {

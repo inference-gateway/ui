@@ -32,13 +32,24 @@ export async function POST(req: Request) {
     logger.debug("[Chat Completions] Creating InferenceGatewayClient", {
       gatewayUrl,
     });
-    const client = new InferenceGatewayClient({
-      baseURL: gatewayUrl,
-      fetch: fetch.bind(globalThis),
-    });
+    const fetchWithAuth = async (
+      input: RequestInfo | URL,
+      init?: RequestInit
+    ) => {
+      const headers = new Headers(init?.headers);
+      if (session?.accessToken) {
+        headers.set("Authorization", `Bearer ${session.accessToken}`);
+      }
+      return fetch(input, {
+        ...init,
+        headers,
+      });
+    };
 
-    const apiKey = process.env.INFERENCE_GATEWAY_API_KEY;
-    const clientWithAuth = apiKey ? client.withOptions({ apiKey }) : client;
+    const clientWithAuth = new InferenceGatewayClient({
+      baseURL: gatewayUrl,
+      fetch: fetchWithAuth,
+    });
     const body = await req.json();
     logger.debug("[Chat Completions] Request body received", {
       stream: body.stream,
