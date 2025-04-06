@@ -9,13 +9,13 @@ import { ChatArea } from "@/components/chat-area";
 import { InputArea } from "@/components/input-area";
 import { useChat } from "@/hooks/use-chat";
 import { useState, useEffect } from "react";
-import { useSession, signOut } from "next-auth/react";
-import logger from "@/lib/logger";
+import { useSession } from "@/hooks/use-session";
+import { signOut } from "next-auth/react";
 
 export default function Home() {
-  const { data: session } = useSession();
+  const { session } = useSession();
 
-  logger.debug("Session data", session);
+  console.debug("Session data", session);
 
   const {
     chatSessions,

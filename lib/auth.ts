@@ -3,26 +3,34 @@ import type {
   NextApiRequest,
   NextApiResponse,
 } from "next";
-import type { Session } from "next-auth";
+import type { Account, Session, User } from "next-auth";
 import NextAuth, { type NextAuthConfig } from "next-auth";
+import { JWT } from "next-auth/jwt";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import Keycloak from "next-auth/providers/keycloak";
 import type { NextRequest } from "next/server";
 
 export const authConfig: NextAuthConfig = {
-  debug: process.env.NODE_ENV === "development",
+  debug: true,
   pages: {
     error: "/auth/error",
     signIn: "/auth/signin",
   },
   trustHost: true,
+  useSecureCookies: false,
   providers: [
     Keycloak({
       clientId: process.env.KEYCLOAK_ID!,
       clientSecret: process.env.KEYCLOAK_SECRET!,
       issuer: process.env.KEYCLOAK_ISSUER!,
-      authorization: { params: { scope: "openid email profile" } },
+      authorization: {
+        params: {
+          scope: "openid email profile",
+          redirect_uri:
+            process.env.NEXTAUTH_URL + "/api/auth/callback/keycloak",
+        },
+      },
     }),
     GitHub({
       clientId: process.env.GITHUB_ID!,
@@ -33,26 +41,57 @@ export const authConfig: NextAuthConfig = {
       clientSecret: process.env.GOOGLE_SECRET!,
     }),
   ],
+  session: { strategy: "jwt" },
+  secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    authorized({ auth, request: { nextUrl } }) {
-      if (process.env.AUTH_ENABLED !== "true") return true;
-
-      const isLoggedIn = !!auth?.user;
-      const isOnDashboard = nextUrl.pathname.startsWith("/dashboard");
-      if (isOnDashboard) return isLoggedIn;
-      return true;
-    },
-    async jwt({ token, account }) {
-      if (account?.id_token) token.idToken = account.id_token;
+    async jwt({
+      token,
+      account,
+      user,
+    }: {
+      token: JWT;
+      account: Account | null;
+      user: User;
+    }) {
+      if (account) {
+        token.accessToken = account.access_token;
+        token.id = user?.id;
+      }
       return token;
     },
-    async session({ session, token }) {
-      session.idToken = token.idToken as string;
+    async session({ session, token }: { session: Session; token: JWT }) {
+      // Safely include token data in session
+      if (token) {
+        session.user = {
+          ...session.user,
+          id: token.sub || undefined,
+          name: token.name || undefined,
+          email: token.email || undefined,
+        };
+        session.accessToken = token.accessToken as string | undefined;
+        session.expires = token.exp?.toString();
+      }
+
+      console.debug("Session callback - Final Session:", {
+        user: session.user,
+        expires: session.expires,
+        accessToken: !!session.accessToken,
+      });
       return session;
     },
   },
-  session: { strategy: "jwt" },
-  secret: process.env.NEXTAUTH_SECRET,
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: false,
+        domain: "localhost",
+      },
+    },
+  },
 };
 
 type AuthHandlers = {
