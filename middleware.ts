@@ -49,11 +49,19 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = await getToken({
-    req: request,
-    secret: process.env.NEXTAUTH_SECRET,
-    cookieName: "next-auth.session-token",
-  });
+  let token;
+  try {
+    token = await getToken({
+      req: request,
+      secret: process.env.NEXTAUTH_SECRET,
+      cookieName: "next-auth.session-token",
+      secureCookie: process.env.SECURE_COOKIES === "true",
+    });
+    console.debug("Token retrieval result:", token);
+  } catch (error) {
+    console.error("Error retrieving token:", error);
+    return NextResponse.redirect(new URL(ROUTES.AUTH.ERROR, request.url));
+  }
 
   logger.debug("[Middleware] Request cookies:", {
     cookies: request.cookies
@@ -81,5 +89,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/((?!_next/static|_next/image|images|favicon.ico|api/v1).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|images|favicon.ico|api/v1|api/auth).*)",
+  ],
 };

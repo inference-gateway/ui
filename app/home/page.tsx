@@ -15,7 +15,12 @@ import { signOut } from "next-auth/react";
 export default function Home() {
   const { session } = useSession();
 
-  console.debug("Session data", session);
+  console.debug("Session data", {
+    session,
+    user: session?.user,
+    expires: session?.expires,
+    status: session ? "authenticated" : "unauthenticated",
+  });
 
   const {
     chatSessions,
@@ -123,7 +128,7 @@ export default function Home() {
               {session && (
                 <button
                   onClick={() => signOut()}
-                  className="h-10 w-10 rounded-md border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 flex items-center justify-center"
+                  className="h-10 px-4 rounded-md border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 flex items-center justify-center gap-2"
                   title="Sign out"
                 >
                   <LogOut className="h-5 w-5 text-neutral-800 dark:text-neutral-200" />

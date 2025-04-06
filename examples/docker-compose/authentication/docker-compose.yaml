@@ -1,7 +1,12 @@
 ---
 services:
   ui:
-    image: ghcr.io/inference-gateway/ui:0.4.0-rc.5
+    build:
+      context: ../../..
+      target: prod
+      dockerfile: Dockerfile
+    # volumes:
+    #   - ../../..:/app
     ports:
       - "3000:3000"
     env_file:

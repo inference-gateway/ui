@@ -13,24 +13,39 @@ import type { NextRequest } from "next/server";
 
 export const authConfig: NextAuthConfig = {
   debug: true,
+  logger: {
+    error(error: Error) {
+      console.error("[Auth Error]", error);
+    },
+    warn(code: string) {
+      console.warn(`[Auth Warning] ${code}`);
+    },
+    debug(message: string, metadata?: unknown) {
+      console.log(`[Auth Debug] ${message}`, metadata);
+    },
+  },
   pages: {
     error: "/auth/error",
     signIn: "/auth/signin",
   },
   trustHost: true,
-  useSecureCookies: false,
+  useSecureCookies: process.env.SECURE_COOKIES === "true",
   providers: [
     Keycloak({
+      id: "keycloak",
+      name: "Keycloak",
       clientId: process.env.KEYCLOAK_ID!,
       clientSecret: process.env.KEYCLOAK_SECRET!,
       issuer: process.env.KEYCLOAK_ISSUER!,
+      wellKnown: `${process.env
+        .KEYCLOAK_ISSUER!}/.well-known/openid-configuration`,
       authorization: {
         params: {
           scope: "openid email profile",
-          redirect_uri:
-            process.env.NEXTAUTH_URL + "/api/auth/callback/keycloak",
+          redirect_uri: `${process.env.NEXTAUTH_URL}/api/auth/callback/keycloak`,
         },
       },
+      checks: ["pkce", "state"],
     }),
     GitHub({
       clientId: process.env.GITHUB_ID!,
@@ -41,7 +56,11 @@ export const authConfig: NextAuthConfig = {
       clientSecret: process.env.GOOGLE_SECRET!,
     }),
   ],
-  session: { strategy: "jwt" },
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+    updateAge: 24 * 60 * 60, // 24 hours
+  },
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
     async jwt({
@@ -60,7 +79,6 @@ export const authConfig: NextAuthConfig = {
       return token;
     },
     async session({ session, token }: { session: Session; token: JWT }) {
-      // Safely include token data in session
       if (token) {
         session.user = {
           ...session.user,
@@ -77,7 +95,15 @@ export const authConfig: NextAuthConfig = {
         expires: session.expires,
         accessToken: !!session.accessToken,
       });
-      return session;
+
+      return {
+        user: {
+          id: session.user?.id,
+          name: session.user?.name,
+          email: session.user?.email,
+        },
+        expires: session.expires,
+      };
     },
   },
   cookies: {
@@ -87,8 +113,7 @@ export const authConfig: NextAuthConfig = {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: false,
-        domain: "localhost",
+        secure: process.env.SECURE_COOKIES === "true",
       },
     },
   },
