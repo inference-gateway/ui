@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0-rc.8](https://github.com/inference-gateway/ui/compare/v0.4.0-rc.7...v0.4.0-rc.8) (2025-04-06)
+
+### ♻️ Improvements
+
+* Update hooks and components for client-side rendering and improve session handling ([b59b570](https://github.com/inference-gateway/ui/commit/b59b57028567772b9134987ceaa9e06efc5c415e))
+
 ## [0.4.0-rc.7](https://github.com/inference-gateway/ui/compare/v0.4.0-rc.6...v0.4.0-rc.7) (2025-04-06)
 
 ### ♻️ Improvements
