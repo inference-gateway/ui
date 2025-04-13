@@ -43,13 +43,6 @@ plugins:
       changelogTitle: "# Changelog\n\nAll notable changes to this project will be documented in this file."
       verifyConditions: true
 
-  - - "@semantic-release/github"
-    - assets:
-        - CHANGELOG.md
-      releasedLabels: ["released"]
-      releaseNameTemplate: "🚀 Version ${nextRelease.version}"
-      successCommentCondition: "false"
-
   - - "@semantic-release/exec"
     - prepareCmd: |
         sed -i 's/^version: .*/version: ${nextRelease.version}/' charts/ui/Chart.yaml
@@ -60,6 +53,13 @@ plugins:
         - CHANGELOG.md
         - charts/ui/Chart.yaml
       message: "chore(release): 🔖 ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+
+  - - "@semantic-release/github"
+    - assets:
+        - CHANGELOG.md
+      releasedLabels: ["released"]
+      releaseNameTemplate: "🚀 Version ${nextRelease.version}"
+      successCommentCondition: "false"
 
 repositoryUrl: "https://github.com/inference-gateway/ui"
 tagFormat: "v${version}"
