@@ -96,3 +96,34 @@ jobs:
           for tag in $(echo "${{ steps.meta.outputs.tags }}" | tr '\n' ' '); do
             cosign sign --yes $tag
           done
+
+  charts:
+    name: Publish Helm Chart
+    runs-on: ubuntu-24.04
+    env:
+      TAG: ${{ github.event.release.tag_name }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4.3.0
+        with:
+          version: v3.17.0
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Package and Push Helm chart
+        run: |
+          VERSION=${TAG#v}
+          cd charts/inference-gateway
+          helm dependency update
+          helm package . --version ${VERSION} --app-version ${VERSION}
+          helm push inference-gateway-${VERSION}.tgz oci://ghcr.io/${{ github.repository_owner }}/charts

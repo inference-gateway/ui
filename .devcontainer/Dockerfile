@@ -24,6 +24,9 @@ RUN npm install -g npm@11.2.0
 # Install global npm packages
 RUN su node -c "npm install -g next typescript"
 
+# Install latest Helm
+RUN curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
 # Install Powerlevel10k theme
 RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /home/node/.powerlevel10k
 RUN echo 'source /home/node/.powerlevel10k/powerlevel10k.zsh-theme' >> /home/node/.zshrc
