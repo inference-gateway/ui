@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0-rc.3](https://github.com/inference-gateway/ui/compare/v0.5.0-rc.2...v0.5.0-rc.3) (2025-04-14)
+
+### 🐛 Bug Fixes
+
+* Correct chart name in Chart.yaml to match application name ([f7f799d](https://github.com/inference-gateway/ui/commit/f7f799d692e42fba9f313aeb0e098f12adbe87d1))
+
 ## [0.5.0-rc.2](https://github.com/inference-gateway/ui/compare/v0.5.0-rc.1...v0.5.0-rc.2) (2025-04-14)
 
 ### ♻️ Improvements
