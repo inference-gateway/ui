@@ -5,6 +5,7 @@ branches:
 verifyConditions:
   - "@semantic-release/github"
   - "@semantic-release/git"
+  - "@semantic-release/npm"
 
 plugins:
   - - "@semantic-release/commit-analyzer"
@@ -40,6 +41,9 @@ plugins:
           - { type: "build", section: "📦 Miscellaneous" }
           - { type: "security", section: "🔒 Security" }
 
+  - - "@semantic-release/npm"
+    - npmPublish: false
+
   - - "@semantic-release/changelog"
     - changelogFile: CHANGELOG.md
       changelogTitle: "# Changelog\n\nAll notable changes to this project will be documented in this file."
@@ -54,6 +58,7 @@ plugins:
     - assets:
         - CHANGELOG.md
         - charts/inference-gateway-ui/Chart.yaml
+        - package.json
       message: "chore(release): 🔖 ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
 
   - - "@semantic-release/github"
