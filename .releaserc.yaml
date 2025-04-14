@@ -47,13 +47,13 @@ plugins:
 
   - - "@semantic-release/exec"
     - prepareCmd: |
-        sed -i 's/^version: .*/version: ${nextRelease.version}/' charts/ui/Chart.yaml
-        sed -i 's/^appVersion: .*/appVersion: \"${nextRelease.version}\"/' charts/ui/Chart.yaml
+        sed -i 's/^version: .*/version: ${nextRelease.version}/' charts/inference-gateway-ui/Chart.yaml
+        sed -i 's/^appVersion: .*/appVersion: \"${nextRelease.version}\"/' charts/inference-gateway-ui/Chart.yaml
 
   - - "@semantic-release/git"
     - assets:
         - CHANGELOG.md
-        - charts/ui/Chart.yaml
+        - charts/inference-gateway-ui/Chart.yaml
       message: "chore(release): 🔖 ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
 
   - - "@semantic-release/github"
