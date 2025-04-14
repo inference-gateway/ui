@@ -105,6 +105,8 @@ tasks:
           --set-string env[0].value=production \
           --set-string env[1].name=NEXT_TELEMETRY_DISABLED \
           --set-string env[1].value=1 \
+          --set-string env[2].name=INFERENCE_GATEWAY_URL \
+          --set-string env[2].value=http://inference-gateway:8080/v1 \
           --set resources.limits.cpu=500m \
           --set resources.limits.memory=512Mi \
           --set resources.requests.cpu=100m \
