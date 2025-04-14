@@ -3,6 +3,11 @@
 ## Project Overview
 This is a Next.js application serving as the UI for the Inference Gateway project. It enables interacting with AI models through a consistent interface. The UI connects to a backend API service for model inference.
 
+## Related Repositories
+The UI is part of the Inference Gateway ecosystem. Here are the related repositories:
+- [inference-gateway](https://github.com/inference-gateway/inference-gateway) - Main gateway service written in Go
+- [docs](https://github.com/inference-gateway/docs) - Documentation for the Inference Gateway
+
 ## Tech Stack
 - **Framework**: Next.js 15 with App Router
 - **Language**: TypeScript
