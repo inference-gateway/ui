@@ -75,24 +75,26 @@ tasks:
     cmds:
       - echo "Deploying UI only..."
       - |
-        helm upgrade --install {{.UI_RELEASE}} ../../charts/ui --version {{.CHART_VERSION}} 
+        helm upgrade --install {{.UI_RELEASE}} ../../charts/ui --version {{.CHART_VERSION}} \
           --create-namespace \
-          --namespace {{.NAMESPACE}}
-          --set gateway.enabled=false
-          --set replicaCount=1
-          --set-string env[0].name=NODE_ENV
-          --set-string env[0].value=production
-          --set-string env[1].name=NEXT_TELEMETRY_DISABLED
-          --set-string env[1].value=1
-          --set resources.limits.cpu=500m
-          --set resources.limits.memory=512Mi
-          --set resources.requests.cpu=100m
+          --namespace {{.NAMESPACE}} \
+          --set gateway.enabled=false \
+          --set replicaCount=1 \
+          --set-string env[0].name=NODE_ENV \
+          --set-string env[0].value=production \
+          --set-string env[1].name=NEXT_TELEMETRY_DISABLED \
+          --set-string env[1].value=1 \
+          --set resources.limits.cpu=500m \
+          --set resources.limits.memory=512Mi \
+          --set resources.requests.cpu=100m \
           --set resources.requests.memory=128Mi
 
   deploy-with-ingress:
     desc: Deploy the UI and Gateway with Ingress enabled
     cmds:
       - echo "Deploying UI with Gateway and Ingress..."
+      - task: clean
+        ignore_error: true
       - >
         helm upgrade --install {{.UI_RELEASE}} ../../charts/ui --version {{.CHART_VERSION}} \
           --create-namespace \
@@ -101,6 +103,7 @@ tasks:
           --set gateway.replicaCount=1 \
           --set gateway.service.type=ClusterIP \
           --set gateway.service.port=8080 \
+          --set gateway.service.portName=gateway-http \
           --set replicaCount=1 \
           --set-string env[0].name=NODE_ENV \
           --set-string env[0].value=production \

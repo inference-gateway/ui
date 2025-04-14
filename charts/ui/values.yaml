@@ -142,3 +142,4 @@ affinity: {}
 # Controls whether to deploy the inference-gateway backend along with the UI
 gateway:
   enabled: true
+  fullnameOverride: "inference-gateway"
