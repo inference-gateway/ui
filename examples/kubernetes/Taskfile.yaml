@@ -67,9 +67,9 @@ tasks:
           --set gateway.service.type=ClusterIP \
           --set gateway.service.port=8080 \
           --set replicaCount=1 \
-          --set env[0].name=NODE_ENV \
-          --set env[0].value=production \
-          --set env[1].name=NEXT_TELEMETRY_DISABLED \
+          --set-string env[0].name=NODE_ENV \
+          --set-string env[0].value=production \
+          --set-string env[1].name=NEXT_TELEMETRY_DISABLED \
           --set-string env[1].value=1 \
           --set resources.limits.cpu=500m \
           --set resources.limits.memory=512Mi \
@@ -82,19 +82,19 @@ tasks:
       - create-namespace
     cmds:
       - echo "Deploying UI only..."
-      - >
+      - |
         helm upgrade --install {{.UI_RELEASE}} ../../charts/ui --version {{.CHART_VERSION}} 
-        --namespace {{.NAMESPACE}}
-        --set gateway.enabled=false
-        --set replicaCount=1
-        --set env[0].name=NODE_ENV
-        --set env[0].value=production
-        --set env[1].name=NEXT_TELEMETRY_DISABLED
-        --set env[1].value="1"
-        --set resources.limits.cpu=500m
-        --set resources.limits.memory=512Mi
-        --set resources.requests.cpu=100m
-        --set resources.requests.memory=128Mi
+          --namespace {{.NAMESPACE}}
+          --set gateway.enabled=false
+          --set replicaCount=1
+          --set-string env[0].name=NODE_ENV
+          --set-string env[0].value=production
+          --set-string env[1].name=NEXT_TELEMETRY_DISABLED
+          --set-string env[1].value=1
+          --set resources.limits.cpu=500m
+          --set resources.limits.memory=512Mi
+          --set resources.requests.cpu=100m
+          --set resources.requests.memory=128Mi
 
   deploy-with-ingress:
     desc: Deploy the UI and Gateway with Ingress enabled
@@ -103,28 +103,28 @@ tasks:
     cmds:
       - echo "Deploying UI with Gateway and Ingress..."
       - >
-        helm upgrade --install {{.UI_RELEASE}} ../../charts/ui --version {{.CHART_VERSION}} 
-        --namespace {{.NAMESPACE}}
-        --set gateway.enabled=true
-        --set gateway.replicaCount=1
-        --set gateway.service.type=ClusterIP
-        --set gateway.service.port=8080
-        --set gateway.auth.provider=none
-        --set gateway.providers.openai.enabled=true
-        --set replicaCount=1
-        --set "env[0].name=NODE_ENV,env[0].value=production"
-        --set "env[1].name=NEXT_TELEMETRY_DISABLED,env[1].value=\"1\""
-        --set resources.limits.cpu=500m
-        --set resources.limits.memory=512Mi
-        --set resources.requests.cpu=100m
-        --set resources.requests.memory=128Mi
-        --set ingress.enabled=true
-        --set ingress.className=nginx
-        --set "ingress.hosts[0].host=ui.inference-gateway.local"
-        --set "ingress.hosts[0].paths[0].path=/"
-        --set "ingress.hosts[0].paths[0].pathType=Prefix"
-        --set "ingress.tls[0].secretName=ui-tls"
-        --set "ingress.tls[0].hosts[0]=ui.inference-gateway.local"
+        helm upgrade --install {{.UI_RELEASE}} ../../charts/ui --version {{.CHART_VERSION}} \
+          --namespace {{.NAMESPACE}} \
+          --set gateway.enabled=true \
+          --set gateway.replicaCount=1 \
+          --set gateway.service.type=ClusterIP \
+          --set gateway.service.port=8080 \
+          --set replicaCount=1 \
+          --set-string env[0].name=NODE_ENV \
+          --set-string env[0].value=production \
+          --set-string env[1].name=NEXT_TELEMETRY_DISABLED \
+          --set-string env[1].value=1 \
+          --set resources.limits.cpu=500m \
+          --set resources.limits.memory=512Mi \
+          --set resources.requests.cpu=100m \
+          --set resources.requests.memory=128Mi \
+          --set ingress.enabled=true \
+          --set ingress.className=nginx \
+          --set "ingress.hosts[0].host=ui.inference-gateway.local" \
+          --set "ingress.hosts[0].paths[0].path=/" \
+          --set "ingress.hosts[0].paths[0].pathType=Prefix" \
+          --set "ingress.tls[0].secretName=ui-tls" \
+          --set "ingress.tls[0].hosts[0]=ui.inference-gateway.local"
 
   port-forward:
     desc: Port-forward to access the UI locally
