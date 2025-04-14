@@ -1,0 +1,184 @@
+version: '3'
+
+vars:
+  NAMESPACE: inference-gateway
+  UI_RELEASE: inference-ui
+  CHART_VERSION: 0.4.0
+
+tasks:
+  deploy-infrastructure:
+    desc: Create a local Kubernetes cluster
+    cmds:
+      - ctlptl apply -f Cluster.yaml
+      - |
+        helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+        helm repo add jetstack https://charts.jetstack.io
+        helm repo update
+      - |
+        echo "Installing NGINX Ingress Controller..."
+      - |
+        helm upgrade --install \
+          --create-namespace \
+          --namespace kube-system \
+          --version 4.12.1 \
+          --wait \
+          ingress-nginx ingress-nginx/ingress-nginx
+      - echo "Installing cert-manager..."
+      - |
+        helm upgrade --install \
+          --create-namespace \
+          --namespace cert-manager \
+          --version 1.17.1 \
+          --set crds.enabled=true \
+          --wait \
+          cert-manager jetstack/cert-manager
+      - echo "Creating self-signed issuer..."
+      - |
+        kubectl apply -f - <<EOF
+        apiVersion: cert-manager.io/v1
+        kind: ClusterIssuer
+        metadata:
+          name: selfsigned-issuer
+        spec:
+          selfSigned: {}
+        EOF
+
+  delete-cluster:
+    desc: Delete the local Kubernetes cluster
+    cmds:
+      - ctlptl delete cluster -f Cluster.yaml
+
+  create-namespace:
+    desc: Create the namespace for deployment
+    cmds:
+      - kubectl create namespace {{.NAMESPACE}} --dry-run=client -o yaml | kubectl apply -f -
+
+  deploy:
+    desc: Deploy the UI with Gateway enabled
+    deps:
+      - create-namespace
+    cmds:
+      - echo "Deploying UI with Gateway..."
+      - |
+        helm upgrade --install {{.UI_RELEASE}} ../../charts/ui --version {{.CHART_VERSION}} \
+          --namespace {{.NAMESPACE}} \
+          --set gateway.enabled=true \
+          --set gateway.replicaCount=1 \
+          --set gateway.service.type=ClusterIP \
+          --set gateway.service.port=8080 \
+          --set replicaCount=1 \
+          --set env[0].name=NODE_ENV \
+          --set env[0].value=production \
+          --set env[1].name=NEXT_TELEMETRY_DISABLED \
+          --set-string env[1].value=1 \
+          --set resources.limits.cpu=500m \
+          --set resources.limits.memory=512Mi \
+          --set resources.requests.cpu=100m \
+          --set resources.requests.memory=128Mi
+
+  deploy-ui-only:
+    desc: Deploy just the UI, connecting to existing Gateway
+    deps:
+      - create-namespace
+    cmds:
+      - echo "Deploying UI only..."
+      - >
+        helm upgrade --install {{.UI_RELEASE}} ../../charts/ui --version {{.CHART_VERSION}} 
+        --namespace {{.NAMESPACE}}
+        --set gateway.enabled=false
+        --set replicaCount=1
+        --set env[0].name=NODE_ENV
+        --set env[0].value=production
+        --set env[1].name=NEXT_TELEMETRY_DISABLED
+        --set env[1].value="1"
+        --set resources.limits.cpu=500m
+        --set resources.limits.memory=512Mi
+        --set resources.requests.cpu=100m
+        --set resources.requests.memory=128Mi
+
+  deploy-with-ingress:
+    desc: Deploy the UI and Gateway with Ingress enabled
+    deps:
+      - create-namespace
+    cmds:
+      - echo "Deploying UI with Gateway and Ingress..."
+      - >
+        helm upgrade --install {{.UI_RELEASE}} ../../charts/ui --version {{.CHART_VERSION}} 
+        --namespace {{.NAMESPACE}}
+        --set gateway.enabled=true
+        --set gateway.replicaCount=1
+        --set gateway.service.type=ClusterIP
+        --set gateway.service.port=8080
+        --set gateway.auth.provider=none
+        --set gateway.providers.openai.enabled=true
+        --set replicaCount=1
+        --set "env[0].name=NODE_ENV,env[0].value=production"
+        --set "env[1].name=NEXT_TELEMETRY_DISABLED,env[1].value=\"1\""
+        --set resources.limits.cpu=500m
+        --set resources.limits.memory=512Mi
+        --set resources.requests.cpu=100m
+        --set resources.requests.memory=128Mi
+        --set ingress.enabled=true
+        --set ingress.className=nginx
+        --set "ingress.hosts[0].host=ui.inference-gateway.local"
+        --set "ingress.hosts[0].paths[0].path=/"
+        --set "ingress.hosts[0].paths[0].pathType=Prefix"
+        --set "ingress.tls[0].secretName=ui-tls"
+        --set "ingress.tls[0].hosts[0]=ui.inference-gateway.local"
+
+  port-forward:
+    desc: Port-forward to access the UI locally
+    cmds:
+      - kubectl port-forward svc/{{.UI_RELEASE}} 3000:3000 -n {{.NAMESPACE}}
+
+  gateway-port-forward:
+    desc: Port-forward to access the Gateway API directly
+    cmds:
+      - kubectl port-forward svc/{{.UI_RELEASE}}-gateway 8080:8080 -n {{.NAMESPACE}}
+
+  clean:
+    desc: Remove the deployment
+    cmds:
+      - helm uninstall {{.UI_RELEASE}} -n {{.NAMESPACE}} || true
+
+  full-clean:
+    desc: Remove deployment and namespace
+    cmds:
+      - task: clean
+      - kubectl delete namespace {{.NAMESPACE}} || true
+
+  setup-secrets:
+    desc: Set up API key secrets for providers
+    cmds:
+      - echo "Enter your OpenAI API key:"
+      - read -s OPENAI_API_KEY && kubectl create secret generic openai-api-key --from-literal=api-key=$OPENAI_API_KEY -n {{.NAMESPACE}}
+      - echo "Secret created"
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: provider-secrets
+          namespace: {{.NAMESPACE}}
+        type: Opaque
+        stringData:
+          config.yaml: |
+            providers:
+              openai:
+                apiKey: $OPENAI_API_KEY
+        EOF
+
+  logs-ui:
+    desc: Show logs for UI pods
+    cmds:
+      - kubectl logs -l app.kubernetes.io/name=ui -n {{.NAMESPACE}} --tail=100 -f
+
+  logs-gateway:
+    desc: Show logs for Gateway pods
+    cmds:
+      - kubectl logs -l app.kubernetes.io/name=gateway -n {{.NAMESPACE}} --tail=100 -f
+
+  status:
+    desc: Show status of all pods in the namespace
+    cmds:
+      - kubectl get pods -n {{.NAMESPACE}}

@@ -41,7 +41,7 @@ RUN curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | gpg --d
 RUN curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
 
 # Install ctlptl
-RUN curl -fsSL https://github.com/tilt-dev/ctlptl/releases/download/v0.8.24/ctlptl.0.8.24.linux.x86_64.tar.gz | tar -xzv -C /usr/local/bin ctlptl
+RUN curl -fsSL https://github.com/tilt-dev/ctlptl/releases/download/v0.8.40/ctlptl.0.8.40.linux.x86_64.tar.gz | tar -xzv -C /usr/local/bin ctlptl
 
 # Install Task
 RUN sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
@@ -52,11 +52,13 @@ RUN echo 'source /home/node/.powerlevel10k/powerlevel10k.zsh-theme' >> /home/nod
 RUN echo 'POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true' >> /home/node/.zshrc
 
 # Add Helm, kubectl, and k3d autocompletion to zsh
-RUN echo '# Enable Helm autocompletion' >> /home/node/.zshrc
+RUN echo '# Enable autocompletion' >> /home/node/.zshrc
 RUN echo 'autoload -Uz compinit && compinit' >> /home/node/.zshrc
 RUN echo 'source <(helm completion zsh)' >> /home/node/.zshrc
 RUN echo 'source <(kubectl completion zsh)' >> /home/node/.zshrc
 RUN echo 'source <(k3d completion zsh)' >> /home/node/.zshrc
+RUN echo 'source <(task --completion zsh)' >> /home/node/.zshrc
+RUN echo 'source <(ctlptl completion zsh)' >> /home/node/.zshrc
 
 # Set Zsh as default shell for node user
 RUN chsh -s /usr/bin/zsh node
