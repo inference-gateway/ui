@@ -96,15 +96,11 @@ tasks:
       - task: clean
         ignore_error: true
       - |
-        helm upgrade --install {{.UI_RELEASE}} oci://ghcr.io/inference-gateway/charts/inference-gateway-ui --version {{.CHART_VERSION}} \
+        helm upgrade --install {{.UI_RELEASE}} ../../charts/inference-gateway-ui --version {{.CHART_VERSION}} \
           --create-namespace \
           --namespace {{.NAMESPACE}} \
-          --set gateway.enabled=true \
-          --set gateway.replicaCount=1 \
-          --set gateway.service.type=ClusterIP \
-          --set gateway.service.port=8080 \
-          --set gateway.service.portName=gateway-http \
           --set replicaCount=1 \
+          --set gateway.enabled=true \
           --set-string env[0].name=NODE_ENV \
           --set-string env[0].value=production \
           --set-string env[1].name=NEXT_TELEMETRY_DISABLED \
