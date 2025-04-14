@@ -123,7 +123,7 @@ jobs:
       - name: Package and Push Helm chart
         run: |
           VERSION=${TAG#v}
-          cd charts/inference-gateway
+          cd charts/inference-gateway-ui
           helm dependency update
           helm package . --version ${VERSION} --app-version ${VERSION}
-          helm push inference-gateway-${VERSION}.tgz oci://ghcr.io/${{ github.repository_owner }}/charts
+          helm push inference-gateway-ui-${VERSION}.tgz oci://ghcr.io/${{ github.repository_owner }}/charts
