@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0-rc.4](https://github.com/inference-gateway/ui/compare/v0.5.0-rc.3...v0.5.0-rc.4) (2025-04-14)
+
+### 🐛 Bug Fixes
+
+* **ci:** Move permissions to the top level in GitHub Actions workflow ([a2a9e8d](https://github.com/inference-gateway/ui/commit/a2a9e8d3346c111de9a3f28193b2f28dca2fdc7b))
+
 ## [0.5.0-rc.3](https://github.com/inference-gateway/ui/compare/v0.5.0-rc.2...v0.5.0-rc.3) (2025-04-14)
 
 ### 🐛 Bug Fixes
