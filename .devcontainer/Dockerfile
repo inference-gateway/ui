@@ -9,7 +9,11 @@ RUN apt-get update \
     curl \
     build-essential \
     zsh \
-    fonts-powerline
+    fonts-powerline \
+    apt-transport-https \
+    gnupg \
+    lsb-release \
+    ca-certificates
 
 # Install GitHub CLI
 RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
@@ -27,15 +31,32 @@ RUN su node -c "npm install -g next typescript"
 # Install latest Helm
 RUN curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
+# Install kubectl
+RUN curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg \
+    && echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /" | tee /etc/apt/sources.list.d/kubernetes.list \
+    && apt-get update \
+    && apt-get install -y kubectl
+
+# Install k3d
+RUN curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+
+# Install ctlptl
+RUN curl -fsSL https://github.com/tilt-dev/ctlptl/releases/download/v0.8.24/ctlptl.0.8.24.linux.x86_64.tar.gz | tar -xzv -C /usr/local/bin ctlptl
+
+# Install Task
+RUN sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
+
 # Install Powerlevel10k theme
 RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /home/node/.powerlevel10k
 RUN echo 'source /home/node/.powerlevel10k/powerlevel10k.zsh-theme' >> /home/node/.zshrc
 RUN echo 'POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true' >> /home/node/.zshrc
 
-# Add Helm autocompletion to zsh
+# Add Helm, kubectl, and k3d autocompletion to zsh
 RUN echo '# Enable Helm autocompletion' >> /home/node/.zshrc
 RUN echo 'autoload -Uz compinit && compinit' >> /home/node/.zshrc
 RUN echo 'source <(helm completion zsh)' >> /home/node/.zshrc
+RUN echo 'source <(kubectl completion zsh)' >> /home/node/.zshrc
+RUN echo 'source <(k3d completion zsh)' >> /home/node/.zshrc
 
 # Set Zsh as default shell for node user
 RUN chsh -s /usr/bin/zsh node
