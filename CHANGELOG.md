@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0-rc.2](https://github.com/inference-gateway/ui/compare/v0.5.0-rc.1...v0.5.0-rc.2) (2025-04-14)
+
+### ♻️ Improvements
+
+* Add Inference Gateway UI Helm chart with deployment, service, and ingress configurations ([9e7a58e](https://github.com/inference-gateway/ui/commit/9e7a58ef7f46808d940c281c638e57d60022ae0e))
+
+### 🔧 Miscellaneous
+
+* Update release configuration to use inference-gateway-ui Chart.yaml ([576461c](https://github.com/inference-gateway/ui/commit/576461c90282f81386449447412c04bf4af6d368))
+
 ## [0.5.0-rc.1](https://github.com/inference-gateway/ui/compare/v0.4.0...v0.5.0-rc.1) (2025-04-14)
 
 ### ✨ Features
