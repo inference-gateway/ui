@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0-rc.5](https://github.com/inference-gateway/ui/compare/v0.5.0-rc.4...v0.5.0-rc.5) (2025-04-14)
+
+### 👷 CI
+
+* Add @semantic-release/npm to verifyConditions and plugins for npm integration ([d632e3f](https://github.com/inference-gateway/ui/commit/d632e3fea5a97c601cb49823a819d866ec09cc13))
+
+### 🔧 Miscellaneous
+
+* Remove obsolete inference-gateway-0.5.0.tgz chart file ([27ba18f](https://github.com/inference-gateway/ui/commit/27ba18f05a916b08b6f150aea01166baaf7f4d76))
+
 ## [0.5.0-rc.4](https://github.com/inference-gateway/ui/compare/v0.5.0-rc.3...v0.5.0-rc.4) (2025-04-14)
 
 ### 🐛 Bug Fixes
