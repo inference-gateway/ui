@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0-rc.6](https://github.com/inference-gateway/ui/compare/v0.5.0-rc.5...v0.5.0-rc.6) (2025-04-14)
+
+### 🐛 Bug Fixes
+
+* update CHART_VERSION and change chart source to OCI registry ([ee1f09d](https://github.com/inference-gateway/ui/commit/ee1f09dd052d3f403a227c15f1eb4ddae814c8c8))
+* update liveness and readiness probe paths to /api/health ([1b99555](https://github.com/inference-gateway/ui/commit/1b995555ceadd4558584252b5250081cc499f8d0))
+
 ## [0.5.0-rc.5](https://github.com/inference-gateway/ui/compare/v0.5.0-rc.4...v0.5.0-rc.5) (2025-04-14)
 
 ### 👷 CI
