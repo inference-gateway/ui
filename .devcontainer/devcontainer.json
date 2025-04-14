@@ -36,5 +36,6 @@
     "GITHUB_TOKEN": "${localEnv:GITHUB_TOKEN}"
   },
   "postCreateCommand": "npm install",
-  "remoteUser": "node"
+  "remoteUser": "node",
+  "runArgs": ["--add-host=ui.inference-gateway.local:127.0.0.1"]
 }
