@@ -10,6 +10,9 @@ k3d:
       - port: 80:80
         nodeFilters:
           - server:0
+      - port: 443:443
+        nodeFilters:
+          - server:0
     options:
       k3s:
         extraArgs:
