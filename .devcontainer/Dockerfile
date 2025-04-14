@@ -32,6 +32,11 @@ RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /home/node/
 RUN echo 'source /home/node/.powerlevel10k/powerlevel10k.zsh-theme' >> /home/node/.zshrc
 RUN echo 'POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true' >> /home/node/.zshrc
 
+# Add Helm autocompletion to zsh
+RUN echo '# Enable Helm autocompletion' >> /home/node/.zshrc
+RUN echo 'autoload -Uz compinit && compinit' >> /home/node/.zshrc
+RUN echo 'source <(helm completion zsh)' >> /home/node/.zshrc
+
 # Set Zsh as default shell for node user
 RUN chsh -s /usr/bin/zsh node
 
