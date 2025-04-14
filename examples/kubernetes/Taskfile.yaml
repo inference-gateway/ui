@@ -95,7 +95,7 @@ tasks:
       - echo "Deploying UI with Gateway and Ingress..."
       - task: clean
         ignore_error: true
-      - >
+      - |
         helm upgrade --install {{.UI_RELEASE}} oci://ghcr.io/inference-gateway/charts/inference-gateway-ui --version {{.CHART_VERSION}} \
           --create-namespace \
           --namespace {{.NAMESPACE}} \
