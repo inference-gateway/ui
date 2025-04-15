@@ -6,13 +6,15 @@ on:
       - published
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
 jobs:
   containers:
     name: Build and Push Container Images
     runs-on: ${{ matrix.os }}
-    permissions:
-      contents: read
-      packages: write
     strategy:
       matrix:
         include:
@@ -63,10 +65,6 @@ jobs:
     name: Sign Container Images
     runs-on: ubuntu-24.04
     needs: containers
-    permissions:
-      contents: read
-      packages: write
-      id-token: write
     steps:
       - name: Install cosign
         uses: sigstore/cosign-installer@v3.8.1
@@ -123,7 +121,7 @@ jobs:
       - name: Package and Push Helm chart
         run: |
           VERSION=${TAG#v}
-          cd charts/inference-gateway
+          cd charts/inference-gateway-ui
           helm dependency update
           helm package . --version ${VERSION} --app-version ${VERSION}
-          helm push inference-gateway-${VERSION}.tgz oci://ghcr.io/${{ github.repository_owner }}/charts
+          helm push inference-gateway-ui-${VERSION}.tgz oci://ghcr.io/${{ github.repository_owner }}/charts

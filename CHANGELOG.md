@@ -2,6 +2,105 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0-rc.7](https://github.com/inference-gateway/ui/compare/v0.5.0-rc.6...v0.5.0-rc.7) (2025-04-15)
+
+### ♻️ Improvements
+
+* Add INFERENCE_GATEWAY_URL environment variable for production deployment ([2055ec4](https://github.com/inference-gateway/ui/commit/2055ec4b4e0c5d2dc357abe3b9f8a81162c0cc6e))
+
+### 🐛 Bug Fixes
+
+* Format helm upgrade command for better readability in README ([ac9e40d](https://github.com/inference-gateway/ui/commit/ac9e40dac7bcf36177362f90a208695763d2c9e9))
+* Remove default parameters ([3e3c460](https://github.com/inference-gateway/ui/commit/3e3c46094778a414956e5a548fdca9c23c7c4720))
+
+### 📚 Documentation
+
+* Update helm upgrade command to work on different terminals ([1a11526](https://github.com/inference-gateway/ui/commit/1a11526ceef60f889a3359a4d28ad65c09ea6f9a))
+
+### 🔧 Miscellaneous
+
+* Add ctlptl installation requirement for local Kubernetes cluster management ([544c735](https://github.com/inference-gateway/ui/commit/544c73526f87914ec859ea47ebd33267a62f5217))
+* update CHART_VERSION to 0.5.0-rc.6 ([4496534](https://github.com/inference-gateway/ui/commit/4496534e77f31ae5db371322051ffc9d31fa5645))
+* update helm command syntax for UI deployment for consistency ([417e424](https://github.com/inference-gateway/ui/commit/417e424cfc1db03bd6d1111e4fbc55cfe9b1ac35))
+* Update inference-gateway dependency version to 0.5.4 ([e47b790](https://github.com/inference-gateway/ui/commit/e47b7908923749f798c2b5168276f87f501213f8))
+* Update README and Taskfile for improved deployment instructions and clarity ([1b14159](https://github.com/inference-gateway/ui/commit/1b14159f2d3854b290dfa641bc574c0a026fe1a2))
+
+## [0.5.0-rc.6](https://github.com/inference-gateway/ui/compare/v0.5.0-rc.5...v0.5.0-rc.6) (2025-04-14)
+
+### 🐛 Bug Fixes
+
+* update CHART_VERSION and change chart source to OCI registry ([ee1f09d](https://github.com/inference-gateway/ui/commit/ee1f09dd052d3f403a227c15f1eb4ddae814c8c8))
+* update liveness and readiness probe paths to /api/health ([1b99555](https://github.com/inference-gateway/ui/commit/1b995555ceadd4558584252b5250081cc499f8d0))
+
+## [0.5.0-rc.5](https://github.com/inference-gateway/ui/compare/v0.5.0-rc.4...v0.5.0-rc.5) (2025-04-14)
+
+### 👷 CI
+
+* Add @semantic-release/npm to verifyConditions and plugins for npm integration ([d632e3f](https://github.com/inference-gateway/ui/commit/d632e3fea5a97c601cb49823a819d866ec09cc13))
+
+### 🔧 Miscellaneous
+
+* Remove obsolete inference-gateway-0.5.0.tgz chart file ([27ba18f](https://github.com/inference-gateway/ui/commit/27ba18f05a916b08b6f150aea01166baaf7f4d76))
+
+## [0.5.0-rc.4](https://github.com/inference-gateway/ui/compare/v0.5.0-rc.3...v0.5.0-rc.4) (2025-04-14)
+
+### 🐛 Bug Fixes
+
+* **ci:** Move permissions to the top level in GitHub Actions workflow ([a2a9e8d](https://github.com/inference-gateway/ui/commit/a2a9e8d3346c111de9a3f28193b2f28dca2fdc7b))
+
+## [0.5.0-rc.3](https://github.com/inference-gateway/ui/compare/v0.5.0-rc.2...v0.5.0-rc.3) (2025-04-14)
+
+### 🐛 Bug Fixes
+
+* Correct chart name in Chart.yaml to match application name ([f7f799d](https://github.com/inference-gateway/ui/commit/f7f799d692e42fba9f313aeb0e098f12adbe87d1))
+
+## [0.5.0-rc.2](https://github.com/inference-gateway/ui/compare/v0.5.0-rc.1...v0.5.0-rc.2) (2025-04-14)
+
+### ♻️ Improvements
+
+* Add Inference Gateway UI Helm chart with deployment, service, and ingress configurations ([9e7a58e](https://github.com/inference-gateway/ui/commit/9e7a58ef7f46808d940c281c638e57d60022ae0e))
+
+### 🔧 Miscellaneous
+
+* Update release configuration to use inference-gateway-ui Chart.yaml ([576461c](https://github.com/inference-gateway/ui/commit/576461c90282f81386449447412c04bf4af6d368))
+
+## [0.5.0-rc.1](https://github.com/inference-gateway/ui/compare/v0.4.0...v0.5.0-rc.1) (2025-04-14)
+
+### ✨ Features
+
+* Add Chart.lock for inference-gateway dependency and update .gitignore for chart dependencies ([18bd761](https://github.com/inference-gateway/ui/commit/18bd761be6cb0e01229287ae390f4d5dfa7fa8dc))
+* Add GitHub Copilot instructions for Inference Gateway UI ([cb7d7ba](https://github.com/inference-gateway/ui/commit/cb7d7bae2e394e0d9ba4ec85e7430906cab5a3da))
+* Add health check endpoint for service status verification ([83b1185](https://github.com/inference-gateway/ui/commit/83b118565af5e136ecc779a3d14d8b3bcf203a10))
+* Add Helm chart for Inference Gateway UI with deployment, service, and ingress configurations ([0849f9d](https://github.com/inference-gateway/ui/commit/0849f9dd02f8b6560673f9f62cbc69d1e3637c89))
+* Add related repositories section to GitHub Copilot instructions ([4ce5854](https://github.com/inference-gateway/ui/commit/4ce5854d79703c046d78f6d7752baf1d3c270671))
+* Update ingress configuration with Nginx settings and CORS support ([3603f50](https://github.com/inference-gateway/ui/commit/3603f507143bd7156d2e30ad48163f2859a0044c))
+
+### 🐛 Bug Fixes
+
+* Update helm commands to use --set-string for environment variables ([f132a52](https://github.com/inference-gateway/ui/commit/f132a52491b588e8c2c140ef44285e35d2c2cbda))
+
+### 📚 Documentation
+
+* Add fullnameOverride for gateway and improve helm command formatting ([63b22c9](https://github.com/inference-gateway/ui/commit/63b22c97d2eb890c3b19bc11126179772bc9918e))
+* Add https port ([3eab9a5](https://github.com/inference-gateway/ui/commit/3eab9a5fa9756c4f6cb43bd42f355b88636504e5))
+* **examples:** Add kubernetes example ([9bebe3f](https://github.com/inference-gateway/ui/commit/9bebe3f567a397bf0c4c66c877083d6b5c89e1af))
+* Update helm command to use unquoted set parameters for ingress configuration ([06fefda](https://github.com/inference-gateway/ui/commit/06fefda5eff77624fda0fd1d4b64194619ad970e))
+
+### 🔧 Miscellaneous
+
+* Add runArgs to devcontainer configuration for local host resolution ([c09251e](https://github.com/inference-gateway/ui/commit/c09251ebf90433b242d94bfdbb2e50ae8d9b9fdb))
+* Move exec plugin to the correct position in the release configuration for clarity ([c8eb8ea](https://github.com/inference-gateway/ui/commit/c8eb8ea11714570f0d0b2f69f345d972e4b0fc91))
+* Update UI release name and add namespace creation to helm commands ([afb6520](https://github.com/inference-gateway/ui/commit/afb6520693fb6aba0d6f7035c120f5d2d42ee9b9))
+
+### 📦 Miscellaneous
+
+* Add Helm autocompletion to Zsh configuration in Dockerfile ([bb9035e](https://github.com/inference-gateway/ui/commit/bb9035e494769791739162076bb6eb619ec9f54b))
+* Update Dockerfile to install kubectl, k3d, and ctlptl with autocompletion support ([8385dfc](https://github.com/inference-gateway/ui/commit/8385dfc66ad5ee1d86442fd3af41f8735f8e1fab))
+
+### 🔒 Security
+
+* Update security context to set runAsUser to 1001 which is nextjs user ([51205cc](https://github.com/inference-gateway/ui/commit/51205cceabc9f14169e77e45ca000f7464342e60))
+
 ## [0.4.0](https://github.com/inference-gateway/ui/compare/v0.3.0...v0.4.0) (2025-04-06)
 
 ### ✨ Features
