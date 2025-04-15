@@ -148,5 +148,11 @@ helm uninstall inference-ui -n inference-gateway
 kubectl delete namespace inference-gateway
 
 # Delete the k3d cluster
-k3d cluster delete inference-gateway-dev
+ctlptl delete -f Cluster.yaml
+```
+
+Or, just run:
+
+```bash
+task delete-cluster
 ```
