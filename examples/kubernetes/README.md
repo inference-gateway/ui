@@ -7,6 +7,7 @@ This example demonstrates how to deploy the Inference Gateway UI with the Infere
 - Docker installed and running
 - kubectl installed
 - Helm v3 installed
+- ctlptl installed (for local Kubernetes cluster management)
 - k3d installed (for local Kubernetes cluster)
 - Task installed (optional, for automation)
 
