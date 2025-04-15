@@ -8,6 +8,9 @@ const config: Config = {
   testEnvironment: 'jsdom',
   roots: ['<rootDir>'],
   modulePaths: ['<rootDir>'],
+  maxWorkers: '50%',
+  cache: true,
+  testTimeout: 10000,
   moduleNameMapper: {
     ...pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>/' }),
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
@@ -26,6 +29,11 @@ const config: Config = {
     '/node_modules/(?!(react-markdown|rehype-raw|rehype-sanitize|hast-util-sanitize|micromark|decode-named-character-reference|character-entities|remark-rehype|mdast-util-to-hast|mdast-util-to-string|remark-parse|markdown-table|unist-util-stringify-position|unist-util-visit|unist-util-is|trough|unified|bail|is-plain-obj|vfile|vfile-message|@types|mdast-util-from-markdown|remark-gfm|ccount|escape-string-regexp|property-information)/)',
   ],
   testMatch: ['**/__tests__/**/*.+(ts|tsx|js)', '**/?(*.)+(spec|test).+(ts|tsx|js)'],
+  // Add coverage settings but configure them to not slow down regular tests
+  collectCoverage: process.env.COLLECT_COVERAGE === 'true',
+  coveragePathIgnorePatterns: ['/node_modules/', '/tests/'],
+  // Add bail option to exit after first failure in CI
+  bail: process.env.CI === 'true',
 };
 
 export default config;

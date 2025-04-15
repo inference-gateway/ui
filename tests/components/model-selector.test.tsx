@@ -15,9 +15,7 @@ describe('ModelSelector Component', () => {
   test('displays loading state initially', async () => {
     (fetchModels as jest.Mock).mockReturnValue(new Promise(() => {}));
 
-    await act(async () => {
-      render(<ModelSelector selectedModel="" onSelectModelAction={mockOnSelectModelAction} />);
-    });
+    render(<ModelSelector selectedModel="" onSelectModelAction={mockOnSelectModelAction} />);
 
     const selectTrigger = screen.getByRole('combobox');
     expect(selectTrigger).toHaveTextContent('Loading...');
@@ -26,20 +24,16 @@ describe('ModelSelector Component', () => {
   test('loads and displays models', async () => {
     (fetchModels as jest.Mock).mockImplementation(mockFetchModelsSuccess);
 
-    await act(async () => {
-      render(<ModelSelector selectedModel="" onSelectModelAction={mockOnSelectModelAction} />);
-    });
+    render(<ModelSelector selectedModel="" onSelectModelAction={mockOnSelectModelAction} />);
 
     expect(fetchModels).toHaveBeenCalledTimes(1);
 
-    await act(async () => {
-      await waitFor(() => {
-        expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
-      });
+    await waitFor(() => {
+      expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
     });
 
+    const selectTrigger = screen.getByRole('combobox');
     await act(async () => {
-      const selectTrigger = screen.getByRole('combobox');
       fireEvent.click(selectTrigger);
     });
 
@@ -51,18 +45,14 @@ describe('ModelSelector Component', () => {
   test('shows error message when API fails', async () => {
     (fetchModels as jest.Mock).mockImplementation(mockFetchModelsError);
 
-    await act(async () => {
-      render(<ModelSelector selectedModel="" onSelectModelAction={mockOnSelectModelAction} />);
+    render(<ModelSelector selectedModel="" onSelectModelAction={mockOnSelectModelAction} />);
+
+    await waitFor(() => {
+      expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
     });
 
+    const selectTrigger = screen.getByRole('combobox');
     await act(async () => {
-      await waitFor(() => {
-        expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
-      });
-    });
-
-    await act(async () => {
-      const selectTrigger = screen.getByRole('combobox');
       fireEvent.click(selectTrigger);
     });
 
@@ -72,23 +62,19 @@ describe('ModelSelector Component', () => {
   test('filters models based on search query', async () => {
     (fetchModels as jest.Mock).mockImplementation(mockFetchModelsSuccess);
 
-    await act(async () => {
-      render(<ModelSelector selectedModel="" onSelectModelAction={mockOnSelectModelAction} />);
+    render(<ModelSelector selectedModel="" onSelectModelAction={mockOnSelectModelAction} />);
+
+    await waitFor(() => {
+      expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
     });
 
+    const selectTrigger = screen.getByRole('combobox');
     await act(async () => {
-      await waitFor(() => {
-        expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
-      });
-    });
-
-    await act(async () => {
-      const selectTrigger = screen.getByRole('combobox');
       fireEvent.click(selectTrigger);
     });
 
+    const searchInput = screen.getByPlaceholderText('Search models...');
     await act(async () => {
-      const searchInput = screen.getByPlaceholderText('Search models...');
       fireEvent.change(searchInput, { target: { value: 'claude' } });
     });
 
@@ -100,23 +86,19 @@ describe('ModelSelector Component', () => {
   test('calls onSelectModelAction with correct model ID when selected', async () => {
     (fetchModels as jest.Mock).mockImplementation(mockFetchModelsSuccess);
 
-    await act(async () => {
-      render(<ModelSelector selectedModel="" onSelectModelAction={mockOnSelectModelAction} />);
+    render(<ModelSelector selectedModel="" onSelectModelAction={mockOnSelectModelAction} />);
+
+    await waitFor(() => {
+      expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
     });
 
+    const selectTrigger = screen.getByRole('combobox');
     await act(async () => {
-      await waitFor(() => {
-        expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
-      });
-    });
-
-    await act(async () => {
-      const selectTrigger = screen.getByRole('combobox');
       fireEvent.click(selectTrigger);
     });
 
+    const modelOption = screen.getByText('openai/gpt-4o');
     await act(async () => {
-      const modelOption = screen.getByText('openai/gpt-4o');
       fireEvent.click(modelOption);
     });
 

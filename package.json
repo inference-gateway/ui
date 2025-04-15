@@ -11,8 +11,12 @@
     "format:check": "prettier --check .",
     "lint:fix": "next lint --fix",
     "oas-download": "curl -X GET \"https://raw.githubusercontent.com/inference-gateway/inference-gateway/main/openapi.yaml\" -o openapi.yaml",
-    "test": "jest",
+    "test": "jest --detectOpenHandles",
     "test:watch": "jest --watch",
+    "test:fast": "jest --runInBand --detectOpenHandles",
+    "test:ci": "CI=true jest --ci --runInBand --detectOpenHandles",
+    "test:coverage": "COLLECT_COVERAGE=true jest --coverage",
+    "test:clear-cache": "jest --clearCache",
     "prepare": "husky"
   },
   "dependencies": {
