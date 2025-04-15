@@ -80,27 +80,27 @@ EOF
 # Deploy UI with Gateway
 helm upgrade --install {{.UI_RELEASE}} \
   oci://ghcr.io/inference-gateway/charts/inference-gateway-ui --version 0.4.0 \
-    --create-namespace \
-    --namespace inference-gateway \
-    --set replicaCount=1 \
-    --set gateway.enabled=true \
-    --set-string env[0].name=NODE_ENV \
-    --set-string env[0].value=production \
-    --set-string env[1].name=NEXT_TELEMETRY_DISABLED \
-    --set-string env[1].value=1 \
-    --set-string env[2].name=INFERENCE_GATEWAY_URL \
-    --set-string env[2].value=http://inference-gateway:8080/v1 \
-    --set resources.limits.cpu=500m \
-    --set resources.limits.memory=512Mi \
-    --set resources.requests.cpu=100m \
-    --set resources.requests.memory=128Mi \
-    --set ingress.enabled=true \
-    --set ingress.className=nginx \
-    --set ingress.hosts[0].host=ui.inference-gateway.local \
-    --set ingress.hosts[0].paths[0].path=/ \
-    --set ingress.hosts[0].paths[0].pathType=Prefix \
-    --set ingress.tls[0].secretName=ui-tls \
-    --set ingress.tls[0].hosts[0]=ui.inference-gateway.local
+  --create-namespace \
+  --namespace inference-gateway \
+  --set replicaCount=1 \
+  --set gateway.enabled=true \
+  --set-string env[0].name=NODE_ENV \
+  --set-string env[0].value=production \
+  --set-string env[1].name=NEXT_TELEMETRY_DISABLED \
+  --set-string env[1].value=1 \
+  --set-string env[2].name=INFERENCE_GATEWAY_URL \
+  --set-string env[2].value=http://inference-gateway:8080/v1 \
+  --set resources.limits.cpu=500m \
+  --set resources.limits.memory=512Mi \
+  --set resources.requests.cpu=100m \
+  --set resources.requests.memory=128Mi \
+  --set ingress.enabled=true \
+  --set ingress.className=nginx \
+  --set ingress.hosts[0].host=ui.inference-gateway.local \
+  --set ingress.hosts[0].paths[0].path=/ \
+  --set ingress.hosts[0].paths[0].pathType=Prefix \
+  --set ingress.tls[0].secretName=ui-tls \
+  --set ingress.tls[0].hosts[0]=ui.inference-gateway.local
 ```
 
 Access the UI at: http://localhost:3000
