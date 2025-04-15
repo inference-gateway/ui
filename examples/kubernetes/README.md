@@ -80,7 +80,7 @@ EOF
 # Deploy UI with Gateway
 helm upgrade --install inference-gateway-ui \
   oci://ghcr.io/inference-gateway/charts/inference-gateway-ui \
-  --version 0.5.0-rc.6 \
+  --version 0.5.0-rc.7 \
   --create-namespace \
   --namespace inference-gateway \
   --set replicaCount=1 \
