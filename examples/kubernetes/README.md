@@ -50,7 +50,12 @@ ctlptl apply -f Cluster.yaml
 # Install NGINX ingress controller
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo update
-helm install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-nginx --create-namespace
+helm upgrade --install \
+  --create-namespace \
+  --namespace kube-system \
+  --version 4.12.1 \
+  --wait \
+  ingress-nginx ingress-nginx/ingress-nginx
 
 # Install Cert-Manager for TLS certificates
 helm repo add jetstack https://charts.jetstack.io
@@ -63,7 +68,7 @@ helm upgrade --install \
   --wait \
   cert-manager jetstack/cert-manager
 
-# Create a self-signed issuer for TLS certificates
+# Create a self-signed issuer for TLS certificates, in production use a proper issuer
 kubectl apply -f - <<EOF
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -100,7 +105,7 @@ helm upgrade --install inference-gateway-ui \
   --set "ingress.hosts[0].host=ui.inference-gateway.local" \
   --set "ingress.hosts[0].paths[0].path=/" \
   --set "ingress.hosts[0].paths[0].pathType=Prefix" \
-  --set "ingress.tls[0].secretName=ui-tls" \
+  --set "ingress.tls[0].secretName=inference-gateway-ui-tls" \
   --set "ingress.tls[0].hosts[0]=ui.inference-gateway.local"
 ```
 

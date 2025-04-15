@@ -114,7 +114,7 @@ tasks:
           --set ingress.hosts[0].host=ui.inference-gateway.local \
           --set ingress.hosts[0].paths[0].path=/ \
           --set ingress.hosts[0].paths[0].pathType=Prefix \
-          --set ingress.tls[0].secretName=ui-tls \
+          --set ingress.tls[0].secretName=inference-gateway-ui-tls \
           --set ingress.tls[0].hosts[0]=ui.inference-gateway.local
 
   port-forward:

@@ -37,5 +37,6 @@
   },
   "postCreateCommand": "npm install",
   "remoteUser": "node",
+  "appPort": ["443:443", "80:80"],
   "runArgs": ["--add-host=ui.inference-gateway.local:127.0.0.1"]
 }
