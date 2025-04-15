@@ -1,0 +1,4 @@
+helm lint ./charts/inference-gateway-ui
+npm run oas-download
+npm run format:check
+npm run lint

@@ -1,9 +1,9 @@
-import { LocalStorageService } from "@/lib/storage-local";
-import { MockStorageLocal } from "@/tests/mocks/storage";
-import { ChatSession } from "@/types/chat";
+import { LocalStorageService } from '@/lib/storage-local';
+import { MockStorageLocal } from '@/tests/mocks/storage';
+import { ChatSession } from '@/types/chat';
 
 beforeAll(() => {
-  Object.defineProperty(window, "localStorage", {
+  Object.defineProperty(window, 'localStorage', {
     value: MockStorageLocal,
   });
 });
@@ -15,21 +15,21 @@ beforeEach(() => {
   localStorage.clear();
 });
 
-describe("LocalStorageService", () => {
+describe('LocalStorageService', () => {
   const testSession: ChatSession = {
-    id: "test-id",
-    title: "Test Session",
+    id: 'test-id',
+    title: 'Test Session',
     messages: [],
     createdAt: Date.now(),
   };
 
-  describe("without userId", () => {
+  describe('without userId', () => {
     const service = new LocalStorageService();
 
-    it("should save and get chat sessions", async () => {
+    it('should save and get chat sessions', async () => {
       await service.saveChatSessions([testSession]);
       expect(localStorage.setItem).toHaveBeenCalledWith(
-        "chatSessions",
+        'chatSessions',
         JSON.stringify([testSession])
       );
 
@@ -37,62 +37,54 @@ describe("LocalStorageService", () => {
       expect(sessions).toEqual([testSession]);
     });
 
-    it("should handle empty chat sessions", async () => {
+    it('should handle empty chat sessions', async () => {
       const sessions = await service.getChatSessions();
       expect(sessions).toEqual([]);
     });
 
-    it("should save and get active chat ID", async () => {
-      await service.saveActiveChatId("test-id");
-      expect(localStorage.setItem).toHaveBeenCalledWith(
-        "activeChatId",
-        "test-id"
-      );
+    it('should save and get active chat ID', async () => {
+      await service.saveActiveChatId('test-id');
+      expect(localStorage.setItem).toHaveBeenCalledWith('activeChatId', 'test-id');
 
       const activeId = await service.getActiveChatId();
-      expect(activeId).toBe("test-id");
+      expect(activeId).toBe('test-id');
     });
 
-    it("should return empty string for missing active chat ID", async () => {
+    it('should return empty string for missing active chat ID', async () => {
       const activeId = await service.getActiveChatId();
-      expect(activeId).toBe("");
+      expect(activeId).toBe('');
     });
 
-    it("should clear storage", async () => {
+    it('should clear storage', async () => {
       await service.saveChatSessions([testSession]);
-      await service.saveActiveChatId("test-id");
+      await service.saveActiveChatId('test-id');
       await service.clear();
 
-      expect(localStorage.removeItem).toHaveBeenCalledWith("chatSessions");
-      expect(localStorage.removeItem).toHaveBeenCalledWith("activeChatId");
+      expect(localStorage.removeItem).toHaveBeenCalledWith('chatSessions');
+      expect(localStorage.removeItem).toHaveBeenCalledWith('activeChatId');
     });
   });
 
-  describe("with userId", () => {
-    const service = new LocalStorageService({ userId: "user-123" });
+  describe('with userId', () => {
+    const service = new LocalStorageService({ userId: 'user-123' });
 
-    it("should use userId in storage keys", async () => {
+    it('should use userId in storage keys', async () => {
       await service.saveChatSessions([testSession]);
       expect(localStorage.setItem).toHaveBeenCalledWith(
-        "user-123_chatSessions",
+        'user-123_chatSessions',
         JSON.stringify([testSession])
       );
 
       await service.getChatSessions();
-      expect(localStorage.getItem).toHaveBeenCalledWith(
-        "user-123_chatSessions"
-      );
+      expect(localStorage.getItem).toHaveBeenCalledWith('user-123_chatSessions');
     });
 
-    it("should handle first active chat ID", async () => {
+    it('should handle first active chat ID', async () => {
       await service.saveChatSessions([testSession]);
       const activeId = await service.getActiveChatId();
 
       expect(activeId).toBe(testSession.id);
-      expect(localStorage.setItem).toHaveBeenCalledWith(
-        "user-123_activeChatId",
-        testSession.id
-      );
+      expect(localStorage.setItem).toHaveBeenCalledWith('user-123_activeChatId', testSession.id);
     });
   });
 });

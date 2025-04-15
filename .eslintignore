@@ -1,0 +1,18 @@
+# Build artifacts
+.next/
+build/
+dist/
+out/
+
+# Node modules
+node_modules/
+
+# Charts directory
+charts/
+
+# Generated files
+*.generated.*
+*.min.js
+
+# Config files
+next-env.d.ts

@@ -1,16 +1,14 @@
-import type { ListModelsResponse } from "@/types/model";
-import { Session } from "next-auth";
+import type { ListModelsResponse } from '@/types/model';
+import { Session } from 'next-auth';
 
-export async function fetchModels(
-  session?: Session
-): Promise<ListModelsResponse> {
+export async function fetchModels(session?: Session): Promise<ListModelsResponse> {
   const headers: Record<string, string> = {};
 
   if (session?.accessToken) {
-    headers["Authorization"] = `Bearer ${session.accessToken}`;
+    headers['Authorization'] = `Bearer ${session.accessToken}`;
   }
 
-  const response = await fetch("/api/v1/models", {
+  const response = await fetch('/api/v1/models', {
     headers,
   });
 

@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useRef } from "react";
-import type { Model } from "@/types/model";
+import { useEffect, useState, useRef } from 'react';
+import type { Model } from '@/types/model';
 import {
   Select,
   SelectContent,
@@ -9,25 +9,22 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { fetchModels } from "@/lib/api";
-import { Input } from "@/components/ui/input";
-import { Check, Search } from "lucide-react";
-import logger from "@/lib/logger";
+} from '@/components/ui/select';
+import { fetchModels } from '@/lib/api';
+import { Input } from '@/components/ui/input';
+import { Check, Search } from 'lucide-react';
+import logger from '@/lib/logger';
 
 interface ModelSelectorProps {
   selectedModel: string;
   onSelectModelAction: (modelId: string) => void;
 }
 
-export default function ModelSelector({
-  selectedModel,
-  onSelectModelAction,
-}: ModelSelectorProps) {
+export default function ModelSelector({ selectedModel, onSelectModelAction }: ModelSelectorProps) {
   const [models, setModels] = useState<Model[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [open, setOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -39,9 +36,8 @@ export default function ModelSelector({
         const response = await fetchModels();
         setModels(response.data);
       } catch (err) {
-        const error =
-          err instanceof Error ? err.message : "Failed to load models";
-        logger.error("Error loading models", { error });
+        const error = err instanceof Error ? err.message : 'Failed to load models';
+        logger.error('Error loading models', { error });
         setError(error);
       } finally {
         setIsLoading(false);
@@ -60,9 +56,7 @@ export default function ModelSelector({
   }, [open]);
 
   const filteredModels =
-    models?.filter((model) =>
-      model.id.toLowerCase().includes(searchQuery.toLowerCase())
-    ) || [];
+    models?.filter(model => model.id.toLowerCase().includes(searchQuery.toLowerCase())) || [];
 
   const handleModelSelect = (modelId: string) => {
     onSelectModelAction(modelId);
@@ -78,9 +72,7 @@ export default function ModelSelector({
       onOpenChange={setOpen}
     >
       <SelectTrigger className="w-full min-w-[320px] max-w-[380px]">
-        <SelectValue
-          placeholder={isLoading ? "Loading..." : "Select a model"}
-        />
+        <SelectValue placeholder={isLoading ? 'Loading...' : 'Select a model'} />
       </SelectTrigger>
       <SelectContent className="w-[var(--radix-select-trigger-width)] max-h-[300px]">
         <div className="flex items-center px-3 pb-2 sticky top-0 bg-background z-10">
@@ -90,12 +82,12 @@ export default function ModelSelector({
             placeholder="Search models..."
             className="h-9"
             value={searchQuery}
-            onChange={(e) => {
+            onChange={e => {
               const query = e.target.value;
               setSearchQuery(query);
             }}
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => e.stopPropagation()}
+            onClick={e => e.stopPropagation()}
+            onKeyDown={e => e.stopPropagation()}
           />
         </div>
         {error ? (
@@ -104,24 +96,18 @@ export default function ModelSelector({
           </SelectItem>
         ) : filteredModels.length > 0 ? (
           <SelectGroup>
-            {filteredModels.map((model) => (
-              <SelectItem
-                key={model.id}
-                value={model.id}
-                className="flex justify-between"
-              >
+            {filteredModels.map(model => (
+              <SelectItem key={model.id} value={model.id} className="flex justify-between">
                 <div className="flex justify-between w-full items-center">
                   <span className="truncate">{model.id}</span>
-                  {selectedModel === model.id && (
-                    <Check className="h-4 w-4 ml-2 flex-shrink-0" />
-                  )}
+                  {selectedModel === model.id && <Check className="h-4 w-4 ml-2 flex-shrink-0" />}
                 </div>
               </SelectItem>
             ))}
           </SelectGroup>
         ) : (
           <SelectItem value="none" disabled>
-            {searchQuery ? "No matching models" : "No models available"}
+            {searchQuery ? 'No matching models' : 'No models available'}
           </SelectItem>
         )}
       </SelectContent>

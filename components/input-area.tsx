@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { Trash2, Loader2 } from "lucide-react";
-import type { Message } from "@/types/chat";
+import { Trash2, Loader2 } from 'lucide-react';
+import type { Message } from '@/types/chat';
 
 interface InputAreaProps {
   inputValue: string;
@@ -36,13 +36,9 @@ export function InputArea({
         <div className="flex items-end gap-2">
           <textarea
             value={inputValue}
-            onChange={(e) => onInputChange(e.target.value)}
+            onChange={e => onInputChange(e.target.value)}
             onKeyDown={onKeyDown}
-            placeholder={
-              !selectedModel
-                ? "Please select a model first..."
-                : "Type a message..."
-            }
+            placeholder={!selectedModel ? 'Please select a model first...' : 'Type a message...'}
             rows={1}
             disabled={isLoading || !selectedModel}
             className="flex-1 min-h-[40px] max-h-[200px] rounded-md border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 resize-none disabled:opacity-70"
@@ -62,7 +58,7 @@ export function InputArea({
                 <span>Sending...</span>
               </>
             ) : (
-              "Send"
+              'Send'
             )}
           </button>
           {messages.length > 0 && (
@@ -93,8 +89,7 @@ export function InputArea({
         </div>
         <div className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
           <span>
-            Press Enter to send, Shift+Enter for new line. Try commands like
-            /help or /reset
+            Press Enter to send, Shift+Enter for new line. Try commands like /help or /reset
           </span>
         </div>
       </div>
