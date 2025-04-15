@@ -1,12 +1,12 @@
-import { renderHook, act } from "@testing-library/react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { renderHook, act } from '@testing-library/react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
-describe("useIsMobile Hook", () => {
+describe('useIsMobile Hook', () => {
   const originalMatchMedia = window.matchMedia;
   const originalInnerWidth = window.innerWidth;
 
   beforeEach(() => {
-    window.matchMedia = jest.fn().mockImplementation((query) => ({
+    window.matchMedia = jest.fn().mockImplementation(query => ({
       matches: false,
       media: query,
       onchange: null,
@@ -20,15 +20,15 @@ describe("useIsMobile Hook", () => {
 
   afterEach(() => {
     window.matchMedia = originalMatchMedia;
-    Object.defineProperty(window, "innerWidth", {
+    Object.defineProperty(window, 'innerWidth', {
       writable: true,
       configurable: true,
       value: originalInnerWidth,
     });
   });
 
-  test("returns false for desktop viewport", () => {
-    Object.defineProperty(window, "innerWidth", {
+  test('returns false for desktop viewport', () => {
+    Object.defineProperty(window, 'innerWidth', {
       writable: true,
       configurable: true,
       value: 1024,
@@ -38,8 +38,8 @@ describe("useIsMobile Hook", () => {
     expect(result.current).toBe(false);
   });
 
-  test("returns true for mobile viewport", () => {
-    Object.defineProperty(window, "innerWidth", {
+  test('returns true for mobile viewport', () => {
+    Object.defineProperty(window, 'innerWidth', {
       writable: true,
       configurable: true,
       value: 480,
@@ -49,8 +49,8 @@ describe("useIsMobile Hook", () => {
     expect(result.current).toBe(true);
   });
 
-  test("updates when window size changes", () => {
-    Object.defineProperty(window, "innerWidth", {
+  test('updates when window size changes', () => {
+    Object.defineProperty(window, 'innerWidth', {
       writable: true,
       configurable: true,
       value: 1024,
@@ -60,13 +60,13 @@ describe("useIsMobile Hook", () => {
     expect(result.current).toBe(false);
 
     act(() => {
-      Object.defineProperty(window, "innerWidth", {
+      Object.defineProperty(window, 'innerWidth', {
         writable: true,
         configurable: true,
         value: 480,
       });
 
-      window.dispatchEvent(new Event("resize"));
+      window.dispatchEvent(new Event('resize'));
     });
 
     expect(result.current).toBe(true);

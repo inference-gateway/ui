@@ -1,0 +1,28 @@
+# Build artifacts
+.next/
+build/
+dist/
+out/
+
+# Node modules
+node_modules/
+
+# Charts directory
+charts/
+
+# Generated files
+*.generated.*
+*.min.js
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Config files
+next-env.d.ts
+
+# Misc
+.DS_Store
+
+openapi.yaml

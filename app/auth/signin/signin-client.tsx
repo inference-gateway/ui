@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { signIn } from "next-auth/react";
-import { Key, Lock } from "lucide-react";
-import { ProviderConfig } from "@/lib/auth";
+import { signIn } from 'next-auth/react';
+import { Key, Lock } from 'lucide-react';
+import { ProviderConfig } from '@/lib/auth';
 
 interface SigninClientProps {
   providers: ProviderConfig[];
@@ -24,13 +24,13 @@ export function SigninClient({ providers }: SigninClientProps) {
           </p>
         </div>
         <div className="flex flex-col gap-4">
-          {providers.map((provider) => (
+          {providers.map(provider => (
             <button
               key={provider.id}
               onClick={() =>
                 signIn(provider.id, {
-                  callbackUrl: "/",
-                  error: "/auth/error",
+                  callbackUrl: '/',
+                  error: '/auth/error',
                 })
               }
               className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 hover:shadow-lg active:scale-[0.98]"

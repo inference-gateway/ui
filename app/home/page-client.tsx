@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import { Moon, Sun, Menu, LogOut } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { cn } from "@/lib/utils";
-import ModelSelector from "@/components/model-selector";
-import { ChatHistory } from "@/components/chat-history";
-import { ChatArea } from "@/components/chat-area";
-import { InputArea } from "@/components/input-area";
-import { useChat } from "@/hooks/use-chat";
-import { useState, useEffect } from "react";
-import { useSession } from "@/hooks/use-session";
-import { signOut } from "next-auth/react";
+import { Moon, Sun, Menu, LogOut } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
+import ModelSelector from '@/components/model-selector';
+import { ChatHistory } from '@/components/chat-history';
+import { ChatArea } from '@/components/chat-area';
+import { InputArea } from '@/components/input-area';
+import { useChat } from '@/hooks/use-chat';
+import { useState, useEffect } from 'react';
+import { useSession } from '@/hooks/use-session';
+import { signOut } from 'next-auth/react';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 export default function PageClient() {
   const { session } = useSession();
@@ -34,17 +34,17 @@ export default function PageClient() {
     chatContainerRef,
   } = useChat();
 
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(true);
   const isMobile = useIsMobile();
   const [showSidebar, setShowSidebar] = useState(!isMobile);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       if (inputValue.trim()) {
         handleSendMessage(inputValue);
-        setInputValue("");
+        setInputValue('');
       }
     }
   };
@@ -55,9 +55,9 @@ export default function PageClient() {
 
   useEffect(() => {
     if (isDarkMode) {
-      document.documentElement.classList.add("dark");
+      document.documentElement.classList.add('dark');
     } else {
-      document.documentElement.classList.remove("dark");
+      document.documentElement.classList.remove('dark');
     }
   }, [isDarkMode]);
 
@@ -76,9 +76,9 @@ export default function PageClient() {
       {/* Chat History Sidebar */}
       <div
         className={cn(
-          "transition-all duration-300 ease-in-out h-full bg-white dark:bg-neutral-800",
-          isMobile ? "fixed inset-y-0 z-40 w-64" : "w-64",
-          showSidebar ? "translate-x-0" : "-translate-x-full"
+          'transition-all duration-300 ease-in-out h-full bg-white dark:bg-neutral-800',
+          isMobile ? 'fixed inset-y-0 z-40 w-64' : 'w-64',
+          showSidebar ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         <ChatHistory
@@ -95,8 +95,8 @@ export default function PageClient() {
       {/* Main Content */}
       <div
         className={cn(
-          "flex-1 flex flex-col h-full overflow-hidden transition-transform duration-300",
-          isMobile && showSidebar ? "translate-x-64" : ""
+          'flex-1 flex flex-col h-full overflow-hidden transition-transform duration-300',
+          isMobile && showSidebar ? 'translate-x-64' : ''
         )}
       >
         {/* Header */}
@@ -114,10 +114,7 @@ export default function PageClient() {
             </div>
             <div className="flex items-center gap-4 w-full md:w-auto">
               {/* Model Selector */}
-              <ModelSelector
-                selectedModel={selectedModel}
-                onSelectModelAction={setSelectedModel}
-              />
+              <ModelSelector selectedModel={selectedModel} onSelectModelAction={setSelectedModel} />
 
               {/* Sign Out Button */}
               {session && (

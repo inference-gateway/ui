@@ -1,15 +1,12 @@
-import { Bot } from "lucide-react";
-import ReactMarkdown from "react-markdown";
+import { Bot } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
 interface ThinkingBubbleProps {
   content: string;
   isVisible: boolean;
 }
 
-export default function ThinkingBubble({
-  content,
-  isVisible,
-}: ThinkingBubbleProps) {
+export default function ThinkingBubble({ content, isVisible }: ThinkingBubbleProps) {
   if (!isVisible || !content) return null;
 
   return (

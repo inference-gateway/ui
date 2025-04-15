@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { AlertCircle, ArrowLeft } from "lucide-react";
+import { useRouter } from 'next/navigation';
+import { AlertCircle, ArrowLeft } from 'lucide-react';
 
 export default function AuthErrorPage() {
   const router = useRouter();
@@ -20,7 +20,7 @@ export default function AuthErrorPage() {
         </div>
         <div className="flex flex-col gap-3">
           <button
-            onClick={() => router.push("/auth/signin")}
+            onClick={() => router.push('/auth/signin')}
             className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-md transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />

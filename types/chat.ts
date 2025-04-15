@@ -1,4 +1,4 @@
-import { SchemaMessage } from "@inference-gateway/sdk";
+import { SchemaMessage } from '@inference-gateway/sdk';
 
 export interface Message extends SchemaMessage {
   id: string;
@@ -21,7 +21,7 @@ export interface StorageService {
 }
 
 export enum StorageType {
-  LOCAL = "local",
+  LOCAL = 'local',
 }
 
 export interface StorageOptions {

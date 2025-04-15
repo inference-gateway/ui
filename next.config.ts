@@ -1,7 +1,7 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  output: 'standalone',
   reactStrictMode: true,
   images: {
     unoptimized: true,
@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
     parallelServerCompiles: true,
     forceSwcTransforms: true,
   },
-  webpack: (config) => {
+  webpack: config => {
     config.resolve.fallback = { fs: false };
     return config;
   },

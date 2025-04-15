@@ -1,15 +1,15 @@
-import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import "@testing-library/jest-dom";
-import { ChatHistory } from "@/components/chat-history";
-import { mockChatSessions, mockHandlers } from "@/tests/mocks/chat-data";
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { ChatHistory } from '@/components/chat-history';
+import { mockChatSessions, mockHandlers } from '@/tests/mocks/chat-data';
 
 const originalConfirm = window.confirm;
 
 beforeEach(() => {
   window.confirm = jest.fn(() => true);
   jest.clearAllMocks();
-  Object.defineProperty(window, "innerWidth", {
+  Object.defineProperty(window, 'innerWidth', {
     writable: true,
     configurable: true,
     value: 1024,
@@ -20,7 +20,7 @@ afterEach(() => {
   window.confirm = originalConfirm;
 });
 
-test("renders chat sessions correctly", () => {
+test('renders chat sessions correctly', () => {
   render(
     <ChatHistory
       chatSessions={mockChatSessions}
@@ -31,12 +31,12 @@ test("renders chat sessions correctly", () => {
     />
   );
 
-  expect(screen.getByText("First Chat")).toBeInTheDocument();
-  expect(screen.getByText("Second Chat")).toBeInTheDocument();
-  expect(screen.getByText("New Chat")).toBeInTheDocument();
+  expect(screen.getByText('First Chat')).toBeInTheDocument();
+  expect(screen.getByText('Second Chat')).toBeInTheDocument();
+  expect(screen.getByText('New Chat')).toBeInTheDocument();
 });
 
-test("calls onNewChatAction when New Chat button is clicked", () => {
+test('calls onNewChatAction when New Chat button is clicked', () => {
   render(
     <ChatHistory
       chatSessions={mockChatSessions}
@@ -46,13 +46,13 @@ test("calls onNewChatAction when New Chat button is clicked", () => {
     />
   );
 
-  const newChatButton = screen.getByText("New Chat");
+  const newChatButton = screen.getByText('New Chat');
   fireEvent.click(newChatButton);
 
   expect(mockHandlers.onNewChatAction).toHaveBeenCalledTimes(1);
 });
 
-test("calls onSelectChatAction when a chat is clicked", () => {
+test('calls onSelectChatAction when a chat is clicked', () => {
   render(
     <ChatHistory
       chatSessions={mockChatSessions}
@@ -62,13 +62,13 @@ test("calls onSelectChatAction when a chat is clicked", () => {
     />
   );
 
-  const secondChat = screen.getByText("Second Chat");
+  const secondChat = screen.getByText('Second Chat');
   fireEvent.click(secondChat);
 
-  expect(mockHandlers.onSelectChatAction).toHaveBeenCalledWith("2");
+  expect(mockHandlers.onSelectChatAction).toHaveBeenCalledWith('2');
 });
 
-test("calls onDeleteChatAction when delete button is clicked and confirmed", () => {
+test('calls onDeleteChatAction when delete button is clicked and confirmed', () => {
   render(
     <ChatHistory
       chatSessions={mockChatSessions}
@@ -79,18 +79,16 @@ test("calls onDeleteChatAction when delete button is clicked and confirmed", () 
     />
   );
 
-  const deleteButtons = screen.getAllByLabelText("Delete chat");
+  const deleteButtons = screen.getAllByLabelText('Delete chat');
   const firstDeleteButton = deleteButtons[0];
 
   fireEvent.click(firstDeleteButton);
 
-  expect(window.confirm).toHaveBeenCalledWith(
-    "Are you sure you want to delete this chat?"
-  );
-  expect(mockHandlers.onDeleteChatAction).toHaveBeenCalledWith("1");
+  expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to delete this chat?');
+  expect(mockHandlers.onDeleteChatAction).toHaveBeenCalledWith('1');
 });
 
-test("does not call onDeleteChatAction when deletion is not confirmed", () => {
+test('does not call onDeleteChatAction when deletion is not confirmed', () => {
   window.confirm = jest.fn(() => false);
 
   render(
@@ -103,15 +101,15 @@ test("does not call onDeleteChatAction when deletion is not confirmed", () => {
     />
   );
 
-  const deleteButtons = screen.getAllByLabelText("Delete chat");
+  const deleteButtons = screen.getAllByLabelText('Delete chat');
   fireEvent.click(deleteButtons[0]);
 
   expect(window.confirm).toHaveBeenCalled();
   expect(mockHandlers.onDeleteChatAction).not.toHaveBeenCalled();
 });
 
-test("shows mobile menu button on mobile devices", async () => {
-  Object.defineProperty(window, "innerWidth", {
+test('shows mobile menu button on mobile devices', async () => {
+  Object.defineProperty(window, 'innerWidth', {
     writable: true,
     configurable: true,
     value: 600,
@@ -126,16 +124,16 @@ test("shows mobile menu button on mobile devices", async () => {
     />
   );
 
-  fireEvent(window, new Event("resize"));
+  fireEvent(window, new Event('resize'));
 
   await waitFor(() => {
-    const mobileMenuButton = screen.getByLabelText("Toggle menu");
+    const mobileMenuButton = screen.getByLabelText('Toggle menu');
     expect(mobileMenuButton).toBeInTheDocument();
   });
 });
 
-test("closes mobile sidebar when a chat is selected on mobile", async () => {
-  Object.defineProperty(window, "innerWidth", {
+test('closes mobile sidebar when a chat is selected on mobile', async () => {
+  Object.defineProperty(window, 'innerWidth', {
     writable: true,
     configurable: true,
     value: 600,
@@ -152,18 +150,18 @@ test("closes mobile sidebar when a chat is selected on mobile", async () => {
     />
   );
 
-  fireEvent(window, new Event("resize"));
+  fireEvent(window, new Event('resize'));
 
   await waitFor(() => {
-    const secondChat = screen.getByText("Second Chat");
+    const secondChat = screen.getByText('Second Chat');
     fireEvent.click(secondChat);
 
-    expect(mockHandlers.onSelectChatAction).toHaveBeenCalledWith("2");
+    expect(mockHandlers.onSelectChatAction).toHaveBeenCalledWith('2');
     expect(mockHandlers.setIsMobileOpen).toHaveBeenCalledWith(false);
   });
 });
 
-test("renders empty state when no chats exist", () => {
+test('renders empty state when no chats exist', () => {
   render(
     <ChatHistory
       chatSessions={[]}
@@ -173,18 +171,17 @@ test("renders empty state when no chats exist", () => {
     />
   );
 
-  const emptyMessage = screen.getByTestId("empty-message");
+  const emptyMessage = screen.getByTestId('empty-message');
   expect(emptyMessage).toBeInTheDocument();
-  expect(emptyMessage).toHaveTextContent("No chats yet");
-  expect(screen.getByText("New Chat")).toBeInTheDocument();
+  expect(emptyMessage).toHaveTextContent('No chats yet');
+  expect(screen.getByText('New Chat')).toBeInTheDocument();
 });
 
-test("handles long chat titles gracefully", () => {
+test('handles long chat titles gracefully', () => {
   const longTitleChats = [
     {
-      id: "3",
-      title:
-        "This is a very long chat title that should be truncated properly in the UI",
+      id: '3',
+      title: 'This is a very long chat title that should be truncated properly in the UI',
       messages: [],
     },
   ];
@@ -200,10 +197,10 @@ test("handles long chat titles gracefully", () => {
 
   const chatTitle = screen.getByText(/This is a very long chat title/);
   expect(chatTitle).toBeInTheDocument();
-  expect(chatTitle).toHaveClass("truncate");
+  expect(chatTitle).toHaveClass('truncate');
 });
 
-test("displays active chat with different styling", () => {
+test('displays active chat with different styling', () => {
   render(
     <ChatHistory
       chatSessions={mockChatSessions}
@@ -213,24 +210,24 @@ test("displays active chat with different styling", () => {
     />
   );
 
-  const activeChat = screen.getByText("Second Chat");
-  const inactiveChat = screen.getByText("First Chat");
+  const activeChat = screen.getByText('Second Chat');
+  const inactiveChat = screen.getByText('First Chat');
 
   const activeChatItem = activeChat.closest('[data-testid^="chat-item-"]');
   const inactiveChatItem = inactiveChat.closest('[data-testid^="chat-item-"]');
 
-  expect(activeChatItem).toHaveClass("bg-neutral-100");
-  expect(activeChatItem).toHaveClass("dark:bg-neutral-700");
-  expect(activeChatItem).toHaveClass("border-l-4");
-  expect(activeChatItem).toHaveClass("border-blue-500");
+  expect(activeChatItem).toHaveClass('bg-neutral-100');
+  expect(activeChatItem).toHaveClass('dark:bg-neutral-700');
+  expect(activeChatItem).toHaveClass('border-l-4');
+  expect(activeChatItem).toHaveClass('border-blue-500');
 
-  expect(inactiveChatItem).not.toHaveClass("bg-neutral-100");
-  expect(inactiveChatItem).not.toHaveClass("dark:bg-neutral-700");
-  expect(inactiveChatItem).not.toHaveClass("border-l-4");
-  expect(inactiveChatItem).not.toHaveClass("border-blue-500");
+  expect(inactiveChatItem).not.toHaveClass('bg-neutral-100');
+  expect(inactiveChatItem).not.toHaveClass('dark:bg-neutral-700');
+  expect(inactiveChatItem).not.toHaveClass('border-l-4');
+  expect(inactiveChatItem).not.toHaveClass('border-blue-500');
 });
 
-test("displays model information for chats with messages", () => {
+test('displays model information for chats with messages', () => {
   render(
     <ChatHistory
       chatSessions={mockChatSessions}
@@ -240,20 +237,20 @@ test("displays model information for chats with messages", () => {
     />
   );
 
-  const firstChatModel = screen.getByTestId("chat-model-1");
-  const secondChatModel = screen.getByTestId("chat-model-2");
-  const emptyChatModel = screen.queryByTestId("chat-model-3");
+  const firstChatModel = screen.getByTestId('chat-model-1');
+  const secondChatModel = screen.getByTestId('chat-model-2');
+  const emptyChatModel = screen.queryByTestId('chat-model-3');
 
-  expect(firstChatModel).toHaveTextContent("gpt-4o");
-  expect(secondChatModel).toHaveTextContent("claude-3-opus");
+  expect(firstChatModel).toHaveTextContent('gpt-4o');
+  expect(secondChatModel).toHaveTextContent('claude-3-opus');
   expect(emptyChatModel).not.toBeInTheDocument();
 });
 
-test("handles special characters in chat titles", () => {
+test('handles special characters in chat titles', () => {
   const specialChats = [
     {
-      id: "6",
-      title: "Chat with emoji 😊 and 日本語",
+      id: '6',
+      title: 'Chat with emoji 😊 and 日本語',
       messages: [],
     },
   ];
@@ -267,10 +264,10 @@ test("handles special characters in chat titles", () => {
     />
   );
 
-  expect(screen.getByText("Chat with emoji 😊 and 日本語")).toBeInTheDocument();
+  expect(screen.getByText('Chat with emoji 😊 and 日本語')).toBeInTheDocument();
 });
 
-test("handles long lists of chats with scroll", () => {
+test('handles long lists of chats with scroll', () => {
   const longChatList = Array.from({ length: 50 }, (_, i) => ({
     id: `chat-${i}`,
     title: `Chat ${i + 1}`,
@@ -286,11 +283,11 @@ test("handles long lists of chats with scroll", () => {
     />
   );
 
-  const container = screen.getByTestId("chat-history-container");
-  expect(container).toHaveStyle("overflow-y: auto");
+  const container = screen.getByTestId('chat-history-container');
+  expect(container).toHaveStyle('overflow-y: auto');
 });
 
-test("supports keyboard navigation", async () => {
+test('supports keyboard navigation', async () => {
   render(
     <ChatHistory
       chatSessions={mockChatSessions}
@@ -301,31 +298,27 @@ test("supports keyboard navigation", async () => {
   );
 
   const firstChat = screen
-    .getByText("First Chat")
-    .closest(
-      '[data-testid^="chat-item-"][data-focusable="true"]'
-    ) as HTMLElement;
+    .getByText('First Chat')
+    .closest('[data-testid^="chat-item-"][data-focusable="true"]') as HTMLElement;
   const secondChat = screen
-    .getByText("Second Chat")
-    .closest(
-      '[data-testid^="chat-item-"][data-focusable="true"]'
-    ) as HTMLElement;
+    .getByText('Second Chat')
+    .closest('[data-testid^="chat-item-"][data-focusable="true"]') as HTMLElement;
 
   firstChat.focus();
   await waitFor(() => expect(firstChat).toHaveFocus());
 
-  fireEvent.keyDown(firstChat, { key: "ArrowDown" });
+  fireEvent.keyDown(firstChat, { key: 'ArrowDown' });
   await waitFor(() => expect(secondChat).toHaveFocus());
 
-  fireEvent.keyDown(secondChat, { key: "Enter" });
-  expect(mockHandlers.onSelectChatAction).toHaveBeenCalledWith("2");
+  fireEvent.keyDown(secondChat, { key: 'Enter' });
+  expect(mockHandlers.onSelectChatAction).toHaveBeenCalledWith('2');
 
-  fireEvent.keyDown(secondChat, { key: "ArrowUp" });
+  fireEvent.keyDown(secondChat, { key: 'ArrowUp' });
   await waitFor(() => expect(firstChat).toHaveFocus());
 });
 
-test("toggles mobile sidebar when menu button is clicked", async () => {
-  Object.defineProperty(window, "innerWidth", {
+test('toggles mobile sidebar when menu button is clicked', async () => {
+  Object.defineProperty(window, 'innerWidth', {
     writable: true,
     configurable: true,
     value: 600,
@@ -342,10 +335,10 @@ test("toggles mobile sidebar when menu button is clicked", async () => {
     />
   );
 
-  fireEvent(window, new Event("resize"));
+  fireEvent(window, new Event('resize'));
 
   await waitFor(() => {
-    const toggleButton = screen.getByLabelText("Toggle menu");
+    const toggleButton = screen.getByLabelText('Toggle menu');
     fireEvent.click(toggleButton);
     expect(mockHandlers.setIsMobileOpen).toHaveBeenCalledWith(true);
   });
@@ -361,7 +354,7 @@ test("toggles mobile sidebar when menu button is clicked", async () => {
     />
   );
 
-  const toggleButton = screen.getByLabelText("Toggle menu");
+  const toggleButton = screen.getByLabelText('Toggle menu');
   fireEvent.click(toggleButton);
   expect(mockHandlers.setIsMobileOpen).toHaveBeenCalledWith(false);
 });

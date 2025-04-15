@@ -1,22 +1,18 @@
-import logger from "@/lib/logger";
-import type {
-  GetServerSidePropsContext,
-  NextApiRequest,
-  NextApiResponse,
-} from "next";
-import type { Account, Session, User } from "next-auth";
-import NextAuth, { type NextAuthConfig } from "next-auth";
-import { JWT } from "next-auth/jwt";
-import GitHub from "next-auth/providers/github";
-import Google from "next-auth/providers/google";
-import Keycloak from "next-auth/providers/keycloak";
-import type { NextRequest } from "next/server";
+import logger from '@/lib/logger';
+import type { GetServerSidePropsContext, NextApiRequest, NextApiResponse } from 'next';
+import type { Account, Session, User } from 'next-auth';
+import NextAuth, { type NextAuthConfig } from 'next-auth';
+import { JWT } from 'next-auth/jwt';
+import GitHub from 'next-auth/providers/github';
+import Google from 'next-auth/providers/google';
+import Keycloak from 'next-auth/providers/keycloak';
+import type { NextRequest } from 'next/server';
 
 export const authConfig: NextAuthConfig = {
   debug: true,
   logger: {
     error(error: Error) {
-      logger.error("[Auth Error]", error);
+      logger.error('[Auth Error]', error);
     },
     warn(code: string) {
       logger.warn(`[Auth Warning] ${code}`);
@@ -26,27 +22,26 @@ export const authConfig: NextAuthConfig = {
     },
   },
   pages: {
-    error: "/auth/error",
-    signIn: "/auth/signin",
+    error: '/auth/error',
+    signIn: '/auth/signin',
   },
   trustHost: true,
-  useSecureCookies: process.env.SECURE_COOKIES === "true",
+  useSecureCookies: process.env.SECURE_COOKIES === 'true',
   providers: [
     Keycloak({
-      id: "keycloak",
-      name: "Keycloak",
+      id: 'keycloak',
+      name: 'Keycloak',
       clientId: process.env.KEYCLOAK_ID!,
       clientSecret: process.env.KEYCLOAK_SECRET!,
       issuer: process.env.KEYCLOAK_ISSUER!,
-      wellKnown: `${process.env
-        .KEYCLOAK_ISSUER!}/.well-known/openid-configuration`,
+      wellKnown: `${process.env.KEYCLOAK_ISSUER!}/.well-known/openid-configuration`,
       authorization: {
         params: {
-          scope: "openid email profile",
+          scope: 'openid email profile',
           redirect_uri: `${process.env.NEXTAUTH_URL}/api/auth/callback/keycloak`,
         },
       },
-      checks: ["pkce", "state"],
+      checks: ['pkce', 'state'],
     }),
     GitHub({
       clientId: process.env.GITHUB_ID!,
@@ -58,21 +53,13 @@ export const authConfig: NextAuthConfig = {
     }),
   ],
   session: {
-    strategy: "jwt",
+    strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
     updateAge: 24 * 60 * 60, // 24 hours
   },
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    async jwt({
-      token,
-      account,
-      user,
-    }: {
-      token: JWT;
-      account: Account | null;
-      user: User;
-    }) {
+    async jwt({ token, account, user }: { token: JWT; account: Account | null; user: User }) {
       if (account) {
         token.accessToken = account.access_token;
         token.id = user?.id;
@@ -99,9 +86,9 @@ export const authConfig: NextAuthConfig = {
       name: `next-auth.session-token`,
       options: {
         httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: process.env.SECURE_COOKIES === "true",
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.SECURE_COOKIES === 'true',
       },
     },
   },
@@ -123,7 +110,7 @@ type AuthHandlers = {
 };
 
 const createAuthHandlers = (): AuthHandlers => {
-  if (process.env.AUTH_ENABLED !== "true") {
+  if (process.env.AUTH_ENABLED !== 'true') {
     return {
       GET: async () => new Response(null, { status: 404 }),
       POST: async () => new Response(null, { status: 404 }),
@@ -159,29 +146,27 @@ export type ProviderConfig = {
 export function getEnabledProviders(): ProviderConfig[] {
   return [
     {
-      id: "keycloak",
-      name: "Keycloak",
+      id: 'keycloak',
+      name: 'Keycloak',
       enabled: Boolean(
-        process.env.KEYCLOAK_ID &&
-          process.env.KEYCLOAK_SECRET &&
-          process.env.KEYCLOAK_ISSUER
+        process.env.KEYCLOAK_ID && process.env.KEYCLOAK_SECRET && process.env.KEYCLOAK_ISSUER
       ),
       signinUrl: `/api/auth/signin/keycloak`,
       callbackUrl: `/api/auth/callback/keycloak`,
     },
     {
-      id: "github",
-      name: "GitHub",
+      id: 'github',
+      name: 'GitHub',
       enabled: Boolean(process.env.GITHUB_ID && process.env.GITHUB_SECRET),
       signinUrl: `/api/auth/signin/github`,
       callbackUrl: `/api/auth/callback/github`,
     },
     {
-      id: "google",
-      name: "Google",
+      id: 'google',
+      name: 'Google',
       enabled: Boolean(process.env.GOOGLE_ID && process.env.GOOGLE_SECRET),
       signinUrl: `/api/auth/signin/google`,
       callbackUrl: `/api/auth/callback/google`,
     },
-  ].filter((provider) => provider.enabled);
+  ].filter(provider => provider.enabled);
 }
