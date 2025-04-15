@@ -3,7 +3,7 @@ version: '3'
 vars:
   NAMESPACE: inference-gateway
   UI_RELEASE: inference-gateway-ui
-  CHART_VERSION: 0.5.0-rc.6
+  CHART_VERSION: 0.5.0
 
 tasks:
   deploy-infrastructure:
@@ -94,7 +94,7 @@ tasks:
     cmds:
       - echo "Deploying UI with Gateway and Ingress..."
       - |
-        helm upgrade --install {{.UI_RELEASE}} ../../charts/inference-gateway-ui --version {{.CHART_VERSION}} \
+        helm upgrade --install {{.UI_RELEASE}} oci://ghcr.io/inference-gateway/charts/inference-gateway-ui --version {{.CHART_VERSION}} \
           --create-namespace \
           --namespace {{.NAMESPACE}} \
           --set replicaCount=1 \
