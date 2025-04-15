@@ -82,6 +82,23 @@ EOF
 ### 2. Deploy the UI with Gateway
 
 ```bash
+# Deploy a secret for the provider, choose from many providers available in the docs
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: inference-gateway
+  namespace: inference-gateway
+  annotations:
+    meta.helm.sh/release-name: inference-gateway-ui
+    meta.helm.sh/release-namespace: inference-gateway
+  labels:
+    app.kubernetes.io/managed-by: Helm
+type: Opaque
+stringData:
+  DEEPSEEK_API_KEY: your-secret-key
+EOF
+
 # Deploy UI with Gateway
 helm upgrade --install inference-gateway-ui \
   oci://ghcr.io/inference-gateway/charts/inference-gateway-ui \
@@ -90,6 +107,8 @@ helm upgrade --install inference-gateway-ui \
   --namespace inference-gateway \
   --set replicaCount=1 \
   --set gateway.enabled=true \
+  --set gateway.envFrom.secretRef=inference-gateway \
+  --set gateway.envFrom.configMapRef=inference-gateway \
   --set-string "env[0].name=NODE_ENV" \
   --set-string "env[0].value=production" \
   --set-string "env[1].name=NEXT_TELEMETRY_DISABLED" \
