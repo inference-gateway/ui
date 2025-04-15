@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0](https://github.com/inference-gateway/ui/compare/v0.4.0...v0.5.0) (2025-04-15)
+
+### ✨ Features
+
+* Implement an Helm Chart ([#17](https://github.com/inference-gateway/ui/issues/17)) ([28a311d](https://github.com/inference-gateway/ui/commit/28a311d76edd66963fe49fa4d96a52e7f503ae8f)), closes [#18](https://github.com/inference-gateway/ui/issues/18)
+
 ## [0.5.0-rc.7](https://github.com/inference-gateway/ui/compare/v0.5.0-rc.6...v0.5.0-rc.7) (2025-04-15)
 
 ### ♻️ Improvements
