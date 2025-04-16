@@ -34,10 +34,15 @@ export default function PageClient() {
   const [inputValue, setInputValue] = useState('');
   const isMobile = useIsMobile();
   const [showSidebar, setShowSidebar] = useState(!isMobile);
+  const [hasMessages, setHasMessages] = useState(messages.length > 0);
 
   useEffect(() => {
     setShowSidebar(!isMobile);
   }, [isMobile]);
+
+  useEffect(() => {
+    setHasMessages(messages.length > 0);
+  }, [messages]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -94,7 +99,7 @@ export default function PageClient() {
       {/* Main Content */}
       <div
         className={cn(
-          'flex-1 flex flex-col h-full overflow-hidden',
+          'flex-1 flex flex-col h-full overflow-hidden relative', // Added relative positioning for absolute children
           'transition-all duration-300 ease-in-out',
           showSidebar && !isMobile ? 'ml-[320px]' : 'ml-0'
         )}
@@ -132,28 +137,40 @@ export default function PageClient() {
         {/* Chat Area */}
         <div
           ref={chatContainerRef}
-          className="flex-1 overflow-y-auto bg-[#131314] dark:bg-[#131314]"
+          className={cn(
+            'flex-1 overflow-y-auto bg-[#131314] dark:bg-[#131314]',
+            !hasMessages && 'flex flex-col justify-center'
+          )}
           onClick={() => isMobile && setShowSidebar(false)}
         >
           <ChatArea messages={messages} isStreaming={isStreaming} />
         </div>
 
         {/* Input Area */}
-        <div className="sticky bottom-0 w-full bg-[#131314] dark:bg-[#131314] border-t border-[#2a2a2d] dark:border-[#2a2a2d]">
-          <InputArea
-            inputValue={inputValue}
-            isLoading={isLoading}
-            selectedModel={selectedModel}
-            tokenUsage={tokenUsage}
-            onInputChangeAction={setInputValue}
-            onKeyDownAction={handleKeyDown}
-            onSendMessageAction={() => {
-              if (inputValue.trim()) {
-                handleSendMessage(inputValue);
-                setInputValue('');
-              }
-            }}
-          />
+        <div
+          className={cn(
+            'w-full bg-[#131314] dark:bg-[#131314] transition-all duration-500 ease-in-out px-4',
+            hasMessages
+              ? 'sticky bottom-0 border-t border-[#2a2a2d] dark:border-[#2a2a2d]'
+              : 'absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 max-w-[800px]'
+          )}
+        >
+          <div className={cn('mx-auto', hasMessages ? 'max-w-[800px]' : '')}>
+            <InputArea
+              inputValue={inputValue}
+              isLoading={isLoading}
+              selectedModel={selectedModel}
+              tokenUsage={tokenUsage}
+              onInputChangeAction={setInputValue}
+              onKeyDownAction={handleKeyDown}
+              onSendMessageAction={() => {
+                if (inputValue.trim()) {
+                  handleSendMessage(inputValue);
+                  setInputValue('');
+                }
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>

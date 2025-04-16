@@ -24,8 +24,8 @@ export function InputArea({
   onSendMessageAction,
 }: InputAreaProps) {
   return (
-    <div className="py-4 px-3">
-      <div className="mx-auto max-w-2xl">
+    <div className="py-4">
+      <div className="w-full">
         <div className="mb-2 text-xs text-gray-400 flex justify-end">
           <span className="mr-2">Tokens: {tokenUsage.total_tokens || 0}</span>
           <span>
@@ -33,7 +33,7 @@ export function InputArea({
             completion)
           </span>
         </div>
-        <div className="relative rounded-xl bg-[#202123] border border-[#3e3f44]">
+        <div className="relative rounded-xl bg-[#202123] border border-[#3e3f44] shadow-lg">
           <textarea
             value={inputValue}
             onChange={e => onInputChangeAction(e.target.value)}

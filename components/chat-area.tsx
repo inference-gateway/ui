@@ -37,9 +37,9 @@ export function ChatArea({ messages, isStreaming }: ChatAreaProps) {
 
   return (
     <div className="flex-1 overflow-y-auto">
-      <div className="mx-auto max-w-2xl px-4 py-6">
+      <div className={cn('mx-auto max-w-2xl px-4', messages.length > 0 ? 'py-6' : 'py-2')}>
         {messages.length > 0 ? (
-          <div className="flex flex-col space-y-4">
+          <div className="flex flex-col space-y-4 pb-14">
             {messages.map((message, index) => {
               const isUser = message.role === 'user';
               const showReasoning = !isUser && message.reasoning_content;
@@ -104,8 +104,8 @@ export function ChatArea({ messages, isStreaming }: ChatAreaProps) {
             })}
           </div>
         ) : (
-          <div className="flex items-center justify-center h-[calc(100vh-200px)]">
-            <div className="text-center">
+          <div className="flex items-center justify-center h-[calc(100vh-350px)]">
+            <div className="text-center mb-32">
               <h3 className="text-2xl font-normal text-gray-200">Start a conversation</h3>
               <p className="text-gray-400 mt-2">
                 Type a message to begin chatting with the AI assistant
