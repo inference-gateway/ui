@@ -20,7 +20,9 @@
         "typescript.tsdk": "node_modules/typescript/lib",
         "files.associations": {
           "*.css": "tailwindcss"
-        }
+        },
+        "githubPullRequests.experimental.chat": true,
+        "githubPullRequests.experimental.notificationsView": true
       },
       "extensions": [
         "dbaeumer.vscode-eslint",
@@ -28,7 +30,8 @@
         "bradlc.vscode-tailwindcss",
         "ms-vscode.vscode-typescript-next",
         "dsznajder.es7-react-js-snippets",
-        "github.vscode-github-actions"
+        "github.vscode-github-actions",
+        "github.vscode-pull-request-github"
       ]
     }
   },
