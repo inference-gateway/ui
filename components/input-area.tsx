@@ -1,22 +1,17 @@
 'use client';
 
-import { Trash2, Loader2 } from 'lucide-react';
-import type { Message } from '@/types/chat';
+import { SendHorizonal, Plus, Circle, SquareArrowUp } from 'lucide-react';
+import { SchemaCompletionUsage } from '@inference-gateway/sdk';
+import { cn } from '@/lib/utils';
 
 interface InputAreaProps {
   inputValue: string;
   isLoading: boolean;
   selectedModel: string;
-  tokenUsage: {
-    promptTokens: number;
-    completionTokens: number;
-    totalTokens: number;
-  };
-  messages: Message[];
-  onInputChange: (value: string) => void;
-  onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
-  onSendMessage: () => void;
-  onClearMessages: () => void;
+  tokenUsage: SchemaCompletionUsage;
+  onInputChangeAction: (value: string) => void;
+  onKeyDownAction: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  onSendMessageAction: () => void;
 }
 
 export function InputArea({
@@ -24,73 +19,69 @@ export function InputArea({
   isLoading,
   selectedModel,
   tokenUsage,
-  messages,
-  onInputChange,
-  onKeyDown,
-  onSendMessage,
-  onClearMessages,
+  onInputChangeAction,
+  onKeyDownAction,
+  onSendMessageAction,
 }: InputAreaProps) {
   return (
-    <div className="border-t border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4">
-      <div className="container mx-auto max-w-4xl">
-        <div className="flex items-end gap-2">
+    <div className="py-4 px-3">
+      <div className="mx-auto max-w-2xl">
+        <div className="mb-2 text-xs text-gray-400 flex justify-end">
+          <span className="mr-2">Tokens: {tokenUsage.total_tokens || 0}</span>
+          <span>
+            ({tokenUsage.prompt_tokens || 0} prompt / {tokenUsage.completion_tokens || 0}{' '}
+            completion)
+          </span>
+        </div>
+        <div className="relative rounded-xl bg-[#202123] border border-[#3e3f44]">
           <textarea
             value={inputValue}
-            onChange={e => onInputChange(e.target.value)}
-            onKeyDown={onKeyDown}
-            placeholder={!selectedModel ? 'Please select a model first...' : 'Type a message...'}
+            onChange={e => onInputChangeAction(e.target.value)}
+            onKeyDown={onKeyDownAction}
+            placeholder="Ask anything"
             rows={1}
             disabled={isLoading || !selectedModel}
-            className="flex-1 min-h-[40px] max-h-[200px] rounded-md border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 resize-none disabled:opacity-70"
+            className={cn(
+              'w-full min-h-[44px] max-h-[200px] py-3 px-14',
+              'bg-transparent text-white resize-none',
+              'focus:outline-none',
+              'disabled:opacity-50 disabled:cursor-not-allowed',
+              'placeholder:text-gray-500'
+            )}
             aria-label="Message input"
             data-testid="mock-input"
           />
-          <button
-            onClick={onSendMessage}
-            disabled={!inputValue.trim() || isLoading || !selectedModel}
-            className="h-10 px-4 py-2 rounded-md bg-blue-600 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            aria-label="Send message"
-            data-testid="mock-send-button"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Sending...</span>
-              </>
-            ) : (
-              'Send'
-            )}
-          </button>
-          {messages.length > 0 && (
-            <button
-              onClick={onClearMessages}
-              disabled={isLoading}
-              title="Clear chat"
-              className="h-10 w-10 rounded-md border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 flex items-center justify-center disabled:opacity-50"
-            >
-              <Trash2 className="h-4 w-4 text-neutral-800 dark:text-neutral-200" />
+
+          <div className="absolute left-3 bottom-3 flex gap-1.5">
+            <button className="text-gray-400 hover:text-gray-300 p-1">
+              <Plus className="h-4 w-4" />
             </button>
-          )}
-        </div>
-        <div className="mt-4 p-2 border border-neutral-200 dark:border-neutral-700 rounded-md bg-neutral-50 dark:bg-neutral-800">
-          <div className="container mx-auto max-w-4xl">
-            <div className="flex justify-between items-center text-xs text-neutral-500 dark:text-neutral-400">
-              <span className="bg-blue-50 dark:bg-blue-900/20 p-1 px-2 rounded">
-                Prompt: {tokenUsage.promptTokens || 0} tokens
-              </span>
-              <span className="bg-green-50 dark:bg-green-900/20 p-1 px-2 rounded">
-                Completion: {tokenUsage.completionTokens || 0} tokens
-              </span>
-              <span className="font-medium bg-neutral-100 dark:bg-neutral-700 p-1 px-2 rounded">
-                Total: {tokenUsage.totalTokens || 0} tokens
-              </span>
-            </div>
           </div>
-        </div>
-        <div className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
-          <span>
-            Press Enter to send, Shift+Enter for new line. Try commands like /help or /reset
-          </span>
+
+          <div className="absolute right-3 bottom-2 flex items-center gap-1">
+            <button className="text-gray-400 hover:text-gray-300 p-1">
+              <Circle className="h-4 w-4" />
+            </button>
+
+            <button
+              onClick={onSendMessageAction}
+              disabled={!inputValue.trim() || isLoading || !selectedModel}
+              className={cn(
+                'p-1.5 rounded-md',
+                'text-gray-400 hover:bg-gray-700 hover:text-gray-300',
+                'disabled:opacity-50 disabled:cursor-not-allowed',
+                'transition-colors'
+              )}
+              aria-label="Send message"
+              data-testid="mock-send-button"
+            >
+              {inputValue.trim() ? (
+                <SendHorizonal className="h-4 w-4" />
+              ) : (
+                <SquareArrowUp className="h-4 w-4" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

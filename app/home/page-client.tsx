@@ -1,6 +1,6 @@
 'use client';
 
-import { Moon, Sun, Menu, LogOut } from 'lucide-react';
+import { Menu, PlusSquare, ChevronLeft } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import ModelSelector from '@/components/model-selector';
@@ -9,14 +9,10 @@ import { ChatArea } from '@/components/chat-area';
 import { InputArea } from '@/components/input-area';
 import { useChat } from '@/hooks/use-chat';
 import { useState, useEffect } from 'react';
-import { useSession } from '@/hooks/use-session';
-import { signOut } from 'next-auth/react';
 
 export const dynamic = 'force-dynamic';
 
 export default function PageClient() {
-  const { session } = useSession();
-
   const {
     chatSessions,
     activeChatId,
@@ -25,19 +21,23 @@ export default function PageClient() {
     isLoading,
     isStreaming,
     tokenUsage,
+    error,
+    clearError,
     setSelectedModel,
     handleNewChat,
     handleSendMessage,
     handleSelectChat,
     handleDeleteChat,
-    clearMessages,
     chatContainerRef,
   } = useChat();
 
   const [inputValue, setInputValue] = useState('');
-  const [isDarkMode, setIsDarkMode] = useState(true);
   const isMobile = useIsMobile();
   const [showSidebar, setShowSidebar] = useState(!isMobile);
+
+  useEffect(() => {
+    setShowSidebar(!isMobile);
+  }, [isMobile]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -49,38 +49,35 @@ export default function PageClient() {
     }
   };
 
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-  };
-
   useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDarkMode]);
+    document.documentElement.classList.add('dark');
+  }, []);
 
   return (
-    <div className="h-screen bg-neutral-50 dark:bg-neutral-900 flex overflow-hidden">
-      {/* Mobile Menu Button */}
-      {isMobile && (
-        <button
-          onClick={() => setShowSidebar(!showSidebar)}
-          className="fixed top-4 left-4 z-50 h-10 w-10 rounded-md border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 flex items-center justify-center"
-        >
-          <Menu className="h-5 w-5 text-neutral-800 dark:text-neutral-200" />
-        </button>
-      )}
-
+    <div className="h-screen flex overflow-hidden bg-[#131314] dark:bg-[#131314]">
       {/* Chat History Sidebar */}
       <div
         className={cn(
-          'transition-all duration-300 ease-in-out h-full bg-white dark:bg-neutral-800',
-          isMobile ? 'fixed inset-y-0 z-40 w-64' : 'w-64',
+          'fixed inset-y-0 left-0 z-40 h-full transition-all duration-300 ease-in-out',
+          'bg-[#0d0d0e] dark:bg-[#0d0d0e] border-r border-[#2a2a2d] dark:border-[#2a2a2d]',
+          'w-[320px]',
           showSidebar ? 'translate-x-0' : '-translate-x-full'
         )}
       >
+        {/* Sidebar toggle button */}
+        <button
+          onClick={() => setShowSidebar(false)}
+          className={cn(
+            'absolute right-0 top-2 translate-x-1/2 z-50 flex items-center justify-center',
+            'bg-[#131314] border border-[#2a2a2d] rounded-full w-6 h-6',
+            'text-gray-300 hover:text-white transition-opacity',
+            !showSidebar && 'opacity-0 pointer-events-none'
+          )}
+          aria-label="Collapse sidebar"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+
         <ChatHistory
           chatSessions={chatSessions}
           activeChatId={activeChatId}
@@ -89,81 +86,73 @@ export default function PageClient() {
           onDeleteChatAction={handleDeleteChat}
           isMobileOpen={showSidebar}
           setIsMobileOpen={setShowSidebar}
+          error={error?.toString()}
+          onErrorDismiss={clearError}
         />
       </div>
 
       {/* Main Content */}
       <div
         className={cn(
-          'flex-1 flex flex-col h-full overflow-hidden transition-transform duration-300',
-          isMobile && showSidebar ? 'translate-x-64' : ''
+          'flex-1 flex flex-col h-full overflow-hidden',
+          'transition-all duration-300 ease-in-out',
+          showSidebar && !isMobile ? 'ml-[320px]' : 'ml-0'
         )}
       >
         {/* Header */}
-        <header className="border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4">
-          <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-4">
-              <h1 className="text-xl font-bold text-neutral-800 dark:text-white">
-                Inference Gateway UI
-              </h1>
-              {session?.user?.name && (
-                <span className="text-neutral-600 dark:text-neutral-300">
-                  | {session.user.name}
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-4 w-full md:w-auto">
-              {/* Model Selector */}
-              <ModelSelector selectedModel={selectedModel} onSelectModelAction={setSelectedModel} />
+        <header className="border-b border-[#2a2a2d] dark:border-[#2a2a2d] bg-[#131314] dark:bg-[#131314] py-4 px-3.5 relative h-14">
+          {/* Left - Chat history button */}
+          <button
+            onClick={() => setShowSidebar(!showSidebar)}
+            className={cn(
+              'absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center',
+              'w-7 h-7 rounded-md hover:bg-gray-700/30',
+              'text-gray-300 hover:text-white transition-colors'
+            )}
+            aria-label="Toggle chat history"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
 
-              {/* Sign Out Button */}
-              {session && (
-                <button
-                  onClick={() => signOut()}
-                  className="h-10 px-4 rounded-md border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 flex items-center justify-center gap-2"
-                  title="Sign out"
-                >
-                  <LogOut className="h-5 w-5 text-neutral-800 dark:text-neutral-200" />
-                </button>
-              )}
-
-              {/* Theme Toggle */}
-              <button
-                onClick={toggleTheme}
-                className="h-10 w-10 rounded-md border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 flex items-center justify-center"
-                title="Toggle theme"
-              >
-                {isDarkMode ? (
-                  <Sun className="h-5 w-5 text-neutral-800 dark:text-neutral-200" />
-                ) : (
-                  <Moon className="h-5 w-5 text-neutral-800 dark:text-neutral-200" />
-                )}
-              </button>
-            </div>
+          {/* Model selector */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+            <ModelSelector selectedModel={selectedModel} onSelectModelAction={setSelectedModel} />
           </div>
+
+          {/* New chat button */}
+          <button
+            onClick={handleNewChat}
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-300 hover:text-white"
+            aria-label="New chat"
+          >
+            <PlusSquare className="h-5 w-5" />
+          </button>
         </header>
 
         {/* Chat Area */}
         <div
           ref={chatContainerRef}
-          className="flex-1 overflow-y-auto"
+          className="flex-1 overflow-y-auto bg-[#131314] dark:bg-[#131314]"
           onClick={() => isMobile && setShowSidebar(false)}
         >
           <ChatArea messages={messages} isStreaming={isStreaming} />
         </div>
 
         {/* Input Area */}
-        <div className="sticky bottom-0 w-full bg-neutral-50 dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700">
+        <div className="sticky bottom-0 w-full bg-[#131314] dark:bg-[#131314] border-t border-[#2a2a2d] dark:border-[#2a2a2d]">
           <InputArea
             inputValue={inputValue}
             isLoading={isLoading}
             selectedModel={selectedModel}
             tokenUsage={tokenUsage}
-            messages={messages}
-            onInputChange={setInputValue}
-            onKeyDown={handleKeyDown}
-            onSendMessage={() => handleSendMessage(inputValue)}
-            onClearMessages={clearMessages}
+            onInputChangeAction={setInputValue}
+            onKeyDownAction={handleKeyDown}
+            onSendMessageAction={() => {
+              if (inputValue.trim()) {
+                handleSendMessage(inputValue);
+                setInputValue('');
+              }
+            }}
           />
         </div>
       </div>

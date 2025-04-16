@@ -3,7 +3,7 @@
 import logger from '@/lib/logger';
 import { StorageServiceFactory } from '@/lib/storage';
 import { StorageType, type ChatSession, type Message } from '@/types/chat';
-import { InferenceGatewayClient, MessageRole } from '@inference-gateway/sdk';
+import { InferenceGatewayClient, MessageRole, SchemaCompletionUsage } from '@inference-gateway/sdk';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSession } from './use-session';
 
@@ -17,12 +17,7 @@ interface UIState {
   isLoading: boolean;
   isStreaming: boolean;
   isDarkMode: boolean;
-}
-
-interface TokenUsage {
-  promptTokens: number;
-  completionTokens: number;
-  totalTokens: number;
+  error: string | null;
 }
 
 export function useChat(initialDarkMode = true) {
@@ -47,12 +42,13 @@ export function useChat(initialDarkMode = true) {
     isLoading: false,
     isStreaming: false,
     isDarkMode: initialDarkMode,
+    error: null,
   });
 
-  const [tokenUsage, setTokenUsage] = useState<TokenUsage>({
-    promptTokens: 0,
-    completionTokens: 0,
-    totalTokens: 0,
+  const [tokenUsage, setTokenUsage] = useState<SchemaCompletionUsage>({
+    prompt_tokens: 0,
+    completion_tokens: 0,
+    total_tokens: 0,
   });
 
   const [clientInstance, setClientInstance] = useState<InferenceGatewayClient | null>(null);
@@ -62,7 +58,7 @@ export function useChat(initialDarkMode = true) {
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const { sessions, activeId, messages } = chatState;
-  const { isLoading, isStreaming, isDarkMode } = uiState;
+  const { isLoading, isStreaming, isDarkMode, error } = uiState;
 
   const { session } = useSession();
 
@@ -103,12 +99,18 @@ export function useChat(initialDarkMode = true) {
         }
         const activeId = (await storageService.getActiveChatId()) || '';
 
+        const activeChat = Array.isArray(sessions)
+          ? sessions.find(chat => chat.id === activeId)
+          : null;
+
+        if (activeChat?.tokenUsage) {
+          setTokenUsage(activeChat.tokenUsage);
+        }
+
         setChatState({
           sessions: Array.isArray(sessions) ? sessions : [],
           activeId,
-          messages: Array.isArray(sessions)
-            ? sessions.find(chat => chat.id === activeId)?.messages || []
-            : [],
+          messages: activeChat?.messages || [],
         });
       } catch (error) {
         logger.error('Failed to load chat data', {
@@ -128,7 +130,17 @@ export function useChat(initialDarkMode = true) {
   useEffect(() => {
     const saveData = async () => {
       try {
-        await storageService.saveChatSessions(sessions);
+        const updatedSessions = sessions.map(chat => {
+          if (chat.id === activeId) {
+            return {
+              ...chat,
+              tokenUsage,
+            };
+          }
+          return chat;
+        });
+
+        await storageService.saveChatSessions(updatedSessions);
         await storageService.saveActiveChatId(activeId);
       } catch (error) {
         logger.error('Failed to save chat data', {
@@ -138,7 +150,7 @@ export function useChat(initialDarkMode = true) {
       }
     };
     saveData();
-  }, [sessions, activeId, storageService]);
+  }, [sessions, activeId, tokenUsage, storageService]); // Added tokenUsage as dependency
 
   useEffect(() => {
     if (isDarkMode) {
@@ -180,6 +192,11 @@ export function useChat(initialDarkMode = true) {
       title: 'New Chat',
       messages: [],
       createdAt: new Date().getTime(),
+      tokenUsage: {
+        prompt_tokens: 0,
+        completion_tokens: 0,
+        total_tokens: 0,
+      },
     };
 
     setChatState(prev => ({
@@ -188,6 +205,12 @@ export function useChat(initialDarkMode = true) {
       activeId: newChatId,
       messages: [],
     }));
+
+    setTokenUsage({
+      prompt_tokens: 0,
+      completion_tokens: 0,
+      total_tokens: 0,
+    });
 
     try {
       const currentSessions = await storageService.getChatSessions();
@@ -216,6 +239,10 @@ export function useChat(initialDarkMode = true) {
     [activeId, handleNewChat]
   );
 
+  const clearError = useCallback(() => {
+    setUIState(prev => ({ ...prev, error: null }));
+  }, []);
+
   const handleSendMessage = useCallback(
     async (inputValue: string) => {
       if (!inputValue.trim() || isLoading || !clientInstance) return;
@@ -229,9 +256,9 @@ export function useChat(initialDarkMode = true) {
         if (inputValue.trim() === '/reset' || inputValue.trim() === '/clear') {
           setChatState(prev => ({ ...prev, messages: [] }));
           setTokenUsage({
-            promptTokens: 0,
-            completionTokens: 0,
-            totalTokens: 0,
+            prompt_tokens: 0,
+            completion_tokens: 0,
+            total_tokens: 0,
           });
           return;
         }
@@ -275,7 +302,7 @@ export function useChat(initialDarkMode = true) {
         role: MessageRole.assistant,
         content: '',
         id: assistantMessageId,
-        model: selectedModel.split('/')[1],
+        model: selectedModel,
       };
 
       setChatState(prev => ({
@@ -315,10 +342,22 @@ export function useChat(initialDarkMode = true) {
               });
 
               if (chunk.usage) {
-                setTokenUsage({
-                  promptTokens: chunk.usage.prompt_tokens,
-                  completionTokens: chunk.usage.completion_tokens,
-                  totalTokens: chunk.usage.total_tokens,
+                setTokenUsage(chunk.usage);
+
+                setChatState(prev => {
+                  const updatedSessions = prev.sessions.map(chat => {
+                    if (chat.id === activeId) {
+                      return {
+                        ...chat,
+                        tokenUsage: chunk.usage,
+                      };
+                    }
+                    return chat;
+                  });
+                  return {
+                    ...prev,
+                    sessions: updatedSessions,
+                  };
                 });
               }
             },
@@ -331,6 +370,32 @@ export function useChat(initialDarkMode = true) {
             },
           }
         );
+
+        const finalAssistantMessage = {
+          role: MessageRole.assistant,
+          content: latestMessageRef.current,
+          id: assistantMessageId,
+          model: selectedModel,
+          reasoning_content: reasoningContentRef.current || undefined,
+        };
+
+        const updatedSessionsWithAssistant = updatedSessions.map(chat => {
+          if (chat.id === activeId) {
+            return {
+              ...chat,
+              messages: [...chat.messages, finalAssistantMessage],
+              tokenUsage: tokenUsage,
+            };
+          }
+          return chat;
+        });
+
+        setChatState(prev => ({
+          ...prev,
+          sessions: updatedSessionsWithAssistant,
+        }));
+
+        await storageService.saveChatSessions(updatedSessionsWithAssistant);
       } catch (error) {
         logger.error('Failed to get chat response', {
           error: error instanceof Error ? error.message : error,
@@ -350,6 +415,13 @@ export function useChat(initialDarkMode = true) {
           }
           return { ...prev, messages: updated };
         });
+
+        setUIState(prev => ({
+          ...prev,
+          isLoading: false,
+          isStreaming: false,
+          error: error instanceof Error ? error.message : 'Failed to get response from model',
+        }));
       } finally {
         setUIState(prev => ({
           ...prev,
@@ -358,23 +430,51 @@ export function useChat(initialDarkMode = true) {
         }));
       }
     },
-    [activeId, clientInstance, handleNewChat, isLoading, messages, sessions, selectedModel]
+    [
+      activeId,
+      clientInstance,
+      handleNewChat,
+      isLoading,
+      messages,
+      sessions,
+      selectedModel,
+      storageService,
+      tokenUsage,
+    ]
   );
 
   const handleSelectChat = useCallback(
     async (id: string) => {
-      const updatedSessions = sessions.map(chat =>
-        chat.id === activeId ? { ...chat, messages: [...messages] } : chat
-      );
-
       try {
+        const updatedSessions = sessions.map(chat =>
+          chat.id === activeId
+            ? {
+                ...chat,
+                messages,
+                tokenUsage: tokenUsage,
+              }
+            : chat
+        );
+
         await storageService.saveChatSessions(updatedSessions);
+
+        const selectedChat = updatedSessions.find(chat => chat.id === id);
 
         setChatState(() => ({
           sessions: updatedSessions,
           activeId: id,
-          messages: updatedSessions.find(chat => chat.id === id)?.messages || [],
+          messages: selectedChat?.messages || [],
         }));
+
+        if (selectedChat?.tokenUsage) {
+          setTokenUsage(selectedChat.tokenUsage);
+        } else {
+          setTokenUsage({
+            prompt_tokens: 0,
+            completion_tokens: 0,
+            total_tokens: 0,
+          });
+        }
       } catch (error) {
         logger.error('Failed to select chat', {
           error: error instanceof Error ? error.message : error,
@@ -382,7 +482,7 @@ export function useChat(initialDarkMode = true) {
         });
       }
     },
-    [activeId, messages, sessions, storageService]
+    [activeId, messages, sessions, storageService, tokenUsage]
   );
 
   const handleDeleteChat = useCallback((id: string) => {
@@ -396,6 +496,13 @@ export function useChat(initialDarkMode = true) {
           title: 'New Chat',
           messages: [],
         };
+
+        setTokenUsage({
+          prompt_tokens: 0,
+          completion_tokens: 0,
+          total_tokens: 0,
+        });
+
         return {
           sessions: [newChat],
           activeId: newChatId,
@@ -405,6 +512,18 @@ export function useChat(initialDarkMode = true) {
 
       if (id === prev.activeId) {
         const newActiveId = newSessions[0].id;
+        const newActiveChat = newSessions[0];
+
+        if (newActiveChat.tokenUsage) {
+          setTokenUsage(newActiveChat.tokenUsage);
+        } else {
+          setTokenUsage({
+            prompt_tokens: 0,
+            completion_tokens: 0,
+            total_tokens: 0,
+          });
+        }
+
         return {
           sessions: newSessions,
           activeId: newActiveId,
@@ -416,15 +535,6 @@ export function useChat(initialDarkMode = true) {
         ...prev,
         sessions: newSessions,
       };
-    });
-  }, []);
-
-  const clearMessages = useCallback(() => {
-    setChatState(prev => ({ ...prev, messages: [] }));
-    setTokenUsage({
-      promptTokens: 0,
-      completionTokens: 0,
-      totalTokens: 0,
     });
   }, []);
 
@@ -443,11 +553,12 @@ export function useChat(initialDarkMode = true) {
     isLoading,
     isStreaming,
     tokenUsage,
+    error,
+    clearError,
     setSelectedModel,
     handleNewChat,
     handleSendMessage,
     handleSelectChat,
     handleDeleteChat,
-    clearMessages,
   };
 }

@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { InputArea } from '@/components/input-area';
-import { MessageRole } from '@inference-gateway/sdk';
+import { SchemaCompletionUsage } from '@inference-gateway/sdk';
 
 describe('InputArea Component', () => {
   const mockProps = {
@@ -10,92 +10,91 @@ describe('InputArea Component', () => {
     isLoading: false,
     selectedModel: 'gpt-4o',
     tokenUsage: {
-      promptTokens: 10,
-      completionTokens: 15,
-      totalTokens: 25,
-    },
-    messages: [],
-    onInputChange: jest.fn(),
-    onKeyDown: jest.fn(),
-    onSendMessage: jest.fn(),
-    onClearMessages: jest.fn(),
+      prompt_tokens: 10,
+      completion_tokens: 15,
+      total_tokens: 25,
+    } as SchemaCompletionUsage,
+    onInputChangeAction: jest.fn(),
+    onKeyDownAction: jest.fn(),
+    onSendMessageAction: jest.fn(),
   };
 
   test('renders correctly with model selected', () => {
     render(<InputArea {...mockProps} />);
 
-    expect(screen.getByPlaceholderText('Type a message...')).toBeInTheDocument();
-    expect(screen.getByText('Send')).toBeInTheDocument();
-    expect(screen.getByText('Prompt: 10 tokens')).toBeInTheDocument();
-    expect(screen.getByText('Completion: 15 tokens')).toBeInTheDocument();
-    expect(screen.getByText('Total: 25 tokens')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Ask anything')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-send-button')).toBeInTheDocument();
   });
 
   test('shows different placeholder when no model selected', () => {
     render(<InputArea {...mockProps} selectedModel="" />);
 
-    expect(screen.getByPlaceholderText('Please select a model first...')).toBeInTheDocument();
+    const input = screen.getByTestId('mock-input');
+    expect(input).toBeDisabled();
   });
 
   test('disables input when loading', () => {
     render(<InputArea {...mockProps} isLoading={true} />);
 
-    const input = screen.getByPlaceholderText('Type a message...');
+    const input = screen.getByTestId('mock-input');
     expect(input).toBeDisabled();
   });
 
   test('disables send button when input is empty', () => {
     render(<InputArea {...mockProps} />);
 
-    const sendButton = screen.getByText('Send');
+    const sendButton = screen.getByTestId('mock-send-button');
     expect(sendButton).toBeDisabled();
   });
 
   test('enables send button when input has text', () => {
     render(<InputArea {...mockProps} inputValue="Hello world" />);
 
-    const sendButton = screen.getByText('Send');
+    const sendButton = screen.getByTestId('mock-send-button');
     expect(sendButton).not.toBeDisabled();
   });
 
-  test('shows loading state when isLoading is true', () => {
-    render(<InputArea {...mockProps} isLoading={true} />);
-
-    expect(screen.getByText('Sending...')).toBeInTheDocument();
-  });
-
-  test('calls onSendMessage when send button is clicked', () => {
+  test('calls onSendMessageAction when send button is clicked', () => {
     render(<InputArea {...mockProps} inputValue="Hello world" />);
 
-    const sendButton = screen.getByText('Send');
+    const sendButton = screen.getByTestId('mock-send-button');
     fireEvent.click(sendButton);
 
-    expect(mockProps.onSendMessage).toHaveBeenCalled();
+    expect(mockProps.onSendMessageAction).toHaveBeenCalled();
   });
 
-  test('shows clear button when messages exist', () => {
-    render(
-      <InputArea
-        {...mockProps}
-        messages={[{ id: '1', role: MessageRole.user, content: 'Hello' }]}
-      />
-    );
+  test('shows Plus and Circle buttons', () => {
+    render(<InputArea {...mockProps} />);
 
-    const clearButton = screen.getByTitle('Clear chat');
-    expect(clearButton).toBeInTheDocument();
+    expect(screen.getByLabelText('Send message')).toBeInTheDocument();
+    expect(
+      screen.getByText((content, element) => {
+        return (
+          element?.tagName.toLowerCase() === 'button' &&
+          element?.querySelector('svg[class*="lucide-plus"]') !== null
+        );
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText((content, element) => {
+        return (
+          element?.tagName.toLowerCase() === 'button' &&
+          element?.querySelector('svg[class*="lucide-circle"]') !== null
+        );
+      })
+    ).toBeInTheDocument();
   });
 
-  test('calls onClearMessages when clear button is clicked', () => {
-    render(
-      <InputArea
-        {...mockProps}
-        messages={[{ id: '1', role: MessageRole.user, content: 'Hello' }]}
-      />
-    );
+  test('displays token usage when totalTokens > 0', () => {
+    const tokenUsage = {
+      prompt_tokens: 50,
+      completion_tokens: 75,
+      total_tokens: 125,
+    } as SchemaCompletionUsage;
 
-    const clearButton = screen.getByTitle('Clear chat');
-    fireEvent.click(clearButton);
+    render(<InputArea {...mockProps} tokenUsage={tokenUsage} />);
 
-    expect(mockProps.onClearMessages).toHaveBeenCalled();
+    expect(screen.getByText('Tokens: 125')).toBeInTheDocument();
+    expect(screen.getByText('(50 prompt / 75 completion)')).toBeInTheDocument();
   });
 });

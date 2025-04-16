@@ -1,4 +1,4 @@
-import { SchemaMessage } from '@inference-gateway/sdk';
+import { SchemaCompletionUsage, SchemaMessage } from '@inference-gateway/sdk';
 
 export interface Message extends SchemaMessage {
   id: string;
@@ -10,6 +10,7 @@ export interface ChatSession {
   title: string;
   messages: Message[];
   createdAt?: number;
+  tokenUsage?: SchemaCompletionUsage;
 }
 
 export interface StorageService {

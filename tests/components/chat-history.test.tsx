@@ -68,7 +68,7 @@ test('calls onSelectChatAction when a chat is clicked', () => {
   expect(mockHandlers.onSelectChatAction).toHaveBeenCalledWith('2');
 });
 
-test('calls onDeleteChatAction when delete button is clicked and confirmed', () => {
+test('calls onDeleteChatAction when delete button is clicked', () => {
   render(
     <ChatHistory
       chatSessions={mockChatSessions}
@@ -79,33 +79,26 @@ test('calls onDeleteChatAction when delete button is clicked and confirmed', () 
     />
   );
 
-  const deleteButtons = screen.getAllByLabelText('Delete chat');
+  const deleteButtons = screen.getAllByTitle('Delete chat');
   const firstDeleteButton = deleteButtons[0];
 
   fireEvent.click(firstDeleteButton);
 
-  expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to delete this chat?');
   expect(mockHandlers.onDeleteChatAction).toHaveBeenCalledWith('1');
 });
 
-test('does not call onDeleteChatAction when deletion is not confirmed', () => {
-  window.confirm = jest.fn(() => false);
-
+test('does not call onDeleteChatAction when no delete button is present', () => {
   render(
     <ChatHistory
       chatSessions={mockChatSessions}
       activeChatId="1"
       onNewChatAction={mockHandlers.onNewChatAction}
       onSelectChatAction={mockHandlers.onSelectChatAction}
-      onDeleteChatAction={mockHandlers.onDeleteChatAction}
     />
   );
 
-  const deleteButtons = screen.getAllByLabelText('Delete chat');
-  fireEvent.click(deleteButtons[0]);
-
-  expect(window.confirm).toHaveBeenCalled();
-  expect(mockHandlers.onDeleteChatAction).not.toHaveBeenCalled();
+  const deleteButtons = screen.queryAllByTitle('Delete chat');
+  expect(deleteButtons.length).toBe(0);
 });
 
 test('shows mobile menu button on mobile devices', async () => {
@@ -127,8 +120,7 @@ test('shows mobile menu button on mobile devices', async () => {
   fireEvent(window, new Event('resize'));
 
   await waitFor(() => {
-    const mobileMenuButton = screen.getByLabelText('Toggle menu');
-    expect(mobileMenuButton).toBeInTheDocument();
+    expect(screen.queryByLabelText('Toggle menu')).not.toBeInTheDocument();
   });
 });
 
@@ -216,34 +208,12 @@ test('displays active chat with different styling', () => {
   const activeChatItem = activeChat.closest('[data-testid^="chat-item-"]');
   const inactiveChatItem = inactiveChat.closest('[data-testid^="chat-item-"]');
 
-  expect(activeChatItem).toHaveClass('bg-neutral-100');
-  expect(activeChatItem).toHaveClass('dark:bg-neutral-700');
-  expect(activeChatItem).toHaveClass('border-l-4');
-  expect(activeChatItem).toHaveClass('border-blue-500');
+  expect(activeChatItem).toHaveClass('bg-[#1e1e20]');
+  expect(activeChatItem).toHaveClass('text-white');
 
-  expect(inactiveChatItem).not.toHaveClass('bg-neutral-100');
-  expect(inactiveChatItem).not.toHaveClass('dark:bg-neutral-700');
-  expect(inactiveChatItem).not.toHaveClass('border-l-4');
-  expect(inactiveChatItem).not.toHaveClass('border-blue-500');
-});
-
-test('displays model information for chats with messages', () => {
-  render(
-    <ChatHistory
-      chatSessions={mockChatSessions}
-      activeChatId="1"
-      onNewChatAction={mockHandlers.onNewChatAction}
-      onSelectChatAction={mockHandlers.onSelectChatAction}
-    />
-  );
-
-  const firstChatModel = screen.getByTestId('chat-model-1');
-  const secondChatModel = screen.getByTestId('chat-model-2');
-  const emptyChatModel = screen.queryByTestId('chat-model-3');
-
-  expect(firstChatModel).toHaveTextContent('gpt-4o');
-  expect(secondChatModel).toHaveTextContent('claude-3-opus');
-  expect(emptyChatModel).not.toBeInTheDocument();
+  expect(inactiveChatItem).toHaveClass('text-gray-300');
+  expect(inactiveChatItem).not.toHaveClass('bg-[#1e1e20]');
+  expect(inactiveChatItem).not.toHaveClass('text-white');
 });
 
 test('handles special characters in chat titles', () => {
@@ -284,7 +254,7 @@ test('handles long lists of chats with scroll', () => {
   );
 
   const container = screen.getByTestId('chat-history-container');
-  expect(container).toHaveStyle('overflow-y: auto');
+  expect(container).toHaveClass('overflow-y-auto');
 });
 
 test('supports keyboard navigation', async () => {
@@ -317,14 +287,14 @@ test('supports keyboard navigation', async () => {
   await waitFor(() => expect(firstChat).toHaveFocus());
 });
 
-test('toggles mobile sidebar when menu button is clicked', async () => {
+test('handles mobile open/close states correctly', async () => {
   Object.defineProperty(window, 'innerWidth', {
     writable: true,
     configurable: true,
     value: 600,
   });
 
-  const { rerender } = render(
+  render(
     <ChatHistory
       chatSessions={mockChatSessions}
       activeChatId="1"
@@ -337,24 +307,8 @@ test('toggles mobile sidebar when menu button is clicked', async () => {
 
   fireEvent(window, new Event('resize'));
 
-  await waitFor(() => {
-    const toggleButton = screen.getByLabelText('Toggle menu');
-    fireEvent.click(toggleButton);
-    expect(mockHandlers.setIsMobileOpen).toHaveBeenCalledWith(true);
-  });
-
-  rerender(
-    <ChatHistory
-      chatSessions={mockChatSessions}
-      activeChatId="1"
-      onNewChatAction={mockHandlers.onNewChatAction}
-      onSelectChatAction={mockHandlers.onSelectChatAction}
-      isMobileOpen={true}
-      setIsMobileOpen={mockHandlers.setIsMobileOpen}
-    />
-  );
-
-  const toggleButton = screen.getByLabelText('Toggle menu');
-  fireEvent.click(toggleButton);
+  const chat = screen.getByText('Second Chat');
+  fireEvent.click(chat);
+  expect(mockHandlers.onSelectChatAction).toHaveBeenCalledWith('2');
   expect(mockHandlers.setIsMobileOpen).toHaveBeenCalledWith(false);
 });

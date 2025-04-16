@@ -302,28 +302,6 @@ describe('useChat Hook', () => {
     expect(result.current.isStreaming).toBe(false);
   });
 
-  test('clearMessages resets the message list and token usage', async () => {
-    const { result } = renderHook(() => useChat());
-
-    await waitFor(() => {
-      expect(result.current.messages.length).toBeGreaterThan(0);
-    });
-
-    await act(async () => {
-      result.current.clearMessages();
-    });
-
-    await waitFor(() => {
-      expect(result.current.messages).toEqual([]);
-    });
-
-    expect(result.current.tokenUsage).toEqual({
-      promptTokens: 0,
-      completionTokens: 0,
-      totalTokens: 0,
-    });
-  });
-
   test('toggleTheme switches between dark and light mode', async () => {
     const { result } = renderHook(() => useChat(true));
 

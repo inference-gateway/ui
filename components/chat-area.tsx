@@ -1,10 +1,11 @@
 'use client';
 
-import { Bot, User } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import ThinkingBubble from '@/components/thinking-bubble';
 import type { Message } from '@/types/chat';
 import { CodeBlock } from '@/components/code-block';
+import { cn } from '@/lib/utils';
 
 interface ChatAreaProps {
   messages: Message[];
@@ -12,75 +13,90 @@ interface ChatAreaProps {
 }
 
 export function ChatArea({ messages, isStreaming }: ChatAreaProps) {
+  const [streamedTokens, setStreamedTokens] = useState<string>('');
+  const [streamedMessageIds, setStreamedMessageIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!isStreaming) {
+      setStreamedTokens('');
+    }
+  }, [isStreaming]);
+
+  useEffect(() => {
+    if (!isStreaming && messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.role !== 'user') {
+        setStreamedMessageIds(prev => {
+          const updated = new Set(prev);
+          updated.add(lastMessage.id);
+          return updated;
+        });
+      }
+    }
+  }, [isStreaming, messages]);
+
   return (
-    <div className="flex-1 overflow-y-auto p-4">
-      <div className="container mx-auto max-w-4xl">
+    <div className="flex-1 overflow-y-auto">
+      <div className="mx-auto max-w-2xl px-4 py-6">
         {messages.length > 0 ? (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col space-y-4">
             {messages.map((message, index) => {
               const isUser = message.role === 'user';
-              const nextMessage = messages[index + 1];
-              const showReasoning =
-                !isUser && message.reasoning_content && nextMessage?.role !== 'user';
+              const showReasoning = !isUser && message.reasoning_content;
+              const isLastMessage = index === messages.length - 1;
+              const wasStreamed = streamedMessageIds.has(message.id);
+              const showThinking =
+                !isUser && (showReasoning || (isLastMessage && isStreaming) || wasStreamed);
+
+              const isThinkingModel = !!message.reasoning_content;
 
               return (
-                <div key={`${message.role + message.id}`}>
-                  {!isUser && (
-                    <ThinkingBubble
-                      content={message.reasoning_content || ''}
-                      isVisible={!!showReasoning}
-                    />
-                  )}
-                  <div
-                    className={`flex items-start gap-4 rounded-lg p-4 ${
-                      isUser
-                        ? 'bg-blue-50 dark:bg-blue-950/20'
-                        : 'bg-neutral-100 dark:bg-neutral-800'
-                    }`}
-                  >
+                <div key={`${message.role + message.id}`} className="flex flex-col">
+                  <div className={cn('w-full flex flex-col', isUser ? 'items-end' : 'items-start')}>
+                    {showThinking && (
+                      <div className="mb-1">
+                        <ThinkingBubble
+                          content={message.reasoning_content || ''}
+                          isVisible={!!showThinking}
+                          isStreaming={isLastMessage && isStreaming}
+                          streamTokens={streamedTokens}
+                          isThinkingModel={isThinkingModel}
+                        />
+                      </div>
+                    )}
+
                     <div
-                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md border ${
-                        isUser
-                          ? 'border-blue-200 bg-blue-100 text-blue-600 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300'
-                          : 'border-neutral-200 bg-neutral-100 text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300'
-                      }`}
+                      className={cn(
+                        'rounded-lg px-4 py-3',
+                        isUser ? 'bg-gray-800 text-gray-200' : 'bg-gray-700 text-gray-200',
+                        'max-w-[85%]'
+                      )}
                     >
-                      {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
-                    </div>
-                    <div className="flex-1 space-y-2">
-                      <div className="font-medium flex items-center gap-2">
-                        {isUser ? (
-                          'You'
-                        ) : (
-                          <>
-                            Assistant
-                            {!isUser && message.model && (
-                              <span className="text-xs bg-neutral-200 dark:bg-neutral-700 px-2 py-0.5 rounded-full font-normal">
-                                {message.model}
-                              </span>
-                            )}
-                          </>
-                        )}
-                      </div>
-                      <div className="prose prose-sm dark:prose-invert max-w-none">
-                        {message.content ? (
-                          <ReactMarkdown
-                            components={{
-                              code: CodeBlock,
-                            }}
-                          >
-                            {message.content}
-                          </ReactMarkdown>
-                        ) : isStreaming && index === messages.length - 1 ? (
-                          <div className="animate-pulse space-y-2">
-                            <div className="h-3 bg-neutral-300 dark:bg-neutral-600 rounded w-3/4"></div>
-                            <div className="h-3 bg-neutral-300 dark:bg-neutral-600 rounded w-1/2"></div>
+                      {isUser ? (
+                        <div>
+                          <p className="whitespace-pre-wrap">{message.content}</p>
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="prose prose-invert max-w-none">
+                            {message.content ? (
+                              <ReactMarkdown
+                                components={{
+                                  code: CodeBlock,
+                                }}
+                              >
+                                {message.content}
+                              </ReactMarkdown>
+                            ) : isStreaming && isLastMessage ? (
+                              <div className="flex items-center space-x-2">
+                                <div className="h-2 w-2 rounded-full bg-gray-500 animate-pulse"></div>
+                                <div className="h-2 w-2 rounded-full bg-gray-500 animate-pulse delay-150"></div>
+                                <div className="h-2 w-2 rounded-full bg-gray-500 animate-pulse delay-300"></div>
+                              </div>
+                            ) : null}
                           </div>
-                        ) : null}
-                        {isStreaming && index === messages.length - 1 && !isUser && (
-                          <span className="inline-block w-1 h-4 bg-current animate-pulse ml-1"></span>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -88,10 +104,12 @@ export function ChatArea({ messages, isStreaming }: ChatAreaProps) {
             })}
           </div>
         ) : (
-          <div className="flex items-center justify-center h-[calc(100vh-180px)]">
-            <div className="text-center text-neutral-500 dark:text-neutral-400">
-              <p className="text-lg font-medium">Start a conversation</p>
-              <p className="text-sm">Type a message to begin chatting with the AI assistant</p>
+          <div className="flex items-center justify-center h-[calc(100vh-200px)]">
+            <div className="text-center">
+              <h3 className="text-2xl font-normal text-gray-200">Start a conversation</h3>
+              <p className="text-gray-400 mt-2">
+                Type a message to begin chatting with the AI assistant
+              </p>
             </div>
           </div>
         )}
