@@ -233,56 +233,8 @@ export function useMessageHandler(
     ]
   );
 
-  const handleResendLastMessage = useCallback(() => {
-    const { messages, activeId, sessions } = chatState;
-    const isLoading = false;
-
-    if (messages.length === 0 || !clientInstance || isLoading) return;
-
-    let lastUserMessageIndex = -1;
-    let lastUserMessage = null;
-
-    for (let i = messages.length - 1; i >= 0; i--) {
-      if (messages[i].role === MessageRole.user) {
-        lastUserMessageIndex = i;
-        lastUserMessage = messages[i];
-        break;
-      }
-    }
-
-    if (lastUserMessageIndex === -1 || !lastUserMessage?.content) return;
-
-    const messagesToKeep = messages.slice(0, lastUserMessageIndex);
-
-    const updatedSessions = sessions.map(chat => {
-      if (chat.id === activeId) {
-        return { ...chat, messages: messagesToKeep };
-      }
-      return chat;
-    });
-
-    (async () => {
-      try {
-        await storageService.saveChatSessions(updatedSessions);
-
-        setChatState({
-          ...chatState,
-          messages: messagesToKeep,
-          sessions: updatedSessions,
-        });
-
-        setTimeout(() => handleSendMessage(lastUserMessage.content), 0);
-      } catch (error) {
-        logger.error('Failed to resend message', {
-          error: error instanceof Error ? error.message : error,
-        });
-      }
-    })();
-  }, [chatState, clientInstance, handleSendMessage, setChatState, storageService]);
-
   return {
     handleSendMessage,
-    handleResendLastMessage,
     clearError,
   };
 }

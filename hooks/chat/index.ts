@@ -50,7 +50,7 @@ export function useChat(initialDarkMode = true) {
 
   useChatScroll(chatContainerRef, messages, isStreaming);
 
-  const { handleSendMessage, handleResendLastMessage, clearError } = useMessageHandler(
+  const { handleSendMessage, clearError } = useMessageHandler(
     clientInstance,
     selectedModel,
     chatState,
@@ -108,6 +108,5 @@ export function useChat(initialDarkMode = true) {
     handleSendMessage,
     handleSelectChat,
     handleDeleteChat,
-    handleResendLastMessage,
   };
 }

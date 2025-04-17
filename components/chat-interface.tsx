@@ -8,25 +8,21 @@ import MessageInput from './message-input';
 import type { Message } from '@/types/chat';
 import { Button } from '@/components/ui/button';
 import { signIn } from 'next-auth/react';
-import { Trash2, RotateCcw } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 
 interface ChatInterfaceProps {
   messages: Message[];
   onSendMessageAction: (content: string) => void;
   onClearChatAction: () => void;
-  onResendLastMessageAction?: () => void;
 }
 
 export default function ChatInterface({
   messages,
   onSendMessageAction,
   onClearChatAction,
-  onResendLastMessageAction,
 }: ChatInterfaceProps) {
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const hasUserMessages = messages.some(message => message.role === 'user');
 
   const handleSendMessage = () => {
     if (inputValue.trim()) {
@@ -108,17 +104,6 @@ export default function ChatInterface({
             <Button variant="outline" onClick={() => signIn('oidc')}>
               Login
             </Button>
-            {hasUserMessages && onResendLastMessageAction && (
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={onResendLastMessageAction}
-                title="Resend last message"
-                data-testid="resend-button"
-              >
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-            )}
             {messages.length > 0 && (
               <Button
                 variant="outline"

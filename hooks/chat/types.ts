@@ -39,5 +39,4 @@ export interface ChatContextProps {
   handleSendMessage: (message: string) => Promise<void>;
   handleSelectChat: (id: string) => Promise<void>;
   handleDeleteChat: (id: string) => void;
-  handleResendLastMessage: () => void;
 }

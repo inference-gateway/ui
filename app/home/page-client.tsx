@@ -8,7 +8,6 @@ import { ChatArea } from '@/components/chat-area';
 import { InputArea } from '@/components/input-area';
 import { useChat } from '@/hooks/use-chat';
 import { useState, useEffect } from 'react';
-import { MessageRole } from '@inference-gateway/sdk';
 import { ChatHeader } from '@/components/chat-header';
 
 export const dynamic = 'force-dynamic';
@@ -29,7 +28,6 @@ export default function PageClient() {
     handleSendMessage,
     handleSelectChat,
     handleDeleteChat,
-    handleResendLastMessage,
     chatContainerRef,
   } = useChat();
 
@@ -37,8 +35,6 @@ export default function PageClient() {
   const isMobile = useIsMobile();
   const [showSidebar, setShowSidebar] = useState(!isMobile);
   const [hasMessages, setHasMessages] = useState(messages.length > 0);
-
-  const hasUserMessages = messages.some(message => message.role === MessageRole.user);
 
   useEffect(() => {
     setShowSidebar(!isMobile);
@@ -149,7 +145,6 @@ export default function PageClient() {
                   setInputValue('');
                 }
               }}
-              onResendLastMessageAction={hasUserMessages ? handleResendLastMessage : undefined}
             />
           </div>
         </div>

@@ -1,9 +1,8 @@
 'use client';
 
-import { SendHorizonal, Plus, Circle, SquareArrowUp, RotateCcw } from 'lucide-react';
+import { SendHorizonal, Plus, Circle, SquareArrowUp } from 'lucide-react';
 import { SchemaCompletionUsage } from '@inference-gateway/sdk';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 
 interface InputAreaProps {
   inputValue: string;
@@ -13,7 +12,6 @@ interface InputAreaProps {
   onInputChangeAction: (value: string) => void;
   onKeyDownAction: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   onSendMessageAction: () => void;
-  onResendLastMessageAction?: () => void;
 }
 
 export function InputArea({
@@ -24,26 +22,11 @@ export function InputArea({
   onInputChangeAction,
   onKeyDownAction,
   onSendMessageAction,
-  onResendLastMessageAction,
 }: InputAreaProps) {
   return (
     <div className="py-4">
       <div className="w-full">
         <div className="mb-2 text-xs text-chat-input-text-muted flex justify-between">
-          <div>
-            {onResendLastMessageAction && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onResendLastMessageAction}
-                className="text-xs text-chat-input-text-muted hover:text-chat-input-text"
-                title="Resend last message"
-                data-testid="resend-message-button"
-              >
-                <RotateCcw className="h-3 w-3" />
-              </Button>
-            )}
-          </div>
           <div>
             <span className="mr-2">Tokens: {tokenUsage.total_tokens || 0}</span>
             <span>
