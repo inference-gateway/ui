@@ -56,7 +56,6 @@ export class LocalStorageService implements StorageService {
   async saveChatSessions(sessions: ChatSession[]): Promise<void> {
     const key = this.getStorageKey('chatSessions');
 
-    // Ensure each session has a valid tokenUsage field
     const processedSessions = sessions.map(session => {
       if (!session.tokenUsage) {
         return {

@@ -96,7 +96,6 @@ describe('useChat Hook', () => {
     // @ts-expect-error - We're intentionally deleting crypto
     delete global.crypto;
 
-    // Restore original classList
     Object.defineProperty(document.documentElement, 'classList', {
       value: originalClassList,
       configurable: true,
@@ -330,7 +329,6 @@ describe('useChat Hook', () => {
   });
 
   test('toggleTheme switches between dark and light mode', async () => {
-    // Update the classList mock behavior to properly track dark mode changes
     let isDarkMode = true;
     mockClassList.contains.mockImplementation(className => {
       return className === 'dark' ? isDarkMode : false;
@@ -347,7 +345,6 @@ describe('useChat Hook', () => {
     expect(result.current.isDarkMode).toBe(true);
 
     await act(async () => {
-      // This should call document.documentElement.classList.remove('dark')
       result.current.toggleTheme();
     });
 
@@ -358,7 +355,6 @@ describe('useChat Hook', () => {
     expect(document.documentElement.classList.contains('dark')).toBe(false);
 
     await act(async () => {
-      // This should call document.documentElement.classList.add('dark')
       result.current.toggleTheme();
     });
 
