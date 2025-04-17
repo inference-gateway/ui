@@ -150,15 +150,7 @@ export function useChat(initialDarkMode = true) {
       }
     };
     saveData();
-  }, [sessions, activeId, tokenUsage, storageService]); // Added tokenUsage as dependency
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDarkMode]);
+  }, [sessions, activeId, tokenUsage, storageService]);
 
   const scrollToBottom = useCallback(() => {
     if (chatContainerRef.current) {
@@ -539,7 +531,15 @@ export function useChat(initialDarkMode = true) {
   }, []);
 
   const toggleTheme = useCallback(() => {
-    setUIState(prev => ({ ...prev, isDarkMode: !prev.isDarkMode }));
+    setUIState(prev => {
+      const newIsDarkMode = !prev.isDarkMode;
+      if (newIsDarkMode) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      return { ...prev, isDarkMode: newIsDarkMode };
+    });
   }, []);
 
   return {

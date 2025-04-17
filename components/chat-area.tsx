@@ -68,7 +68,9 @@ export function ChatArea({ messages, isStreaming }: ChatAreaProps) {
                     <div
                       className={cn(
                         'rounded-lg px-4 py-3',
-                        isUser ? 'bg-gray-800 text-gray-200' : 'bg-gray-700 text-gray-200',
+                        isUser
+                          ? 'bg-[hsl(var(--chat-user-message-bg))] text-[hsl(var(--chat-user-message-text))]'
+                          : 'bg-[hsl(var(--chat-ai-message-bg))] text-[hsl(var(--chat-ai-message-text))]',
                         'max-w-[85%]'
                       )}
                     >
@@ -89,9 +91,9 @@ export function ChatArea({ messages, isStreaming }: ChatAreaProps) {
                               </ReactMarkdown>
                             ) : isStreaming && isLastMessage ? (
                               <div className="flex items-center space-x-2">
-                                <div className="h-2 w-2 rounded-full bg-gray-500 animate-pulse"></div>
-                                <div className="h-2 w-2 rounded-full bg-gray-500 animate-pulse delay-150"></div>
-                                <div className="h-2 w-2 rounded-full bg-gray-500 animate-pulse delay-300"></div>
+                                <div className="h-2 w-2 rounded-full bg-[hsl(var(--chat-typing-indicator))] animate-pulse"></div>
+                                <div className="h-2 w-2 rounded-full bg-[hsl(var(--chat-typing-indicator))] animate-pulse delay-150"></div>
+                                <div className="h-2 w-2 rounded-full bg-[hsl(var(--chat-typing-indicator))] animate-pulse delay-300"></div>
                               </div>
                             ) : null}
                           </div>
@@ -106,8 +108,10 @@ export function ChatArea({ messages, isStreaming }: ChatAreaProps) {
         ) : (
           <div className="flex items-center justify-center h-[calc(100vh-350px)]">
             <div className="text-center mb-32">
-              <h3 className="text-2xl font-normal text-gray-200">Start a conversation</h3>
-              <p className="text-gray-400 mt-2">
+              <h3 className="text-2xl font-normal text-[hsl(var(--chat-empty-title-text))]">
+                Start a conversation
+              </h3>
+              <p className="text-[hsl(var(--chat-empty-desc-text))] mt-2">
                 Type a message to begin chatting with the AI assistant
               </p>
             </div>

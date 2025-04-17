@@ -208,12 +208,13 @@ test('displays active chat with different styling', () => {
   const activeChatItem = activeChat.closest('[data-testid^="chat-item-"]');
   const inactiveChatItem = inactiveChat.closest('[data-testid^="chat-item-"]');
 
-  expect(activeChatItem).toHaveClass('bg-[#1e1e20]');
-  expect(activeChatItem).toHaveClass('text-white');
+  expect(activeChatItem).toHaveClass('text-[hsl(var(--chat-active-item-text))]');
+  expect(activeChatItem).toHaveAttribute('data-active', 'true');
+  expect(activeChatItem).toHaveAttribute('aria-current', 'true');
 
-  expect(inactiveChatItem).toHaveClass('text-gray-300');
-  expect(inactiveChatItem).not.toHaveClass('bg-[#1e1e20]');
-  expect(inactiveChatItem).not.toHaveClass('text-white');
+  expect(inactiveChatItem).toHaveClass('text-[hsl(var(--chat-inactive-item-text))]');
+  expect(inactiveChatItem).toHaveAttribute('data-active', 'false');
+  expect(inactiveChatItem).toHaveAttribute('aria-current', 'false');
 });
 
 test('handles special characters in chat titles', () => {

@@ -15,6 +15,13 @@ describe('useChat Hook', () => {
   const mockWithOptions = jest.fn();
   const mockCreateChatCompletion = jest.fn();
 
+  const originalClassList = document.documentElement.classList;
+  let mockClassList: {
+    contains: jest.Mock;
+    add: jest.Mock;
+    remove: jest.Mock;
+  };
+
   beforeAll(() => {
     Object.defineProperty(global, 'crypto', {
       value: {
@@ -23,10 +30,24 @@ describe('useChat Hook', () => {
         subtle: {} as SubtleCrypto,
       },
     });
+
+    mockClassList = {
+      contains: jest.fn().mockImplementation(className => className === 'dark'),
+      add: jest.fn(),
+      remove: jest.fn(),
+    };
+    Object.defineProperty(document.documentElement, 'classList', {
+      value: mockClassList,
+      configurable: true,
+    });
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockClassList.contains.mockImplementation(className => className === 'dark');
+    mockClassList.add.mockClear();
+    mockClassList.remove.mockClear();
 
     const mockStorageService = {
       getChatSessions: mockGetChatSessions,
@@ -74,6 +95,12 @@ describe('useChat Hook', () => {
   afterAll(() => {
     // @ts-expect-error - We're intentionally deleting crypto
     delete global.crypto;
+
+    // Restore original classList
+    Object.defineProperty(document.documentElement, 'classList', {
+      value: originalClassList,
+      configurable: true,
+    });
   });
 
   test('initializes with correct state', async () => {
@@ -303,11 +330,24 @@ describe('useChat Hook', () => {
   });
 
   test('toggleTheme switches between dark and light mode', async () => {
+    // Update the classList mock behavior to properly track dark mode changes
+    let isDarkMode = true;
+    mockClassList.contains.mockImplementation(className => {
+      return className === 'dark' ? isDarkMode : false;
+    });
+    mockClassList.add.mockImplementation(className => {
+      if (className === 'dark') isDarkMode = true;
+    });
+    mockClassList.remove.mockImplementation(className => {
+      if (className === 'dark') isDarkMode = false;
+    });
+
     const { result } = renderHook(() => useChat(true));
 
     expect(result.current.isDarkMode).toBe(true);
 
     await act(async () => {
+      // This should call document.documentElement.classList.remove('dark')
       result.current.toggleTheme();
     });
 
@@ -318,6 +358,7 @@ describe('useChat Hook', () => {
     expect(document.documentElement.classList.contains('dark')).toBe(false);
 
     await act(async () => {
+      // This should call document.documentElement.classList.add('dark')
       result.current.toggleTheme();
     });
 

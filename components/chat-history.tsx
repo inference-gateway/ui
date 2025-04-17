@@ -75,11 +75,11 @@ export function ChatHistory({
   return (
     <aside className="flex flex-col h-full w-full">
       <div className="p-4">
-        <h2 className="text-lg text-white mb-4">Chat History</h2>
+        <h2 className="text-lg text-foreground mb-4">Chat History</h2>
 
         <button
           onClick={handleNewChat}
-          className="w-full h-10 rounded-lg bg-[#2374e1] hover:bg-blue-600 flex items-center justify-center gap-2 transition-colors"
+          className="w-full h-10 rounded-lg bg-[hsl(var(--chat-new-button-bg))] hover:bg-[hsl(var(--chat-new-button-hover))] flex items-center justify-center gap-2 transition-colors"
         >
           <PlusIcon className="h-4 w-4" />
           <span className="font-normal text-sm">New Chat</span>
@@ -88,17 +88,17 @@ export function ChatHistory({
 
       {error && (
         <div className="mx-4 mb-2">
-          <div className="bg-red-900/30 border border-red-800 rounded-md p-3 relative">
+          <div className="bg-[hsl(var(--error-bg))] border border-[hsl(var(--error-border))] rounded-md p-3 relative">
             <div className="flex items-start gap-2">
-              <AlertCircle className="h-4 w-4 text-red-400 mt-0.5 shrink-0" />
-              <div className="text-sm text-red-200">
+              <AlertCircle className="h-4 w-4 text-[hsl(var(--error-icon))] mt-0.5 shrink-0" />
+              <div className="text-sm text-[hsl(var(--error-text))]">
                 <p>Something went wrong, please try again</p>
-                <p className="text-xs text-red-300/70 mt-1">{error}</p>
+                <p className="text-xs text-[hsl(var(--error-text-detail))] mt-1">{error}</p>
               </div>
             </div>
             <button
               onClick={handleDismissError}
-              className="absolute top-1 right-1 text-red-300 hover:text-red-100 p-1"
+              className="absolute top-1 right-1 text-[hsl(var(--error-close))] hover:text-[hsl(var(--error-close-hover))] p-1"
               aria-label="Dismiss error"
             >
               &times;
@@ -109,7 +109,10 @@ export function ChatHistory({
 
       <div className="flex-1 overflow-y-auto px-4 py-2" data-testid="chat-history-container">
         {chatSessions.length === 0 ? (
-          <div className="p-4 text-center text-gray-400" data-testid="empty-state">
+          <div
+            className="p-4 text-center text-[hsl(var(--chat-empty-text))]"
+            data-testid="empty-state"
+          >
             <p data-testid="empty-message">No chats yet</p>
           </div>
         ) : (
@@ -142,11 +145,13 @@ export function ChatHistory({
                   data-testid={`chat-item-${chat.id}`}
                   data-focusable="true"
                   className={cn(
-                    'px-3 py-3 cursor-pointer transition-colors group flex items-center justify-between',
+                    'px-3 py-3 cursor-pointer transition-colors group flex items-center justify-between relative',
                     'focus:outline-none',
                     chat.id === activeChatId
-                      ? 'bg-[#1e1e20] text-white'
-                      : 'text-gray-300 hover:bg-[#131313]'
+                      ? 'text-[hsl(var(--chat-active-item-text))]'
+                      : 'text-[hsl(var(--chat-inactive-item-text))] hover:bg-[hsl(var(--chat-item-hover-bg))]',
+                    chat.id === activeChatId &&
+                      'before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-[hsl(var(--chat-active-item-marker))]'
                   )}
                   data-active={chat.id === activeChatId ? 'true' : 'false'}
                   aria-current={chat.id === activeChatId ? 'true' : 'false'}
@@ -157,7 +162,7 @@ export function ChatHistory({
                   {onDeleteChatAction && (
                     <button
                       onClick={e => handleDeleteChat(e, chat.id)}
-                      className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-opacity rounded"
+                      className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 text-[hsl(var(--chat-delete-icon))] hover:text-[hsl(var(--delete-icon-hover))] transition-opacity rounded"
                       aria-label={`Delete chat ${chat.title}`}
                       title="Delete chat"
                     >

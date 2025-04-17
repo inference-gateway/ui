@@ -26,14 +26,14 @@ export function InputArea({
   return (
     <div className="py-4">
       <div className="w-full">
-        <div className="mb-2 text-xs text-gray-400 flex justify-end">
+        <div className="mb-2 text-xs text-chat-input-text-muted flex justify-end">
           <span className="mr-2">Tokens: {tokenUsage.total_tokens || 0}</span>
           <span>
             ({tokenUsage.prompt_tokens || 0} prompt / {tokenUsage.completion_tokens || 0}{' '}
             completion)
           </span>
         </div>
-        <div className="relative rounded-xl bg-[#202123] border border-[#3e3f44] shadow-lg">
+        <div className="relative rounded-xl bg-chat-input-bg border border-chat-input-border shadow-lg">
           <textarea
             value={inputValue}
             onChange={e => onInputChangeAction(e.target.value)}
@@ -43,23 +43,23 @@ export function InputArea({
             disabled={isLoading || !selectedModel}
             className={cn(
               'w-full min-h-[44px] max-h-[200px] py-3 px-14',
-              'bg-transparent text-white resize-none',
+              'bg-transparent text-chat-input-text resize-none',
               'focus:outline-none',
               'disabled:opacity-50 disabled:cursor-not-allowed',
-              'placeholder:text-gray-500'
+              'placeholder:text-chat-input-placeholder'
             )}
             aria-label="Message input"
             data-testid="mock-input"
           />
 
           <div className="absolute left-3 bottom-3 flex gap-1.5">
-            <button className="text-gray-400 hover:text-gray-300 p-1">
+            <button className="text-chat-input-text-muted hover:text-chat-input-text p-1">
               <Plus className="h-4 w-4" />
             </button>
           </div>
 
           <div className="absolute right-3 bottom-2 flex items-center gap-1">
-            <button className="text-gray-400 hover:text-gray-300 p-1">
+            <button className="text-chat-input-text-muted hover:text-chat-input-text p-1">
               <Circle className="h-4 w-4" />
             </button>
 
@@ -68,7 +68,7 @@ export function InputArea({
               disabled={!inputValue.trim() || isLoading || !selectedModel}
               className={cn(
                 'p-1.5 rounded-md',
-                'text-gray-400 hover:bg-gray-700 hover:text-gray-300',
+                'text-chat-input-text-muted hover:bg-chat-input-hover-bg hover:text-chat-input-text',
                 'disabled:opacity-50 disabled:cursor-not-allowed',
                 'transition-colors'
               )}

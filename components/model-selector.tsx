@@ -76,7 +76,7 @@ export default function ModelSelector({ selectedModel, onSelectModelAction }: Mo
       open={open}
       onOpenChange={setOpen}
     >
-      <SelectTrigger className="bg-transparent border-none text-white hover:bg-[#1e1e20] md:min-w-[330px] focus:ring-0 focus:ring-offset-0 focus:outline-none min-w-0 h-auto flex justify-center items-center text-center">
+      <SelectTrigger className="bg-transparent border-none text-[hsl(var(--model-selector-text))] hover:bg-[hsl(var(--model-selector-bg))] md:min-w-[330px] focus:ring-0 focus:ring-offset-0 focus:outline-none min-w-0 h-auto flex justify-center items-center text-center">
         <SelectValue className="w-full text-center">
           <span
             className="text-lg font-normal text-center w-full block"
@@ -86,13 +86,13 @@ export default function ModelSelector({ selectedModel, onSelectModelAction }: Mo
           </span>
         </SelectValue>
       </SelectTrigger>
-      <SelectContent className="bg-[#1e1e20] border-[#3e3f44] text-white w-[240px] md:min-w-[330px] md:w-[350px] max-h-[300px] mx-auto">
-        <div className="flex items-center px-3 pb-2 sticky top-0 bg-[#1e1e20] z-10">
+      <SelectContent className="bg-[hsl(var(--model-selector-bg))] border-[hsl(var(--model-selector-border))] text-[hsl(var(--model-selector-text))] w-[240px] md:min-w-[330px] md:w-[350px] max-h-[300px] mx-auto">
+        <div className="flex items-center px-3 pb-2 sticky top-0 bg-[hsl(var(--model-selector-bg))] z-10">
           <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
           <Input
             ref={searchInputRef}
             placeholder="Search models..."
-            className="h-8 bg-transparent border-[#3e3f44] text-white placeholder:text-gray-400"
+            className="h-8 bg-transparent border-[hsl(var(--model-selector-border))] text-[hsl(var(--model-selector-text))] placeholder:text-[hsl(var(--model-selector-disabled-text))]"
             value={searchQuery}
             onChange={e => {
               const query = e.target.value;
@@ -117,7 +117,7 @@ export default function ModelSelector({ selectedModel, onSelectModelAction }: Mo
               <SelectItem
                 key={model.id}
                 value={model.id}
-                className="text-gray-200 focus:bg-[#2a2a2d] focus:text-white"
+                className="text-[hsl(var(--model-selector-option-text))] focus:bg-[hsl(var(--model-selector-focus-bg))] focus:text-[hsl(var(--model-selector-text))]"
                 data-testid={`model-option-${model.id}`}
               >
                 {model.id}
@@ -125,7 +125,11 @@ export default function ModelSelector({ selectedModel, onSelectModelAction }: Mo
             ))}
           </SelectGroup>
         ) : (
-          <SelectItem value="none" disabled className="text-gray-400">
+          <SelectItem
+            value="none"
+            disabled
+            className="text-[hsl(var(--model-selector-disabled-text))]"
+          >
             {searchQuery ? 'No matching models' : 'No models available'}
           </SelectItem>
         )}

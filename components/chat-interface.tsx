@@ -79,7 +79,7 @@ export default function ChatInterface({
           <MessageList messages={messages} />
         ) : (
           <div className="flex items-center justify-center h-full">
-            <div className="text-center text-gray-500 dark:text-gray-400">
+            <div className="text-center text-[hsl(var(--chat-empty-text))] dark:text-[hsl(var(--chat-empty-desc-text))]">
               <p className="text-lg font-medium">Start a conversation</p>
               <p className="text-sm">Type a message to begin chatting with the AI assistant</p>
             </div>
@@ -88,7 +88,7 @@ export default function ChatInterface({
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
+      <div className="border-t border-[hsl(var(--chat-footer-border))] bg-[hsl(var(--chat-footer-bg))] dark:bg-gray-800 p-4">
         <div className="container mx-auto max-w-4xl">
           <div className="flex items-center space-x-2">
             <form onSubmit={handleSubmit} className="flex-1 flex items-end space-x-2">
@@ -117,7 +117,7 @@ export default function ChatInterface({
               </Button>
             )}
           </div>
-          <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+          <div className="mt-2 text-xs text-[hsl(var(--chat-footer-subtext))] dark:text-gray-400">
             <span>
               Press Enter to send, Shift+Enter for new line. Try commands like /help or /reset
             </span>
