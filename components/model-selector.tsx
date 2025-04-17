@@ -14,13 +14,19 @@ import { fetchModels } from '@/lib/api';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import logger from '@/lib/logger';
+import { cn } from '@/lib/utils';
 
 interface ModelSelectorProps {
   selectedModel: string;
   onSelectModelAction: (modelId: string) => void;
+  isMobile?: boolean;
 }
 
-export default function ModelSelector({ selectedModel, onSelectModelAction }: ModelSelectorProps) {
+export default function ModelSelector({
+  selectedModel,
+  onSelectModelAction,
+  isMobile = false,
+}: ModelSelectorProps) {
   const [models, setModels] = useState<Model[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -76,7 +82,12 @@ export default function ModelSelector({ selectedModel, onSelectModelAction }: Mo
       open={open}
       onOpenChange={setOpen}
     >
-      <SelectTrigger className="bg-transparent border-none text-[hsl(var(--model-selector-text))] hover:bg-[hsl(var(--model-selector-bg))] md:min-w-[330px] focus:ring-0 focus:ring-offset-0 focus:outline-none min-w-0 h-auto flex justify-center items-center text-center">
+      <SelectTrigger
+        className={cn(
+          'bg-transparent border-none text-[hsl(var(--model-selector-text))] hover:bg-[hsl(var(--model-selector-bg))] focus:ring-0 focus:ring-offset-0 focus:outline-none h-auto flex justify-center items-center text-center',
+          isMobile ? 'w-full' : 'md:min-w-[330px] min-w-0'
+        )}
+      >
         <SelectValue className="w-full text-center">
           <span
             className="text-lg font-normal text-center w-full block"
@@ -86,7 +97,12 @@ export default function ModelSelector({ selectedModel, onSelectModelAction }: Mo
           </span>
         </SelectValue>
       </SelectTrigger>
-      <SelectContent className="bg-[hsl(var(--model-selector-bg))] border-[hsl(var(--model-selector-border))] text-[hsl(var(--model-selector-text))] w-[240px] md:min-w-[330px] md:w-[350px] max-h-[300px] mx-auto">
+      <SelectContent
+        className={cn(
+          'bg-[hsl(var(--model-selector-bg))] border-[hsl(var(--model-selector-border))] text-[hsl(var(--model-selector-text))] max-h-[300px] mx-auto',
+          isMobile ? 'w-[90vw]' : 'w-[240px] md:min-w-[330px] md:w-[350px]'
+        )}
+      >
         <div className="flex items-center px-3 pb-2 sticky top-0 bg-[hsl(var(--model-selector-bg))] z-10">
           <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
           <Input
