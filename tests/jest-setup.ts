@@ -6,13 +6,6 @@ jest.useFakeTimers();
 
 const mockFn = () => jest.fn();
 
-const loggerMock = {
-  debug: mockFn(),
-  info: mockFn(),
-  warn: mockFn(),
-  error: mockFn(),
-};
-
 const sessionMock = {
   data: {
     user: {
@@ -24,12 +17,12 @@ const sessionMock = {
   status: 'authenticated',
 };
 
-jest.mock('@/lib/logger', () => {
-  return {
-    __esModule: true,
-    default: loggerMock,
-  };
-});
+jest.mock('@/lib/logger', () => ({
+  debug: mockFn(),
+  info: mockFn(),
+  warn: mockFn(),
+  error: mockFn(),
+}));
 
 jest.mock('@/lib/storage', () => ({
   StorageServiceFactory: {
