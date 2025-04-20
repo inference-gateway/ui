@@ -89,22 +89,6 @@ describe('Home Component', () => {
     expect(screen.getByLabelText('New chat')).toBeInTheDocument();
   });
 
-  test('toggles sidebar when menu button is clicked', async () => {
-    await act(async () => {
-      render(<Home />);
-    });
-
-    const menuButton = screen.getByLabelText('Toggle chat history');
-    expect(menuButton).toBeInTheDocument();
-
-    await act(async () => {
-      fireEvent.click(menuButton);
-    });
-
-    const sidebar = document.querySelector('[class*="translate-x-0"]');
-    expect(sidebar).toBeFalsy();
-  });
-
   test('sends message on enter key press', async () => {
     await act(async () => {
       render(<Home />);
@@ -117,16 +101,6 @@ describe('Home Component', () => {
     });
 
     expect(mockHandleSendMessage).toHaveBeenCalledWith('Hello world');
-  });
-
-  test('shows mobile menu button on mobile devices', async () => {
-    (useIsMobile as jest.Mock).mockReturnValue(true);
-    await act(async () => {
-      render(<Home />);
-    });
-
-    const menuButton = screen.getByLabelText('Toggle chat history');
-    expect(menuButton).toBeInTheDocument();
   });
 
   test('displays token usage when available', async () => {

@@ -1,6 +1,5 @@
 'use client';
 
-import { ChevronLeft } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { ChatHistory } from '@/components/chat-history';
@@ -9,6 +8,7 @@ import { InputArea } from '@/components/input-area';
 import { useChat } from '@/hooks/use-chat';
 import { useState, useEffect } from 'react';
 import { ChatHeader } from '@/components/chat-header';
+import { ChevronLeft, Menu } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,29 +68,28 @@ export default function PageClient() {
 
   return (
     <div className="h-screen flex overflow-hidden bg-background">
-      {/* Chat History Sidebar */}
+      <button
+        onClick={() => setShowSidebar(!showSidebar)}
+        className={cn(
+          'fixed top-3.5 left-3.5 z-50 flex items-center justify-center',
+          'w-8 h-8 rounded-md bg-background shadow-sm border border-input',
+          'text-muted-foreground hover:text-foreground transition-colors',
+          'focus:outline-none focus:ring-1 focus:ring-primary'
+        )}
+        aria-label="Toggle sidebar"
+        title={showSidebar ? 'Hide sidebar' : 'Show sidebar'}
+      >
+        {showSidebar ? <ChevronLeft className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+      </button>
+
       <div
         className={cn(
           'fixed inset-y-0 left-0 z-40 h-full transition-all duration-300 ease-in-out',
           'bg-[hsl(var(--chat-sidebar-background))] border-r border-[hsl(var(--chat-sidebar-border))]',
-          'w-[320px]',
-          showSidebar ? 'translate-x-0' : '-translate-x-full'
+          showSidebar ? 'w-[260px]' : 'w-0',
+          showSidebar ? 'translate-x-0 opacity-100' : 'translate-x-0 opacity-0 pointer-events-none'
         )}
       >
-        {/* Sidebar toggle button */}
-        <button
-          onClick={() => setShowSidebar(false)}
-          className={cn(
-            'absolute right-0 top-2 translate-x-1/2 z-50 flex items-center justify-center',
-            'bg-[hsl(var(--chat-background))] border border-[hsl(var(--chat-sidebar-border))] rounded-full w-6 h-6',
-            'text-muted-foreground hover:text-foreground transition-opacity',
-            !showSidebar && 'opacity-0 pointer-events-none'
-          )}
-          aria-label="Collapse sidebar"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </button>
-
         <ChatHistory
           chatSessions={chatSessions}
           activeChatId={activeChatId}
@@ -104,15 +103,13 @@ export default function PageClient() {
         />
       </div>
 
-      {/* Main Content */}
       <div
         className={cn(
           'flex-1 flex flex-col h-full overflow-hidden relative',
           'transition-all duration-300 ease-in-out',
-          showSidebar && !isMobile ? 'ml-[320px]' : 'ml-0'
+          showSidebar && !isMobile ? 'ml-[260px]' : 'ml-0'
         )}
       >
-        {/* Header */}
         <ChatHeader
           isMobile={isMobile}
           showSidebar={showSidebar}
@@ -122,7 +119,6 @@ export default function PageClient() {
           setSelectedModel={setSelectedModel}
         />
 
-        {/* Chat Area */}
         <div
           ref={chatContainerRef}
           className={cn(
@@ -134,7 +130,6 @@ export default function PageClient() {
           <ChatArea messages={messages} isStreaming={isStreaming} />
         </div>
 
-        {/* Input Area */}
         <div
           className={cn(
             'w-full bg-[hsl(var(--chat-background))] transition-all duration-500 ease-in-out px-4',

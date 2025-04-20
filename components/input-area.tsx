@@ -4,7 +4,7 @@ import { SendHorizonal, Plus, Globe, Mic, MoreHorizontal } from 'lucide-react';
 import { SchemaCompletionUsage } from '@inference-gateway/sdk';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 
 interface InputAreaProps {
   inputValue: string;
@@ -37,16 +37,21 @@ export function InputArea({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [, setTextareaHeight] = useState<number>(0);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (textareaRef.current) {
+      // Reset height to auto first
       textareaRef.current.style.height = 'auto';
 
-      const scrollHeight = textareaRef.current.scrollHeight;
-      textareaRef.current.style.height = `${scrollHeight}px`;
+      const defaultHeight = isMobile ? '58px' : '44px';
 
+      const scrollHeight = inputValue.trim()
+        ? Math.min(textareaRef.current.scrollHeight, isMobile ? 150 : 120)
+        : parseInt(defaultHeight);
+
+      textareaRef.current.style.height = `${scrollHeight}px`;
       setTextareaHeight(scrollHeight);
     }
-  }, [inputValue]);
+  }, [inputValue, isMobile]);
 
   return (
     <div className={cn('py-4', isMobile && 'pb-6')}>
@@ -61,8 +66,7 @@ export function InputArea({
           </div>
         </div>
         <div className="relative rounded-xl bg-chat-input-bg border border-chat-input-border shadow-lg">
-          {/* Main textarea */}
-          <div className="pb-12">
+          <div className={cn('pb-10', isMobile && 'pb-11')}>
             <textarea
               ref={textareaRef}
               value={inputValue}
@@ -73,7 +77,7 @@ export function InputArea({
               disabled={isLoading || !selectedModel}
               className={cn(
                 'w-full py-3 px-14 resize-none',
-                'min-h-[44px] max-h-[200px]',
+                'min-h-[44px] max-h-[120px]',
                 'bg-transparent text-chat-input-text',
                 'focus:outline-none',
                 'disabled:opacity-50 disabled:cursor-not-allowed',
@@ -84,7 +88,6 @@ export function InputArea({
             />
           </div>
 
-          {/* Plus button on the left */}
           <div className="absolute left-3 top-3 flex gap-1.5">
             <button
               className={cn(
@@ -97,14 +100,12 @@ export function InputArea({
             </button>
           </div>
 
-          {/* Bottom buttons container - fixed position at the bottom */}
           <div
             className={cn(
               'absolute bottom-0 left-0 right-0 flex justify-between items-center px-3 py-2',
               'border-t border-chat-input-border bg-chat-input-bg'
             )}
           >
-            {/* Search and Deep Research Buttons - centered */}
             <div className="flex-1 flex justify-center items-center">
               <button
                 onClick={onSearchAction}
@@ -139,7 +140,6 @@ export function InputArea({
               </button>
             </div>
 
-            {/* Right-aligned buttons */}
             <div className="flex items-center gap-1.5">
               <button
                 className={cn(

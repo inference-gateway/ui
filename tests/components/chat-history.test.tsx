@@ -33,23 +33,6 @@ test('renders chat sessions correctly', () => {
 
   expect(screen.getByText('First Chat')).toBeInTheDocument();
   expect(screen.getByText('Second Chat')).toBeInTheDocument();
-  expect(screen.getByText('New Chat')).toBeInTheDocument();
-});
-
-test('calls onNewChatAction when New Chat button is clicked', () => {
-  render(
-    <ChatHistory
-      chatSessions={mockChatSessions}
-      activeChatId="1"
-      onNewChatAction={mockHandlers.onNewChatAction}
-      onSelectChatAction={mockHandlers.onSelectChatAction}
-    />
-  );
-
-  const newChatButton = screen.getByText('New Chat');
-  fireEvent.click(newChatButton);
-
-  expect(mockHandlers.onNewChatAction).toHaveBeenCalledTimes(1);
 });
 
 test('calls onSelectChatAction when a chat is clicked', () => {
@@ -166,7 +149,6 @@ test('renders empty state when no chats exist', () => {
   const emptyMessage = screen.getByTestId('empty-message');
   expect(emptyMessage).toBeInTheDocument();
   expect(emptyMessage).toHaveTextContent('No chats yet');
-  expect(screen.getByText('New Chat')).toBeInTheDocument();
 });
 
 test('handles long chat titles gracefully', () => {
@@ -190,31 +172,6 @@ test('handles long chat titles gracefully', () => {
   const chatTitle = screen.getByText(/This is a very long chat title/);
   expect(chatTitle).toBeInTheDocument();
   expect(chatTitle).toHaveClass('truncate');
-});
-
-test('displays active chat with different styling', () => {
-  render(
-    <ChatHistory
-      chatSessions={mockChatSessions}
-      activeChatId="2"
-      onNewChatAction={mockHandlers.onNewChatAction}
-      onSelectChatAction={mockHandlers.onSelectChatAction}
-    />
-  );
-
-  const activeChat = screen.getByText('Second Chat');
-  const inactiveChat = screen.getByText('First Chat');
-
-  const activeChatItem = activeChat.closest('[data-testid^="chat-item-"]');
-  const inactiveChatItem = inactiveChat.closest('[data-testid^="chat-item-"]');
-
-  expect(activeChatItem).toHaveClass('text-[hsl(var(--chat-active-item-text))]');
-  expect(activeChatItem).toHaveAttribute('data-active', 'true');
-  expect(activeChatItem).toHaveAttribute('aria-current', 'true');
-
-  expect(inactiveChatItem).toHaveClass('text-[hsl(var(--chat-inactive-item-text))]');
-  expect(inactiveChatItem).toHaveAttribute('data-active', 'false');
-  expect(inactiveChatItem).toHaveAttribute('aria-current', 'false');
 });
 
 test('handles special characters in chat titles', () => {

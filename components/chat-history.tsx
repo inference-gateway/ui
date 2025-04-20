@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import type { Message } from '@/types/chat';
-import { PlusIcon, TrashIcon, AlertCircle } from 'lucide-react';
+import { TrashIcon, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ChatHistoryProps {
@@ -25,7 +25,6 @@ interface ChatHistoryProps {
 export function ChatHistory({
   chatSessions,
   activeChatId,
-  onNewChatAction,
   onSelectChatAction,
   onDeleteChatAction,
   setIsMobileOpen: externalSetMobileOpen,
@@ -52,13 +51,6 @@ export function ChatHistory({
     }
   };
 
-  const handleNewChat = () => {
-    onNewChatAction();
-    if (isMobileDevice) {
-      setIsMobileOpen(false);
-    }
-  };
-
   const handleDeleteChat = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     if (onDeleteChatAction) {
@@ -73,19 +65,7 @@ export function ChatHistory({
   };
 
   return (
-    <aside className="flex flex-col h-full w-full">
-      <div className="p-4">
-        <h2 className="text-lg text-foreground mb-4">Chat History</h2>
-
-        <button
-          onClick={handleNewChat}
-          className="w-full h-10 rounded-lg bg-[hsl(var(--chat-new-button-bg))] hover:bg-[hsl(var(--chat-new-button-hover))] flex items-center justify-center gap-2 transition-colors text-white"
-        >
-          <PlusIcon className="h-4 w-4" />
-          <span className="font-normal text-sm">New Chat</span>
-        </button>
-      </div>
-
+    <aside className="flex flex-col h-full w-full overflow-hidden pt-14">
       {error && (
         <div className="mx-4 mb-2">
           <div className="bg-[hsl(var(--error-bg))] border border-[hsl(var(--error-border))] rounded-md p-3 relative">
@@ -107,7 +87,7 @@ export function ChatHistory({
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto px-4 py-2" data-testid="chat-history-container">
+      <div className="flex-1 overflow-y-auto px-2 py-2" data-testid="chat-history-container">
         {chatSessions.length === 0 ? (
           <div
             className="p-4 text-center text-[hsl(var(--chat-empty-text))]"
@@ -116,7 +96,7 @@ export function ChatHistory({
             <p data-testid="empty-message">No chats yet</p>
           </div>
         ) : (
-          <div className="space-y-px">
+          <div className="space-y-0.5">
             {[...chatSessions]
               .sort((a, b) => {
                 const dateA = new Date(a.createdAt || 0);
@@ -145,24 +125,28 @@ export function ChatHistory({
                   data-testid={`chat-item-${chat.id}`}
                   data-focusable="true"
                   className={cn(
-                    'px-3 py-3 cursor-pointer transition-colors group flex items-center justify-between relative',
-                    'focus:outline-none',
+                    'px-3 py-2.5 cursor-pointer rounded-md transition-colors group flex items-center justify-between relative',
+                    'focus:outline-none focus:ring-1 focus:ring-primary/20',
                     chat.id === activeChatId
-                      ? 'text-[hsl(var(--chat-active-item-text))]'
-                      : 'text-[hsl(var(--chat-inactive-item-text))] hover:bg-[hsl(var(--chat-item-hover-bg))]',
-                    chat.id === activeChatId &&
-                      'before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-[hsl(var(--chat-active-item-marker))]'
+                      ? 'bg-accent/50 text-foreground'
+                      : 'text-[hsl(var(--chat-inactive-item-text))] hover:bg-accent/20'
                   )}
                   data-active={chat.id === activeChatId ? 'true' : 'false'}
                   aria-current={chat.id === activeChatId ? 'true' : 'false'}
                 >
+                  {chat.id === activeChatId && (
+                    <div
+                      className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-l-md"
+                      aria-hidden="true"
+                    ></div>
+                  )}
                   <p className="truncate text-sm flex-1" data-testid="chat-title">
                     {chat.title}
                   </p>
                   {onDeleteChatAction && (
                     <button
                       onClick={e => handleDeleteChat(e, chat.id)}
-                      className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 text-[hsl(var(--chat-delete-icon))] hover:text-[hsl(var(--delete-icon-hover))] transition-opacity rounded"
+                      className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 text-muted-foreground hover:text-foreground transition-opacity rounded"
                       aria-label={`Delete chat ${chat.title}`}
                       title="Delete chat"
                     >
