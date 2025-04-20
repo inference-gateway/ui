@@ -79,7 +79,7 @@ export function ChatHistory({
 
         <button
           onClick={handleNewChat}
-          className="w-full h-10 rounded-lg bg-[hsl(var(--chat-new-button-bg))] hover:bg-[hsl(var(--chat-new-button-hover))] flex items-center justify-center gap-2 transition-colors"
+          className="w-full h-10 rounded-lg bg-[hsl(var(--chat-new-button-bg))] hover:bg-[hsl(var(--chat-new-button-hover))] flex items-center justify-center gap-2 transition-colors text-white"
         >
           <PlusIcon className="h-4 w-4" />
           <span className="font-normal text-sm">New Chat</span>
