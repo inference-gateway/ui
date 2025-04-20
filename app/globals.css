@@ -71,6 +71,8 @@
     --chat-input-placeholder: 220 9% 40%;
     --chat-input-hover-bg: 220 6% 28%;
     --chat-input-focus-border: 220 9% 30%;
+    --chat-input-active-bg: 221.2 83.2% 53.3%;
+    --chat-input-active-text: 0 0% 100%;
 
     /* Message colors */
     --chat-user-message-bg: 0 0% 15%;
@@ -81,6 +83,11 @@
     --message-user-bg-dark: 210 100% 30% / 0.2;
     --message-ai-bg: 0 0% 96%;
     --message-ai-bg-dark: 0 0% 20%;
+
+    /* Button colors */
+    --button-active-bg: 221.2 83.2% 53.3%;
+    --button-active-text: 0 0% 100%;
+    --button-active-hover-bg: 221.2 83.2% 50%;
 
     /* Message icon colors */
     --message-user-icon-border: 210 100% 88%;

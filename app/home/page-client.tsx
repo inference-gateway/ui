@@ -35,6 +35,8 @@ export default function PageClient() {
   const isMobile = useIsMobile();
   const [showSidebar, setShowSidebar] = useState(!isMobile);
   const [hasMessages, setHasMessages] = useState(messages.length > 0);
+  const [isSearchActive, setIsSearchActive] = useState(false);
+  const [isDeepResearchActive, setIsDeepResearchActive] = useState(false);
 
   useEffect(() => {
     setShowSidebar(!isMobile);
@@ -52,6 +54,16 @@ export default function PageClient() {
         setInputValue('');
       }
     }
+  };
+
+  const handleSearchAction = () => {
+    setIsSearchActive(prev => !prev);
+    setIsDeepResearchActive(false);
+  };
+
+  const handleDeepResearchAction = () => {
+    setIsDeepResearchActive(prev => !prev);
+    setIsSearchActive(false);
   };
 
   return (
@@ -145,6 +157,10 @@ export default function PageClient() {
                   setInputValue('');
                 }
               }}
+              isSearchActive={isSearchActive}
+              isDeepResearchActive={isDeepResearchActive}
+              onSearchAction={handleSearchAction}
+              onDeepResearchAction={handleDeepResearchAction}
             />
           </div>
         </div>
