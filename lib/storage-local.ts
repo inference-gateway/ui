@@ -123,11 +123,30 @@ export class LocalStorageService implements StorageService {
     localStorage.setItem(key, id);
   }
 
+  async getSelectedModel(): Promise<string> {
+    const key = this.getStorageKey('selectedModel');
+    const saved = localStorage.getItem(key);
+    if (!saved) {
+      logger.debug('No selected model found in storage', { key });
+      return '';
+    }
+    logger.debug('Found selected model in storage', { key, model: saved });
+    return saved;
+  }
+
+  async saveSelectedModel(model: string): Promise<void> {
+    const key = this.getStorageKey('selectedModel');
+    logger.debug('Saving selected model', { key, model });
+    localStorage.setItem(key, model);
+  }
+
   async clear(): Promise<void> {
     const sessionsKey = this.getStorageKey('chatSessions');
     const activeKey = this.getStorageKey('activeChatId');
+    const selectedModelKey = this.getStorageKey('selectedModel');
 
     localStorage.removeItem(sessionsKey);
     localStorage.removeItem(activeKey);
+    localStorage.removeItem(selectedModelKey);
   }
 }

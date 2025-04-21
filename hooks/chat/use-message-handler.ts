@@ -1,10 +1,10 @@
 'use client';
 
 import logger from '@/lib/logger';
-import { Message } from '@/types/chat';
+import { Message, StorageService } from '@/types/chat';
 import { InferenceGatewayClient, MessageRole, SchemaCompletionUsage } from '@inference-gateway/sdk';
 import { useCallback, useRef } from 'react';
-import { ChatState, StorageService, UIState } from './types';
+import { ChatState, UIState } from './types';
 
 /**
  * Hook for managing sending messages and handling responses

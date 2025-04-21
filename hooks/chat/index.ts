@@ -70,10 +70,15 @@ export function useChat(initialDarkMode = true) {
         messages: data.messages,
       });
       setTokenUsage(data.tokenUsage);
+
+      const savedModel = await storageService.getSelectedModel();
+      if (savedModel) {
+        _setSelectedModel(savedModel);
+      }
     };
 
     initializeChat();
-  }, [loadChatData]);
+  }, [loadChatData, storageService]);
 
   useEffect(() => {
     saveChatData(sessions, activeId, tokenUsage);
@@ -84,6 +89,8 @@ export function useChat(initialDarkMode = true) {
       throw new Error('Model must be in provider/name format');
     }
     _setSelectedModel(model);
+
+    await storageService.saveSelectedModel(model);
 
     if (!activeId) {
       await handleNewChat();

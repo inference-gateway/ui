@@ -2,10 +2,9 @@
 
 import logger from '@/lib/logger';
 import { StorageServiceFactory } from '@/lib/storage';
-import { ChatSession, StorageType } from '@/types/chat';
+import { ChatSession, StorageService, StorageType } from '@/types/chat';
 import { SchemaCompletionUsage } from '@inference-gateway/sdk';
 import { useCallback, useMemo } from 'react';
-import { StorageService } from './types';
 import { createEmptyTokenUsage } from './utils';
 
 /**

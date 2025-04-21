@@ -1,7 +1,7 @@
-import { ChatState, StorageService, UIState } from '@/hooks/chat/types';
+import { ChatState, UIState } from '@/hooks/chat/types';
 import { useMessageHandler } from '@/hooks/chat/use-message-handler';
 import logger from '@/lib/logger';
-import { Message } from '@/types/chat';
+import { Message, StorageService } from '@/types/chat';
 import { InferenceGatewayClient, MessageRole, SchemaCompletionUsage } from '@inference-gateway/sdk';
 import { act, renderHook } from '@testing-library/react';
 
@@ -16,6 +16,9 @@ describe('useMessageHandler Hook', () => {
     saveChatSessions: jest.fn(),
     getActiveChatId: jest.fn(),
     saveActiveChatId: jest.fn(),
+    getSelectedModel: jest.fn(),
+    saveSelectedModel: jest.fn(),
+    clear: jest.fn(),
   };
 
   const mockSetChatState = jest.fn();

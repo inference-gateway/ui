@@ -1,6 +1,5 @@
 type LogLevel = 'error' | 'warn' | 'info' | 'debug';
 
-// Define interface for consistent logger shape
 interface Logger {
   error: (...args: unknown[]) => void;
   warn: (...args: unknown[]) => void;

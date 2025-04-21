@@ -14,13 +14,6 @@ export interface UIState {
   error: string | null;
 }
 
-export interface StorageService {
-  getChatSessions(): Promise<ChatSession[]>;
-  saveChatSessions(sessions: ChatSession[]): Promise<void>;
-  getActiveChatId(): Promise<string>;
-  saveActiveChatId(id: string): Promise<void>;
-}
-
 export interface ChatContextProps {
   chatContainerRef: React.RefObject<HTMLDivElement>;
   isDarkMode: boolean;

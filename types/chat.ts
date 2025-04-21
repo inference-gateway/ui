@@ -18,6 +18,8 @@ export interface StorageService {
   saveChatSessions(sessions: ChatSession[]): Promise<void>;
   getActiveChatId(): Promise<string>;
   saveActiveChatId(id: string): Promise<void>;
+  getSelectedModel(): Promise<string>;
+  saveSelectedModel(model: string): Promise<void>;
   clear(): Promise<void>;
 }
 

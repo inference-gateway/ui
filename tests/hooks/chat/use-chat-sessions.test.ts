@@ -1,7 +1,8 @@
-import { ChatState, StorageService } from '@/hooks/chat/types';
+import { ChatState } from '@/hooks/chat/types';
 import { useChatSessions } from '@/hooks/chat/use-chat-sessions';
 import { createNewChatId } from '@/hooks/chat/utils';
 import logger from '@/lib/logger';
+import { StorageService } from '@/types/chat';
 import { MessageRole } from '@inference-gateway/sdk';
 import { act, renderHook } from '@testing-library/react';
 
@@ -28,6 +29,9 @@ describe('useChatSessions Hook', () => {
       saveChatSessions: jest.fn().mockResolvedValue(undefined),
       getActiveChatId: jest.fn().mockResolvedValue('chat-1'),
       saveActiveChatId: jest.fn().mockResolvedValue(undefined),
+      getSelectedModel: jest.fn().mockResolvedValue(''),
+      saveSelectedModel: jest.fn().mockResolvedValue(undefined),
+      clear: jest.fn().mockResolvedValue(undefined),
     };
 
     mockSetChatState = jest.fn();

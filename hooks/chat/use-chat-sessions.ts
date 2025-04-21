@@ -1,9 +1,10 @@
 'use client';
 
 import logger from '@/lib/logger';
+import { StorageService } from '@/types/chat';
 import { SchemaCompletionUsage } from '@inference-gateway/sdk';
 import { useCallback } from 'react';
-import { ChatState, StorageService } from './types';
+import { ChatState } from './types';
 import { createEmptyTokenUsage, createNewChatId } from './utils';
 
 /**

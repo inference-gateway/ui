@@ -39,7 +39,6 @@ export function InputArea({
 
   useLayoutEffect(() => {
     if (textareaRef.current) {
-      // Reset height to auto first
       textareaRef.current.style.height = 'auto';
 
       const defaultHeight = isMobile ? '58px' : '44px';
