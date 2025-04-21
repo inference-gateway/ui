@@ -219,4 +219,42 @@ describe('ModelSelector Component', () => {
 
     expect(mockOnSelectModelAction).toHaveBeenCalledWith('openai/gpt-4o');
   });
+
+  test('resets selected model when it is not in the available models', async () => {
+    const nonExistentModel = 'non-existent/model';
+
+    (fetchModels as jest.Mock).mockImplementation(mockFetchModelsSuccess);
+
+    render(
+      <ModelSelector
+        selectedModel={nonExistentModel}
+        onSelectModelAction={mockOnSelectModelAction}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('selector-display-text')).toHaveTextContent(nonExistentModel);
+    });
+
+    await waitFor(() => {
+      expect(mockOnSelectModelAction).toHaveBeenCalledWith('');
+    });
+  });
+
+  test('resets selected model when API fails to load models', async () => {
+    const previouslySelectedModel = 'openai/gpt-4o';
+
+    (fetchModels as jest.Mock).mockImplementation(mockFetchModelsError);
+
+    render(
+      <ModelSelector
+        selectedModel={previouslySelectedModel}
+        onSelectModelAction={mockOnSelectModelAction}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockOnSelectModelAction).toHaveBeenCalledWith('');
+    });
+  });
 });

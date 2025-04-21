@@ -45,13 +45,26 @@ export default function ModelSelector({
         const errorMessage = err instanceof Error ? err.message : 'Failed to load models';
         logger.error('Error loading models', { error: errorMessage });
         setError(errorMessage);
+
+        if (selectedModel) {
+          onSelectModelAction('');
+        }
       } finally {
         setIsLoading(false);
       }
     }
 
     loadModels();
-  }, []);
+  }, [selectedModel, onSelectModelAction]);
+
+  useEffect(() => {
+    if (!isLoading && models.length > 0 && selectedModel) {
+      const modelExists = models.some(model => model.id === selectedModel);
+      if (!modelExists) {
+        onSelectModelAction('');
+      }
+    }
+  }, [models, selectedModel, isLoading, onSelectModelAction]);
 
   useEffect(() => {
     if (open && searchInputRef.current) {
