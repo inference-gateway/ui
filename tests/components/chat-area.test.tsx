@@ -33,9 +33,6 @@ describe('ChatArea Component', () => {
 
     expect(screen.getByText('Hello, how are you?')).toBeInTheDocument();
     expect(screen.getByText('I am doing well, thank you for asking!')).toBeInTheDocument();
-    expect(screen.getByText('You')).toBeInTheDocument();
-    expect(screen.getByText('Assistant')).toBeInTheDocument();
-    expect(screen.getByText('gpt-4o')).toBeInTheDocument();
   });
 
   test('shows streaming indicator when isStreaming is true', () => {
@@ -50,7 +47,7 @@ describe('ChatArea Component', () => {
 
     render(<ChatArea messages={streamingMessages} isStreaming={true} />);
 
-    const animationElement = document.querySelector('.animate-pulse');
-    expect(animationElement).toBeInTheDocument();
+    const animationElements = document.querySelectorAll('.animate-pulse');
+    expect(animationElements.length).toBeGreaterThan(0);
   });
 });

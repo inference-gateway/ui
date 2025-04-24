@@ -100,9 +100,9 @@ export const mockChatSessions = [
 ];
 
 export const mockTokenUsage = {
-  promptTokens: 42,
-  completionTokens: 128,
-  totalTokens: 170,
+  prompt_tokens: 42,
+  completion_tokens: 128,
+  total_tokens: 170,
 };
 
 export const mockHandlers = {

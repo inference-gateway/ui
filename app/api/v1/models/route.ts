@@ -24,14 +24,14 @@ export async function GET() {
     }
 
     const fetchWithAuth = async (input: RequestInfo | URL, init?: RequestInit) => {
-      const headers = new Headers(init?.headers);
-      if (session?.accessToken) {
-        headers.set('Authorization', `Bearer ${session.accessToken}`);
-      }
-      return fetch(input, {
+      const authInit = {
         ...init,
-        headers,
-      });
+        headers: {
+          ...init?.headers,
+          Authorization: `Bearer ${session?.accessToken}`,
+        },
+      };
+      return fetch(input, authInit);
     };
 
     const client = new InferenceGatewayClient({
@@ -46,6 +46,11 @@ export async function GET() {
       });
       return NextResponse.json(models);
     } catch (error) {
+      if (error instanceof Error && error.message === 'unauthorized') {
+        logger.warn('[Models] Authentication failed, redirecting to login');
+        return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+      }
+
       logger.error('[Models] Error fetching models from gateway', {
         error: error instanceof Error ? error.message : error,
         stack: error instanceof Error ? error.stack : undefined,

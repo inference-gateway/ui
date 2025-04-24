@@ -22,11 +22,28 @@ export class LocalStorageService implements StorageService {
     }
     try {
       const sessions = JSON.parse(saved);
+
+      const processedSessions = sessions.map((session: ChatSession) => {
+        if (!session.tokenUsage) {
+          return {
+            ...session,
+            tokenUsage: {
+              prompt_tokens: 0,
+              completion_tokens: 0,
+              total_tokens: 0,
+            },
+          };
+        }
+        return session;
+      });
+
       logger.debug('Loaded chat sessions from storage', {
         key,
-        count: sessions.length,
+        count: processedSessions.length,
+        hasTokenUsage: processedSessions.some((session: ChatSession) => !!session.tokenUsage),
       });
-      return sessions;
+
+      return processedSessions;
     } catch (error) {
       logger.error('Failed to parse chat sessions', {
         key,
@@ -38,11 +55,45 @@ export class LocalStorageService implements StorageService {
 
   async saveChatSessions(sessions: ChatSession[]): Promise<void> {
     const key = this.getStorageKey('chatSessions');
+
+    const processedSessions = sessions.map(session => {
+      if (!session.tokenUsage) {
+        return {
+          ...session,
+          tokenUsage: {
+            prompt_tokens: 0,
+            completion_tokens: 0,
+            total_tokens: 0,
+          },
+        };
+      } else {
+        return {
+          ...session,
+          tokenUsage: {
+            prompt_tokens: session.tokenUsage.prompt_tokens || 0,
+            completion_tokens: session.tokenUsage.completion_tokens || 0,
+            total_tokens: session.tokenUsage.total_tokens || 0,
+          },
+        };
+      }
+    });
+
     logger.debug('Saving chat sessions to storage', {
       key,
-      count: sessions.length,
+      count: processedSessions.length,
+      hasTokenUsage: processedSessions.some(session => !!session.tokenUsage),
+      tokenUsageSample:
+        processedSessions.length > 0 ? JSON.stringify(processedSessions[0].tokenUsage) : 'none',
     });
-    localStorage.setItem(key, JSON.stringify(sessions));
+
+    try {
+      localStorage.setItem(key, JSON.stringify(processedSessions));
+    } catch (error) {
+      logger.error('Failed to save chat sessions to storage', {
+        key,
+        error: error instanceof Error ? error.message : error,
+      });
+    }
   }
 
   async getActiveChatId(): Promise<string> {
@@ -72,11 +123,30 @@ export class LocalStorageService implements StorageService {
     localStorage.setItem(key, id);
   }
 
+  async getSelectedModel(): Promise<string> {
+    const key = this.getStorageKey('selectedModel');
+    const saved = localStorage.getItem(key);
+    if (!saved) {
+      logger.debug('No selected model found in storage', { key });
+      return '';
+    }
+    logger.debug('Found selected model in storage', { key, model: saved });
+    return saved;
+  }
+
+  async saveSelectedModel(model: string): Promise<void> {
+    const key = this.getStorageKey('selectedModel');
+    logger.debug('Saving selected model', { key, model });
+    localStorage.setItem(key, model);
+  }
+
   async clear(): Promise<void> {
     const sessionsKey = this.getStorageKey('chatSessions');
     const activeKey = this.getStorageKey('activeChatId');
+    const selectedModelKey = this.getStorageKey('selectedModel');
 
     localStorage.removeItem(sessionsKey);
     localStorage.removeItem(activeKey);
+    localStorage.removeItem(selectedModelKey);
   }
 }

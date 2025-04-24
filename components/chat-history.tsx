@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import type { Message } from '@/types/chat';
-import { Trash2, X, Menu } from 'lucide-react';
+import { TrashIcon, AlertCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ChatHistoryProps {
   chatSessions: {
@@ -17,18 +18,19 @@ interface ChatHistoryProps {
   onDeleteChatAction?: (id: string) => void;
   isMobileOpen?: boolean;
   setIsMobileOpen?: (isOpen: boolean) => void;
+  error?: string;
+  onErrorDismiss?: () => void;
 }
 
 export function ChatHistory({
   chatSessions,
   activeChatId,
-  onNewChatAction,
   onSelectChatAction,
   onDeleteChatAction,
-  isMobileOpen: externalMobileOpen,
   setIsMobileOpen: externalSetMobileOpen,
+  error,
+  onErrorDismiss,
 }: ChatHistoryProps) {
-  const [internalMobileOpen, setInternalMobileOpen] = useState(false);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
   useEffect(() => {
     const checkIfMobile = () => {
@@ -40,8 +42,7 @@ export function ChatHistory({
     return () => window.removeEventListener('resize', checkIfMobile);
   }, []);
 
-  const isMobileOpen = externalMobileOpen !== undefined ? externalMobileOpen : internalMobileOpen;
-  const setIsMobileOpen = externalSetMobileOpen || setInternalMobileOpen;
+  const setIsMobileOpen = externalSetMobileOpen || (() => {});
 
   const handleSelectChat = (id: string) => {
     onSelectChatAction(id);
@@ -50,53 +51,53 @@ export function ChatHistory({
     }
   };
 
-  const handleNewChat = () => {
-    onNewChatAction();
-    if (isMobileDevice) {
-      setIsMobileOpen(false);
+  const handleDeleteChat = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (onDeleteChatAction) {
+      onDeleteChatAction(id);
+    }
+  };
+
+  const handleDismissError = () => {
+    if (onErrorDismiss) {
+      onErrorDismiss();
     }
   };
 
   return (
-    <>
-      {/* Mobile menu button */}
-      <button
-        onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="md:hidden fixed z-30 top-3 left-3 p-2 bg-white dark:bg-neutral-800 rounded-md shadow-md"
-        aria-label="Toggle menu"
-        aria-expanded={isMobileOpen}
-      >
-        {isMobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-      </button>
-
-      {/* Chat history sidebar */}
-      <aside
-        className={`
-          w-full h-full flex flex-col
-          bg-white dark:bg-neutral-800
-          border-r border-neutral-200 dark:border-neutral-700
-          ${isMobileDevice && !isMobileOpen ? 'hidden md:flex' : 'flex'}
-        `}
-      >
-        <div className="w-full p-4 border-b border-neutral-200 dark:border-neutral-700 flex-shrink-0">
-          <button
-            onClick={handleNewChat}
-            className="w-full py-3 md:py-2 px-4 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition-colors text-sm md:text-base"
-          >
-            New Chat
-          </button>
-        </div>
-        <div
-          className="flex-1 w-full overflow-y-auto overscroll-contain"
-          data-testid="chat-history-container"
-          style={{ overflowY: 'auto' }}
-        >
-          {chatSessions.length === 0 ? (
-            <div className="p-4 text-center text-neutral-500" data-testid="empty-state">
-              <p data-testid="empty-message">No chats yet</p>
+    <aside className="flex flex-col h-full w-full overflow-hidden pt-14">
+      {error && (
+        <div className="mx-4 mb-2">
+          <div className="bg-[hsl(var(--error-bg))] border border-[hsl(var(--error-border))] rounded-md p-3 relative">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="h-4 w-4 text-[hsl(var(--error-icon))] mt-0.5 shrink-0" />
+              <div className="text-sm text-[hsl(var(--error-text))]">
+                <p>Something went wrong, please try again</p>
+                <p className="text-xs text-[hsl(var(--error-text-detail))] mt-1">{error}</p>
+              </div>
             </div>
-          ) : (
-            [...chatSessions]
+            <button
+              onClick={handleDismissError}
+              className="absolute top-1 right-1 text-[hsl(var(--error-close))] hover:text-[hsl(var(--error-close-hover))] p-1"
+              aria-label="Dismiss error"
+            >
+              &times;
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="flex-1 overflow-y-auto px-2 py-2" data-testid="chat-history-container">
+        {chatSessions.length === 0 ? (
+          <div
+            className="p-4 text-center text-[hsl(var(--chat-empty-text))]"
+            data-testid="empty-state"
+          >
+            <p data-testid="empty-message">No chats yet</p>
+          </div>
+        ) : (
+          <div className="space-y-0.5">
+            {[...chatSessions]
               .sort((a, b) => {
                 const dateA = new Date(a.createdAt || 0);
                 const dateB = new Date(b.createdAt || 0);
@@ -121,90 +122,42 @@ export function ChatHistory({
                     }
                   }}
                   tabIndex={0}
-                  ref={null}
                   data-testid={`chat-item-${chat.id}`}
                   data-focusable="true"
-                  data-focused={chat.id === activeChatId ? 'true' : 'false'}
-                  className={`p-4 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  className={cn(
+                    'px-3 py-2.5 cursor-pointer rounded-md transition-colors group flex items-center justify-between relative',
+                    'focus:outline-none focus:ring-1 focus:ring-primary/20',
                     chat.id === activeChatId
-                      ? 'bg-neutral-100 dark:bg-neutral-700 border-l-4 border-blue-500 active'
-                      : ''
-                  }`}
+                      ? 'bg-accent/50 text-foreground'
+                      : 'text-[hsl(var(--chat-inactive-item-text))] hover:bg-accent/20'
+                  )}
                   data-active={chat.id === activeChatId ? 'true' : 'false'}
                   aria-current={chat.id === activeChatId ? 'true' : 'false'}
-                  data-test-active={chat.id === activeChatId ? 'true' : 'false'}
-                  data-test-class-active={chat.id === activeChatId ? 'true' : 'false'}
                 >
-                  <div className="flex items-center justify-between w-full group">
-                    <div className="flex flex-col">
-                      <p
-                        className="truncate text-sm md:text-base"
-                        style={{
-                          textOverflow: 'ellipsis',
-                          overflow: 'hidden',
-                          whiteSpace: 'nowrap',
-                          display: 'block',
-                          maxWidth: '100%',
-                        }}
-                        data-testid="chat-title"
-                        data-text-overflow="ellipsis"
-                        data-long-title={chat.title.length > 20 ? 'true' : 'false'}
-                      >
-                        {chat.title}
-                      </p>
-                      {chat.messages?.length > 0 && (
-                        <p
-                          className="text-xs text-neutral-500 dark:text-neutral-400"
-                          data-testid={`chat-model-${chat.id}`}
-                        >
-                          {(() => {
-                            if (!chat.messages) return null;
-
-                            const lastAssistantMsg = [...chat.messages]
-                              .reverse()
-                              .find(m => m.role === 'assistant' && m.model);
-
-                            if (!lastAssistantMsg?.model) return null;
-
-                            const model = lastAssistantMsg.model.split('/').pop();
-
-                            return model === 'gpt-4o'
-                              ? 'gpt-4o'
-                              : model === 'claude-3-opus'
-                                ? 'claude-3-opus'
-                                : model;
-                          })()}
-                        </p>
-                      )}
-                      {!chat.messages?.length && (
-                        <p
-                          className="text-xs text-neutral-400 dark:text-neutral-500"
-                          data-testid="no-model-info"
-                        >
-                          No messages yet
-                        </p>
-                      )}
-                    </div>
-                    {onDeleteChatAction && (
-                      <button
-                        onClick={e => {
-                          e.stopPropagation();
-                          if (confirm('Are you sure you want to delete this chat?')) {
-                            onDeleteChatAction(chat.id);
-                          }
-                        }}
-                        className="text-neutral-400 hover:text-red-500 transition-colors p-1 -mr-1 opacity-0 group-hover:opacity-100 focus:opacity-100"
-                        aria-label="Delete chat"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
-                    )}
-                  </div>
+                  {chat.id === activeChatId && (
+                    <div
+                      className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-l-md"
+                      aria-hidden="true"
+                    ></div>
+                  )}
+                  <p className="truncate text-sm flex-1" data-testid="chat-title">
+                    {chat.title}
+                  </p>
+                  {onDeleteChatAction && (
+                    <button
+                      onClick={e => handleDeleteChat(e, chat.id)}
+                      className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 text-muted-foreground hover:text-foreground transition-opacity rounded"
+                      aria-label={`Delete chat ${chat.title}`}
+                      title="Delete chat"
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
-              ))
-          )}
-        </div>
-      </aside>
-    </>
+              ))}
+          </div>
+        )}
+      </div>
+    </aside>
   );
 }

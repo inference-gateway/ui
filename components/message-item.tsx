@@ -14,15 +14,17 @@ export default function MessageItem({ message }: MessageItemProps) {
     <div
       className={cn(
         'flex items-start gap-4 rounded-lg p-4',
-        isUser ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-gray-100 dark:bg-gray-800'
+        isUser
+          ? 'bg-[hsl(var(--message-user-bg))] dark:bg-[hsl(var(--message-user-bg-dark))]'
+          : 'bg-[hsl(var(--message-ai-bg))] dark:bg-[hsl(var(--message-ai-bg-dark))]'
       )}
     >
       <div
         className={cn(
           'flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-md border',
           isUser
-            ? 'border-blue-200 bg-blue-100 text-blue-600 dark:border-blue-800 dark:bg-blue-900 dark:text-blue-300'
-            : 'border-gray-200 bg-gray-100 text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
+            ? 'border-[hsl(var(--message-user-icon-border))] bg-[hsl(var(--message-user-icon-bg))] text-[hsl(var(--message-user-icon-text))] dark:border-[hsl(var(--message-user-icon-border-dark))] dark:bg-[hsl(var(--message-user-icon-bg-dark))] dark:text-[hsl(var(--message-user-icon-text-dark))]'
+            : 'border-[hsl(var(--message-ai-icon-border))] bg-[hsl(var(--message-ai-icon-bg))] text-[hsl(var(--message-ai-icon-text))] dark:border-[hsl(var(--message-ai-icon-border-dark))] dark:bg-[hsl(var(--message-ai-icon-bg-dark))] dark:text-[hsl(var(--message-ai-icon-text-dark))]'
         )}
       >
         {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}

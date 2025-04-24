@@ -1,14 +1,20 @@
 'use client';
 
 import { signIn } from 'next-auth/react';
-import { Key, Lock } from 'lucide-react';
+import { Key, Lock, AlertCircle } from 'lucide-react';
 import { ProviderConfig } from '@/lib/auth';
+import { useSearchParams } from 'next/navigation';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface SigninClientProps {
   providers: ProviderConfig[];
 }
 
 export function SigninClient({ providers }: SigninClientProps) {
+  const searchParams = useSearchParams();
+  const error = searchParams.get('error');
+  const message = searchParams.get('message') || 'An error occurred during authentication';
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-900 dark:to-neutral-800 flex items-center justify-center p-4">
       <div className="bg-white dark:bg-neutral-800 p-8 rounded-xl shadow-xl max-w-md w-full space-y-8 border border-neutral-200/50 dark:border-neutral-700/50 transition-all duration-300 hover:shadow-2xl">
@@ -23,6 +29,14 @@ export function SigninClient({ providers }: SigninClientProps) {
             Sign in to continue to your account
           </p>
         </div>
+
+        {error && (
+          <Alert variant="destructive" className="border-red-500/50 bg-red-50 dark:bg-red-900/20">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{message}</AlertDescription>
+          </Alert>
+        )}
+
         <div className="flex flex-col gap-4">
           {providers.map(provider => (
             <button

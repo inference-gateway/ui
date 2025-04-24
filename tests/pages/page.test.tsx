@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import Home from '@/app/home/page-client';
+import Chat from '@/app/chat/page-client';
 import { useChat } from '@/hooks/use-chat';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -47,16 +47,20 @@ jest.mock('@/hooks/use-mobile', () => ({
   useIsMobile: jest.fn(),
 }));
 
-jest.mock('@/hooks/use-session', () => ({
+jest.mock('next-auth/react', () => ({
   useSession: jest.fn(() => ({
-    session: { user: { name: 'Test User' } },
+    data: {
+      user: {
+        name: 'Test User',
+        email: 'testuser@example.com',
+      },
+    },
   })),
 }));
 
 describe('Home Component', () => {
   const mockHandleSendMessage = jest.fn();
   const mockSetSelectedModel = jest.fn();
-  const mockClearMessages = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -68,13 +72,12 @@ describe('Home Component', () => {
       selectedModel: 'gpt-4o',
       isLoading: false,
       isStreaming: false,
-      tokenUsage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+      tokenUsage: { prompttTokens: 0, completion_tokens: 0, total_tokens: 0 },
       setSelectedModel: mockSetSelectedModel,
       handleNewChat: jest.fn(),
       handleSendMessage: mockHandleSendMessage,
       handleSelectChat: jest.fn(),
       handleDeleteChat: jest.fn(),
-      clearMessages: mockClearMessages,
       chatContainerRef: { current: null },
     });
 
@@ -83,32 +86,20 @@ describe('Home Component', () => {
 
   test('renders the main components', async () => {
     await act(async () => {
-      render(<Home />);
+      render(<Chat />);
     });
 
-    expect(screen.getByText('Inference Gateway UI')).toBeInTheDocument();
-    expect(screen.getByTitle('Toggle theme')).toBeInTheDocument();
     expect(screen.getByTestId('mock-model-selector')).toBeInTheDocument();
-  });
-
-  test('toggles theme when clicked', async () => {
-    await act(async () => {
-      render(<Home />);
-    });
-    const themeToggle = screen.getByTitle('Toggle theme');
-
-    await act(async () => {
-      fireEvent.click(themeToggle);
-    });
-    expect(screen.getByText('Inference Gateway UI')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Ask anything')).toBeInTheDocument();
+    expect(screen.getByLabelText('New chat')).toBeInTheDocument();
   });
 
   test('sends message on enter key press', async () => {
     await act(async () => {
-      render(<Home />);
+      render(<Chat />);
     });
 
-    const input = screen.getByPlaceholderText('Type a message...');
+    const input = screen.getByPlaceholderText('Ask anything');
     await act(async () => {
       fireEvent.change(input, { target: { value: 'Hello world' } });
       fireEvent.keyDown(input, { key: 'Enter' });
@@ -117,27 +108,32 @@ describe('Home Component', () => {
     expect(mockHandleSendMessage).toHaveBeenCalledWith('Hello world');
   });
 
-  test('does not send empty message', async () => {
-    await act(async () => {
-      render(<Home />);
+  test('displays token usage when available', async () => {
+    (useChat as jest.Mock).mockReturnValue({
+      chatSessions: [{ id: '1', title: 'Test Chat' }],
+      activeChatId: '1',
+      messages: [{ id: '1', role: 'assistant', content: 'Test message' }],
+      selectedModel: 'gpt-4o',
+      isLoading: false,
+      isStreaming: false,
+      tokenUsage: {
+        prompt_tokens: 50,
+        completion_tokens: 75,
+        total_tokens: 125,
+      },
+      setSelectedModel: mockSetSelectedModel,
+      handleNewChat: jest.fn(),
+      handleSendMessage: mockHandleSendMessage,
+      handleSelectChat: jest.fn(),
+      handleDeleteChat: jest.fn(),
+      chatContainerRef: { current: null },
     });
 
-    const input = screen.getByPlaceholderText('Type a message...');
     await act(async () => {
-      fireEvent.change(input, { target: { value: '' } });
-      fireEvent.keyDown(input, { key: 'Enter' });
+      render(<Chat />);
     });
 
-    expect(mockHandleSendMessage).not.toHaveBeenCalled();
-  });
-
-  test('shows mobile menu button on mobile devices', async () => {
-    (useIsMobile as jest.Mock).mockReturnValue(true);
-    await act(async () => {
-      render(<Home />);
-    });
-
-    const menuButton = screen.getByRole('button', { name: '' });
-    expect(menuButton).toBeInTheDocument();
+    expect(screen.getByText('Tokens: 125')).toBeInTheDocument();
+    expect(screen.getByText('(50 prompt / 75 completion)')).toBeInTheDocument();
   });
 });

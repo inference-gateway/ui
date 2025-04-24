@@ -23,11 +23,13 @@ export function CodeBlock({ inline, className, children, ...props }: CodeBlockPr
 
   return !inline ? (
     <div className="relative">
-      <div className="flex items-center justify-between px-4 py-2 bg-neutral-800 rounded-t-md">
-        <span className="text-xs text-neutral-400">{match?.[1] || 'code'}</span>
+      <div className="flex items-center justify-between px-4 py-2 bg-[hsl(var(--code-block-header-bg))] rounded-t-md">
+        <span className="text-xs text-[hsl(var(--code-block-language-text))]">
+          {match?.[1] || 'code'}
+        </span>
         <button
           onClick={handleCopy}
-          className="flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-200"
+          className="flex items-center gap-1 text-xs text-[hsl(var(--code-block-copy-text))] hover:text-[hsl(var(--code-block-copy-hover-text))]"
         >
           <Copy className="w-3 h-3" />
           {copied ? 'Copied!' : 'Copy'}
