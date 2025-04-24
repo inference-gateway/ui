@@ -48,7 +48,10 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
             error: refreshedTokens.error,
             error_description: refreshedTokens.error_description,
           });
-          throw refreshedTokens;
+          return {
+            ...token,
+            error: 'TokenExpiredError',
+          };
         }
 
         logger.debug('[Auth] Refreshed Keycloak access token successfully');
@@ -76,7 +79,11 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
         const refreshedTokens = await response.json();
 
         if (!response.ok) {
-          throw refreshedTokens;
+          logger.error('[Auth] Google token refresh failed', refreshedTokens);
+          return {
+            ...token,
+            error: 'TokenExpiredError',
+          };
         }
 
         logger.debug('[Auth] Refreshed Google access token');
@@ -107,7 +114,11 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
         const refreshedTokens = await response.json();
 
         if (!response.ok) {
-          throw refreshedTokens;
+          logger.error('[Auth] GitHub token refresh failed', refreshedTokens);
+          return {
+            ...token,
+            error: 'TokenExpiredError',
+          };
         }
 
         logger.debug('[Auth] Refreshed GitHub access token');
@@ -130,7 +141,7 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
 
     return {
       ...token,
-      error: 'RefreshAccessTokenError',
+      error: 'TokenExpiredError', // Use consistent error type for token expiration
     };
   }
 }
@@ -247,7 +258,7 @@ export const authConfig: NextAuthConfig = {
           logger.error('[Auth] Error during token refresh', error);
           return {
             ...token,
-            error: 'RefreshAccessTokenError',
+            error: 'TokenExpiredError',
           };
         }
       } else {
@@ -362,23 +373,4 @@ export function getEnabledProviders(): ProviderConfig[] {
       callbackUrl: `/api/auth/callback/google`,
     },
   ].filter(provider => provider.enabled);
-}
-
-/**
- * Handles token expiration or unauthorized errors by signing the user out
- * and redirecting them to the sign-in page with an explanation message.
- */
-export async function handleTokenExpiration(isServer = false): Promise<void> {
-  logger.warn('[Auth] Token expired or unauthorized, redirecting to sign-in page');
-
-  if (isServer) {
-    const redirectUrl = `/auth/signin?error=Session expired, please sign in again`;
-    logger.debug('[Auth] Redirecting to sign-in page:', redirectUrl);
-    throw new Response(null, {
-      status: 302,
-      headers: { Location: redirectUrl },
-    });
-  } else {
-    window.location.href = `/auth/signin?error=Session expired, please sign in again`;
-  }
 }

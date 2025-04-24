@@ -1,4 +1,3 @@
-import { handleTokenExpiration } from '@/lib/auth';
 import logger from '@/lib/logger';
 import type { ListModelsResponse } from '@/types/model';
 import { Session } from 'next-auth';
@@ -13,12 +12,6 @@ export async function fetchModels(session?: Session): Promise<ListModelsResponse
   const response = await fetch('/api/v1/models', {
     headers,
   });
-
-  if (response.status === 401) {
-    logger.warn('[API] Models endpoint returned 401 Unauthorized');
-    await handleTokenExpiration(false);
-    throw new Error('Session expired, redirecting to login');
-  }
 
   if (!response.ok) {
     throw new Error(`Failed to fetch models: ${response.statusText}`);
