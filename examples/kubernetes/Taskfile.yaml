@@ -3,7 +3,7 @@ version: "3"
 vars:
   NAMESPACE: inference-gateway
   UI_RELEASE: inference-gateway-ui
-  CHART_VERSION: 0.5.0
+  CHART_VERSION: 0.6.1
 
 tasks:
   deploy-infrastructure:
@@ -99,12 +99,15 @@ tasks:
           --namespace {{.NAMESPACE}} \
           --set replicaCount=1 \
           --set gateway.enabled=true \
+          --set gateway.envFrom.secretRef=inference-gateway \
           --set-string env[0].name=NODE_ENV \
           --set-string env[0].value=production \
           --set-string env[1].name=NEXT_TELEMETRY_DISABLED \
           --set-string env[1].value=1 \
           --set-string env[2].name=INFERENCE_GATEWAY_URL \
           --set-string env[2].value=http://inference-gateway:8080/v1 \
+          --set-string env[3].name=ENABLE_AUTH \
+          --set-string env[3].value="false" \
           --set resources.limits.cpu=500m \
           --set resources.limits.memory=512Mi \
           --set resources.requests.cpu=100m \
@@ -141,23 +144,24 @@ tasks:
   setup-secrets:
     desc: Set up API key secrets for providers
     cmds:
-      - echo "Enter your OpenAI API key:"
-      - read -s OPENAI_API_KEY && kubectl create secret generic openai-api-key --from-literal=api-key=$OPENAI_API_KEY -n {{.NAMESPACE}}
-      - echo "Secret created"
+      - echo "Enter your DeepSeek API key:"
       - |
-        cat <<EOF | kubectl apply -f -
+        read -s DEEPSEEK_API_KEY && kubectl apply -f - <<EOF
         apiVersion: v1
         kind: Secret
         metadata:
-          name: provider-secrets
-          namespace: {{.NAMESPACE}}
+          name: inference-gateway
+          namespace: inference-gateway
+          annotations:
+            meta.helm.sh/release-name: inference-gateway-ui
+            meta.helm.sh/release-namespace: inference-gateway
+          labels:
+            app.kubernetes.io/managed-by: Helm
         type: Opaque
         stringData:
-          config.yaml: |
-            providers:
-              openai:
-                apiKey: $OPENAI_API_KEY
+          DEEPSEEK_API_KEY: $DEEPSEEK_API_KEY
         EOF
+      - echo "Secret created"
 
   logs-ui:
     desc: Show logs for UI pods

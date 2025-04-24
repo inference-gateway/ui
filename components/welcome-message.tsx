@@ -1,13 +1,15 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
 import { signOut } from 'next-auth/react';
 import { LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Session } from 'next-auth';
 
-export default function WelcomeMessage() {
-  const { data: session } = useSession() || { data: undefined };
+export interface WelcomeMessageProps {
+  session?: Session | null;
+}
 
+export default function WelcomeMessage({ session }: WelcomeMessageProps) {
   if (!session) {
     return null;
   }

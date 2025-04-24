@@ -7,6 +7,12 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 export default async function Page() {
+  const isAuthEnabled = process.env.ENABLE_AUTH === 'true';
+  if (!isAuthEnabled) {
+    logger.debug('[Auth] Authentication is disabled, redirecting to chat');
+    redirect('/chat');
+  }
+
   const providers = getEnabledProviders();
 
   try {
