@@ -60,10 +60,17 @@ The UI is part of the Inference Gateway ecosystem. Here are the related reposito
 
 ### Testing
 
+- **Test Driven Development (TDD) is required for all feature implementations**
+- Follow the Red-Green-Refactor TDD cycle:
+  1. Write a failing test that defines the expected behavior
+  2. Write the minimum code needed to make the test pass
+  3. Refactor the code while keeping tests passing
+- Every feature must have corresponding tests before being considered complete
 - Write tests for all components and hooks
 - Tests should be co-located with components in `/tests` directory
 - Use React Testing Library for component testing
 - Mock API calls in tests
+- Aim for high test coverage, especially for critical application paths
 
 ### Deployment
 
