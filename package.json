@@ -1,6 +1,6 @@
 {
   "name": "inference-gateway-ui",
-  "version": "0.6.0",
+  "version": "0.6.1-rc.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
