@@ -28,14 +28,14 @@ export async function POST(req: Request) {
       gatewayUrl,
     });
     const fetchWithAuth = async (input: RequestInfo | URL, init?: RequestInit) => {
-      const headers = new Headers(init?.headers);
-      if (session?.accessToken) {
-        headers.set('Authorization', `Bearer ${session.accessToken}`);
-      }
-      return fetch(input, {
+      const authInit = {
         ...init,
-        headers,
-      });
+        headers: {
+          ...init?.headers,
+          Authorization: `Bearer ${session?.accessToken}`,
+        },
+      };
+      return fetch(input, authInit);
     };
 
     const clientWithAuth = new InferenceGatewayClient({

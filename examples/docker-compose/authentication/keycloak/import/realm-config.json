@@ -12,12 +12,23 @@
       "standardFlowEnabled": true,
       "implicitFlowEnabled": false,
       "directAccessGrantsEnabled": true,
-      "serviceAccountsEnabled": false,
+      "serviceAccountsEnabled": true,
       "publicClient": false,
       "redirectUris": ["http://localhost:3000/*"],
       "webOrigins": ["http://localhost:3000"],
       "clientAuthenticatorType": "client-secret",
       "secret": "very-secret",
+      "attributes": {
+        "access.token.lifespan": "100",
+        "oauth2.device.authorization.grant.enabled": "true",
+        "backchannel.logout.session.required": "true",
+        "backchannel.logout.revoke.offline.tokens": "false",
+        "client_credentials.use_refresh_token": "true",
+        "use.refresh.tokens": "true",
+        "access.token.audience": "app-client"
+      },
+      "defaultClientScopes": ["web-origins", "acr", "profile", "roles", "email"],
+      "optionalClientScopes": ["address", "phone", "microprofile-jwt", "offline_access"],
       "protocolMappers": [
         {
           "name": "audience-mapper",
@@ -27,6 +38,7 @@
             "included.client.audience": "app-client",
             "id.token.claim": "true",
             "access.token.claim": "true",
+            "included.custom.audience": "app-client",
             "add.to.id.token": "true",
             "add.to.access.token": "true"
           }

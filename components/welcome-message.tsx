@@ -1,14 +1,14 @@
 'use client';
 
-import { useSession } from '@/hooks/use-session';
+import { useSession } from 'next-auth/react';
 import { signOut } from 'next-auth/react';
 import { LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function WelcomeMessage() {
-  const { session, isAuthenticated } = useSession();
+  const { data: session } = useSession() || { data: undefined };
 
-  if (!isAuthenticated || !session?.user?.name) {
+  if (!session) {
     return null;
   }
 
@@ -18,7 +18,7 @@ export default function WelcomeMessage() {
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm font-medium">Welcome, {session.user.name}!</span>
+      <span className="text-sm font-medium">Welcome, {session?.user?.name}!</span>
       <Button
         onClick={handleLogout}
         variant="ghost"

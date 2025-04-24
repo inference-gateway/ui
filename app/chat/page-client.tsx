@@ -9,10 +9,15 @@ import { useChat } from '@/hooks/use-chat';
 import { useState, useEffect } from 'react';
 import { ChatHeader } from '@/components/chat-header';
 import { ChevronLeft, Menu } from 'lucide-react';
+import logger from '@/lib/logger';
+import { useSession } from 'next-auth/react';
 
 export const dynamic = 'force-dynamic';
 
 export default function PageClient() {
+  const { data: session } = useSession() || { data: undefined };
+  logger.debug('Rendering Chat PageClient', { session });
+
   const {
     chatSessions,
     activeChatId,

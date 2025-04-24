@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import Home from '@/app/home/page-client';
+import Chat from '@/app/chat/page-client';
 import { useChat } from '@/hooks/use-chat';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -47,9 +47,14 @@ jest.mock('@/hooks/use-mobile', () => ({
   useIsMobile: jest.fn(),
 }));
 
-jest.mock('@/hooks/use-session', () => ({
+jest.mock('next-auth/react', () => ({
   useSession: jest.fn(() => ({
-    session: { user: { name: 'Test User' } },
+    data: {
+      user: {
+        name: 'Test User',
+        email: 'testuser@example.com',
+      },
+    },
   })),
 }));
 
@@ -81,7 +86,7 @@ describe('Home Component', () => {
 
   test('renders the main components', async () => {
     await act(async () => {
-      render(<Home />);
+      render(<Chat />);
     });
 
     expect(screen.getByTestId('mock-model-selector')).toBeInTheDocument();
@@ -91,7 +96,7 @@ describe('Home Component', () => {
 
   test('sends message on enter key press', async () => {
     await act(async () => {
-      render(<Home />);
+      render(<Chat />);
     });
 
     const input = screen.getByPlaceholderText('Ask anything');
@@ -125,7 +130,7 @@ describe('Home Component', () => {
     });
 
     await act(async () => {
-      render(<Home />);
+      render(<Chat />);
     });
 
     expect(screen.getByText('Tokens: 125')).toBeInTheDocument();

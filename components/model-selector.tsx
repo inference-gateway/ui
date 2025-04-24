@@ -55,7 +55,7 @@ export default function ModelSelector({
     }
 
     loadModels();
-  }, [selectedModel, onSelectModelAction]);
+  }, []); //eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!isLoading && models.length > 0 && selectedModel) {
