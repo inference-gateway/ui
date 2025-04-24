@@ -19,7 +19,7 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "very-secret",
       "attributes": {
-        "access.token.lifespan": "100",
+        "access.token.lifespan": "900",
         "oauth2.device.authorization.grant.enabled": "true",
         "backchannel.logout.session.required": "true",
         "backchannel.logout.revoke.offline.tokens": "false",
