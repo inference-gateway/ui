@@ -141,7 +141,7 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
 
     return {
       ...token,
-      error: 'TokenExpiredError', // Use consistent error type for token expiration
+      error: 'TokenExpiredError',
     };
   }
 }
