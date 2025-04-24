@@ -1,7 +1,7 @@
 'use client';
 
 import { SchemaCompletionUsage } from '@inference-gateway/sdk';
-import { useSession } from 'next-auth/react';
+import { Session } from 'next-auth';
 import { useEffect, useRef, useState } from 'react';
 import { ChatState, UIState } from './types';
 import { useApiClient } from './use-api-client';
@@ -15,9 +15,10 @@ import { createEmptyTokenUsage } from './utils';
 /**
  * Main hook for chat functionality
  */
-export function useChat(initialDarkMode = true) {
-  const { data: session } = useSession() || { data: undefined };
-
+export function useChat({
+  initialDarkMode = true,
+  session = null,
+}: { initialDarkMode?: boolean; session?: Session | null } = {}) {
   const clientInstance = useApiClient(session?.accessToken);
   const { isDarkMode, toggleTheme } = useThemeManager(initialDarkMode);
   const chatContainerRef = useRef<HTMLDivElement>(null);

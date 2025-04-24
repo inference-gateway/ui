@@ -314,7 +314,7 @@ type AuthHandlers = {
 };
 
 const createAuthHandlers = (): AuthHandlers => {
-  if (process.env.AUTH_ENABLED !== 'true') {
+  if (process.env.ENABLE_AUTH !== 'true') {
     return {
       GET: async () => new Response(null, { status: 404 }),
       POST: async () => new Response(null, { status: 404 }),

@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 import { TransformStream } from 'stream/web';
 
 export async function POST(req: Request) {
-  const isAuthEnabled = process.env.AUTH_ENABLED === 'true';
+  const isAuthEnabled = process.env.ENABLEAUTH === 'true';
   const session = isAuthEnabled ? await auth() : null;
 
   if (isAuthEnabled && !session) {

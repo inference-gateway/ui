@@ -20,7 +20,7 @@ cp .env.frontend.example .env.frontend
 2. Configure backend environment (.env.backend):
 
 ```ini
-AUTH_ENABLED=true
+ENABLE_AUTH=true
 SECURE_COOKIES=false # Set to true if you are using HTTPS for production
 NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=your-secure-random-salt
@@ -36,7 +36,7 @@ KEYCLOAK_ISSUER=http://localhost:8080/realms/app-realm
 3. Configure frontend environment (.env.frontend):
 
 ```ini
-AUTH_ENABLED="true"
+ENABLE_AUTH="true"
 ```
 
 4. Start the services:
