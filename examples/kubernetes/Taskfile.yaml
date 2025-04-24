@@ -3,7 +3,7 @@ version: "3"
 vars:
   NAMESPACE: inference-gateway
   UI_RELEASE: inference-gateway-ui
-  CHART_VERSION: 0.6.0
+  CHART_VERSION: 0.6.1-rc.1
 
 tasks:
   deploy-infrastructure:
@@ -99,6 +99,7 @@ tasks:
           --namespace {{.NAMESPACE}} \
           --set replicaCount=1 \
           --set gateway.enabled=true \
+          --set gateway.envFrom.secretRef=inference-gateway \
           --set-string env[0].name=NODE_ENV \
           --set-string env[0].value=production \
           --set-string env[1].name=NEXT_TELEMETRY_DISABLED \
