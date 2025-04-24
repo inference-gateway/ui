@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.2-rc.1](https://github.com/inference-gateway/ui/compare/v0.6.1...v0.6.2-rc.1) (2025-04-24)
+
+### ♻️ Improvements
+
+* Update authentication handling and improve configuration for inference-gateway-ui ([253d2b4](https://github.com/inference-gateway/ui/commit/253d2b45797047e46f89f0bd5f455ab49cd3a9ab))
+
+### 🔧 Miscellaneous
+
+* Enhance testing guidelines with TDD requirements and coverage goals for Copilot ([65e9c3c](https://github.com/inference-gateway/ui/commit/65e9c3cc8e9ef122bb72fcd8f276272a24f12904))
+
 ## [0.6.1](https://github.com/inference-gateway/ui/compare/v0.6.0...v0.6.1) (2025-04-24)
 
 ### 🐛 Bug Fixes
