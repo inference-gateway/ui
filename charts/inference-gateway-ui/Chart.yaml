@@ -15,7 +15,7 @@ type: application
 dependencies:
   - name: inference-gateway
     repository: oci://ghcr.io/inference-gateway/charts
-    version: 0.5.4
+    version: 0.5.6
     condition: gateway.enabled
     alias: gateway
 

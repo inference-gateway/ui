@@ -1,4 +1,4 @@
-# Default values for ui.
+# Default values for inference-gateway-ui.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -10,6 +10,14 @@ image:
   repository: ghcr.io/inference-gateway/ui
   pullPolicy: IfNotPresent
   tag: ""
+
+envFrom:
+  configMapRef:
+    create: true
+    name: inference-gateway-ui
+  secretRef:
+    create: true
+    name: inference-gateway-ui
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
@@ -71,14 +79,14 @@ ingress:
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, PUT, POST, DELETE, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization"
   hosts:
-    - host: ui.inference-gateway.local
+    - host: inference-gateway-ui.inference-gateway.local
       paths:
         - path: /
           pathType: ImplementationSpecific
   tls:
     - secretName: ui-tls
       hosts:
-        - ui.inference-gateway.local
+        - inference-gateway-ui.inference-gateway.local
 
 resources:
   limits:
@@ -89,10 +97,6 @@ resources:
     memory: 128Mi
 
 env:
-  - name: NODE_ENV
-    value: production
-  - name: NEXT_TELEMETRY_DISABLED
-    value: "1"
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -138,6 +142,23 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+config:
+  # General Settings
+  NODE_ENV: "production"
+  PORT: "3000"
+  HOSTNAME: "0.0.0.0"
+  INFERENCE_GATEWAY_URL: "http://inference-gateway:8080/v1"
+  LOG_LEVEL: "info"
+  NEXT_PUBLIC_LOG_LEVEL: "info"
+  # Authentication General Settings
+  ENABLE_AUTH: "true"
+  SECURE_COOKIES: "true"
+  NEXTAUTH_URL: "http://localhost:3000"
+  NEXTAUTH_TRUST_HOST: "true"
+  NEXTAUTH_REFRESH_TOKEN_ENABLED: "true"
+  # Storage
+  NEXT_PUBLIC_INFERENCE_GATEWAY_UI_STORAGE_TYPE: "local"
 
 # Controls whether to deploy the inference-gateway backend along with the UI
 gateway:

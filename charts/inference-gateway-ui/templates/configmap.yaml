@@ -1,0 +1,9 @@
+{{- if .Values.envFrom.configMapRef.create }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.envFrom.configMapRef.name }}
+  labels:
+    {{- include "inference-gateway-ui.labels" . | nindent 4 }}
+data: {}
+{{- end }}

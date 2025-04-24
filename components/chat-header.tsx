@@ -3,8 +3,10 @@ import { cn } from '@/lib/utils';
 import ModelSelector from '@/components/model-selector';
 import ThemeToggle from '@/components/theme-toggle';
 import WelcomeMessage from '@/components/welcome-message';
+import { Session } from 'next-auth';
 
 interface ChatHeaderProps {
+  session?: Session | null;
   isMobile: boolean;
   showSidebar: boolean;
   selectedModel: string;
@@ -14,6 +16,7 @@ interface ChatHeaderProps {
 }
 
 export function ChatHeader({
+  session,
   isMobile,
   selectedModel,
   handleNewChat,
@@ -28,7 +31,7 @@ export function ChatHeader({
     >
       <div className="flex items-center justify-between w-full">
         <div className="flex items-center gap-2 ml-10 my-auto">
-          <WelcomeMessage />
+          <WelcomeMessage session={session} />
         </div>
 
         <div className="flex items-center gap-3 h-full my-auto">
