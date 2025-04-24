@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0](https://github.com/inference-gateway/ui/compare/v0.5.0...v0.6.0) (2025-04-24)
+
+### ✨ Features
+
+* Redesign the chat interface ([#31](https://github.com/inference-gateway/ui/issues/31)) ([e09c906](https://github.com/inference-gateway/ui/commit/e09c906749b401627129c0b08105ced2887351c7))
+
+### 🐛 Bug Fixes
+
+* **release:** Update package-lock.json version to 0.5.0 and add it via git automatically ([8b343ba](https://github.com/inference-gateway/ui/commit/8b343ba12211a653fc7eb0eded8f390431c1f5c8))
+
+### 📚 Documentation
+
+* Add acceptance criteria section to feature request template ([c78ef06](https://github.com/inference-gateway/ui/commit/c78ef067922a9fa6e09450a3e48bf0a77e8f39fe))
+* **kubernetes:** Update Helm chart version to 0.5.0 in deployment examples ([34d2856](https://github.com/inference-gateway/ui/commit/34d2856320f99a6c75c1a04e58f60e6c5400bee2))
+
+### 🔧 Miscellaneous
+
+* Add feature request template ([71463cb](https://github.com/inference-gateway/ui/commit/71463cb74e3807fac149afb72fdb38664c944347))
+
+### 📦 Miscellaneous
+
+* Add pre-commit hook with common tasks to run locally before commiting ([#19](https://github.com/inference-gateway/ui/issues/19)) ([8787ae4](https://github.com/inference-gateway/ui/commit/8787ae45aa0f7f59c9dad0d3107a81d3edb9d2d2))
+* **devcontainer:** Enable GitHub Pull Requests features in VSCode settings ([8e985c2](https://github.com/inference-gateway/ui/commit/8e985c2e8639e42dd33bb3a27d85fac5d07d580c))
+
 ## [0.5.0](https://github.com/inference-gateway/ui/compare/v0.4.0...v0.5.0) (2025-04-15)
 
 ### ✨ Features
