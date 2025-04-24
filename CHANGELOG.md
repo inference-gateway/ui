@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.1-rc.1](https://github.com/inference-gateway/ui/compare/v0.6.0...v0.6.1-rc.1) (2025-04-24)
+
+### 🐛 Bug Fixes
+
+* Update environment variable from AUTH_ENABLED to ENABLE_AUTH for consistency with the backend ([19bbd5c](https://github.com/inference-gateway/ui/commit/19bbd5c9448d5dccaf94037473cd3023328e7765))
+
+### 🔧 Miscellaneous
+
+* Update comment in Session interface for clarity on ENABLE_AUTH usage ([8d177f3](https://github.com/inference-gateway/ui/commit/8d177f3033ee16886e4757360967fbbdcca54fd7))
+
 ## [0.6.0](https://github.com/inference-gateway/ui/compare/v0.5.0...v0.6.0) (2025-04-24)
 
 ### ✨ Features
