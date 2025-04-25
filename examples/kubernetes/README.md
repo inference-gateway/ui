@@ -17,6 +17,8 @@ This example provides two deployment options:
 
 1. **Combined Deployment**: Deploy the UI with the Inference Gateway backend as a dependency (recommended)
 2. **Separate Deployment**: Deploy the UI and connect it to an existing Inference Gateway instance
+3. **Deploy with Ingress**: Deploy the UI with an ingress controller for external access
+4. **Deploy with authentication**: Deploy the UI with authentication using a secret and IdP with OIDC
 
 ## Quick Start Using Task
 
