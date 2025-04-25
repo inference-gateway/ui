@@ -382,6 +382,7 @@ tasks:
           --create-namespace \
           --namespace {{.NAMESPACE}} \
           --set replicaCount=1 \
+          --set gateway.envFrom.secretRef=inference-gateway \
           --set envFrom.secretRef.create=false \
           --set config.NEXTAUTH_URL=https://ui.inference-gateway.local \
           --set ingress.enabled=true \
