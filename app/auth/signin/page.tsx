@@ -13,8 +13,6 @@ export default async function Page() {
     redirect('/chat');
   }
 
-  const providers = getEnabledProviders();
-
   try {
     const session = await auth();
 
@@ -24,7 +22,9 @@ export default async function Page() {
     }
   } catch (error) {
     logger.error('[Auth] Error getting session in signin page:', error);
+    throw error;
   }
 
+  const providers = getEnabledProviders();
   return <SigninClient providers={providers} />;
 }
