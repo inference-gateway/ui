@@ -28,7 +28,7 @@ export async function GET() {
         ...init,
         headers: {
           ...init?.headers,
-          Authorization: `Bearer ${session?.accessToken}`,
+          ...(isAuthEnabled ? { Authorization: `Bearer ${session?.accessToken}` } : {}),
         },
       };
       return fetch(input, authInit);

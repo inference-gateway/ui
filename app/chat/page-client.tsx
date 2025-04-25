@@ -119,6 +119,7 @@ export default function PageClient({ session }: PageClientProps) {
         )}
       >
         <ChatHeader
+          session={session}
           isMobile={isMobile}
           showSidebar={showSidebar}
           selectedModel={selectedModel}

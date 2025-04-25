@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "inference-gateway-ui.fullname" . }}-defaults
+  labels:
+    {{- include "inference-gateway-ui.labels" . | nindent 4 }}
+data:
+  # General Settings
+  NODE_ENV: {{ .Values.config.NODE_ENV | quote }}
+  PORT: {{ .Values.config.PORT | quote }}
+  HOSTNAME: {{ .Values.config.HOSTNAME | quote }}
+  INFERENCE_GATEWAY_URL: {{ .Values.config.INFERENCE_GATEWAY_URL | quote }}
+  LOG_LEVEL: {{ .Values.config.LOG_LEVEL | quote }}
+  NEXT_PUBLIC_LOG_LEVEL: {{ .Values.config.NEXT_PUBLIC_LOG_LEVEL | quote }}
+  # Storage
+  NEXT_PUBLIC_INFERENCE_GATEWAY_UI_STORAGE_TYPE: {{ .Values.config.NEXT_PUBLIC_INFERENCE_GATEWAY_UI_STORAGE_TYPE | quote }}
+  # Authentication General Settings
+  ENABLE_AUTH: {{ .Values.config.ENABLE_AUTH | quote }}
+  SECURE_COOKIES: {{ .Values.config.SECURE_COOKIES | quote }}
+  NEXTAUTH_URL: {{ .Values.config.NEXTAUTH_URL | quote }}
+  NEXTAUTH_TRUST_HOST: {{ .Values.config.NEXTAUTH_TRUST_HOST | quote }}
+  NEXTAUTH_REFRESH_TOKEN_ENABLED: {{ .Values.config.NEXTAUTH_REFRESH_TOKEN_ENABLED | quote }}

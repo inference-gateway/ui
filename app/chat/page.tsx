@@ -19,5 +19,5 @@ export default async function Page() {
     redirect('/auth/signin?error=Session expired, please sign in again');
   }
 
-  return <PageClient />;
+  return <PageClient session={session} />;
 }
