@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.2](https://github.com/inference-gateway/ui/compare/v0.6.1...v0.6.2) (2025-04-25)
+
+### ♻️ Improvements
+
+* Improve helm configurations tuned for production ([#34](https://github.com/inference-gateway/ui/issues/34)) ([a1db2d4](https://github.com/inference-gateway/ui/commit/a1db2d4595fb79d0dac25cdf4f9cad90c594b5cd))
+
+### 🔧 Miscellaneous
+
+* Enhance testing guidelines with TDD requirements and coverage goals for Copilot ([65e9c3c](https://github.com/inference-gateway/ui/commit/65e9c3cc8e9ef122bb72fcd8f276272a24f12904))
+
 ## [0.6.2-rc.2](https://github.com/inference-gateway/ui/compare/v0.6.2-rc.1...v0.6.2-rc.2) (2025-04-25)
 
 ### ♻️ Improvements
