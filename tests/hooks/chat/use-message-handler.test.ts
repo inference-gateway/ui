@@ -66,6 +66,7 @@ describe('useMessageHandler Hook', () => {
     isStreaming: false,
     isDarkMode: false,
     error: null,
+    isWebSearchEnabled: false,
   };
 
   let currentChatState = mockChatState;
@@ -289,7 +290,7 @@ describe('useMessageHandler Hook', () => {
     });
 
     test('should update the title of a "New Chat"', async () => {
-      const newChatState = {
+      currentChatState = {
         ...mockChatState,
         sessions: [
           {
@@ -307,7 +308,7 @@ describe('useMessageHandler Hook', () => {
         useMessageHandler(
           mockClientInstance,
           selectedModel,
-          newChatState,
+          currentChatState,
           mockSetChatState,
           mockSetUIState,
           mockSetTokenUsage,
@@ -323,11 +324,13 @@ describe('useMessageHandler Hook', () => {
       });
 
       const calls = mockSetChatState.mock.calls;
-      const lastCall = calls[calls.length - 1];
-      const updatedState =
-        typeof lastCall[0] === 'function' ? lastCall[0](currentChatState) : lastCall[0];
+      const titleUpdateCall = calls.find(call => {
+        if (typeof call[0] !== 'function') return false;
+        const updatedState = call[0]({ ...currentChatState });
+        return updatedState.sessions[0].title === 'This is a long messa...';
+      });
 
-      expect(updatedState.sessions[0].title).toBe('This is a long messa...');
+      expect(titleUpdateCall).toBeDefined();
     });
 
     test('should handle successful streaming response', async () => {
@@ -411,12 +414,17 @@ describe('useMessageHandler Hook', () => {
           choices: [
             {
               delta: {
-                content: 'The answer',
-                reasoning_content: 'Let me think about this...',
+                content: '',
               },
             },
           ],
         });
+
+        callbacks.onReasoning('Let me think about this...');
+
+        callbacks.onContent('The answer');
+
+        callbacks.onFinish();
 
         return Promise.resolve();
       });
@@ -438,14 +446,20 @@ describe('useMessageHandler Hook', () => {
         await result.current.handleSendMessage('What is 2+2?');
       });
 
-      expectStateUpdate(mockSetChatState, {
-        messages: expect.arrayContaining([
-          expect.objectContaining({
-            content: 'The answer',
-            reasoning_content: 'Let me think about this...',
-          }),
-        ]),
+      const chatCalls = mockSetChatState.mock.calls;
+      const assistantMessageCall = chatCalls.find(call => {
+        if (typeof call[0] !== 'function') return false;
+        const result = call[0](currentChatState);
+        const messages = result.messages || [];
+        return messages.some(
+          m =>
+            m.role === MessageRole.assistant &&
+            m.content === 'The answer' &&
+            m.reasoning_content === 'Let me think about this...'
+        );
       });
+
+      expect(assistantMessageCall).toBeDefined();
     });
 
     test('should handle API errors during streaming', async () => {

@@ -1,4 +1,10 @@
-import { SchemaCompletionUsage, SchemaMessage } from '@inference-gateway/sdk';
+import {
+  MessageRole as MessageRoleType,
+  SchemaCompletionUsage,
+  SchemaMessage,
+} from '@inference-gateway/sdk';
+
+export const MessageRole = MessageRoleType;
 
 export interface Message extends SchemaMessage {
   id: string;

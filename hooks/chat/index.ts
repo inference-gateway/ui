@@ -37,10 +37,11 @@ export function useChat({
     isStreaming: false,
     isDarkMode: initialDarkMode,
     error: null,
+    isWebSearchEnabled: false,
   });
 
   const { sessions, activeId, messages } = chatState;
-  const { isLoading, isStreaming, error } = uiState;
+  const { isLoading, isStreaming, error, isWebSearchEnabled } = uiState;
 
   const { handleNewChat, handleSelectChat, handleDeleteChat } = useChatSessions(
     chatState,
@@ -59,7 +60,8 @@ export function useChat({
     setUIState,
     setTokenUsage,
     handleNewChat,
-    storageService
+    storageService,
+    isWebSearchEnabled
   );
 
   useEffect(() => {
@@ -98,6 +100,13 @@ export function useChat({
     }
   };
 
+  const toggleWebSearch = () => {
+    setUIState(prev => ({
+      ...prev,
+      isWebSearchEnabled: !prev.isWebSearchEnabled,
+    }));
+  };
+
   return {
     chatContainerRef,
     isDarkMode,
@@ -108,6 +117,7 @@ export function useChat({
     selectedModel,
     isLoading,
     isStreaming,
+    isWebSearchEnabled,
     tokenUsage,
     error,
     clearError,
@@ -116,5 +126,6 @@ export function useChat({
     handleSendMessage,
     handleSelectChat,
     handleDeleteChat,
+    toggleWebSearch,
   };
 }

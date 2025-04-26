@@ -9,7 +9,6 @@ import { useChat } from '@/hooks/use-chat';
 import { useState, useEffect } from 'react';
 import { ChatHeader } from '@/components/chat-header';
 import { ChevronLeft, Menu } from 'lucide-react';
-import logger from '@/lib/logger';
 import { Session } from 'next-auth';
 
 export const dynamic = 'force-dynamic';
@@ -19,8 +18,6 @@ export interface PageClientProps {
 }
 
 export default function PageClient({ session }: PageClientProps) {
-  logger.debug('Rendering Chat PageClient', { session });
-
   const {
     chatSessions,
     activeChatId,
@@ -28,6 +25,7 @@ export default function PageClient({ session }: PageClientProps) {
     selectedModel,
     isLoading,
     isStreaming,
+    isWebSearchEnabled,
     tokenUsage,
     error,
     clearError,
@@ -37,13 +35,13 @@ export default function PageClient({ session }: PageClientProps) {
     handleSelectChat,
     handleDeleteChat,
     chatContainerRef,
+    toggleWebSearch,
   } = useChat();
 
   const [inputValue, setInputValue] = useState('');
   const isMobile = useIsMobile();
   const [showSidebar, setShowSidebar] = useState(!isMobile);
   const [hasMessages, setHasMessages] = useState(messages.length > 0);
-  const [isSearchActive, setIsSearchActive] = useState(false);
   const [isDeepResearchActive, setIsDeepResearchActive] = useState(false);
 
   useEffect(() => {
@@ -65,13 +63,16 @@ export default function PageClient({ session }: PageClientProps) {
   };
 
   const handleSearchAction = () => {
-    setIsSearchActive(prev => !prev);
+    toggleWebSearch();
     setIsDeepResearchActive(false);
   };
 
   const handleDeepResearchAction = () => {
     setIsDeepResearchActive(prev => !prev);
-    setIsSearchActive(false);
+    // If enabling deep research, disable web search
+    if (!isDeepResearchActive && isWebSearchEnabled) {
+      toggleWebSearch();
+    }
   };
 
   return (
@@ -161,7 +162,7 @@ export default function PageClient({ session }: PageClientProps) {
                   setInputValue('');
                 }
               }}
-              isSearchActive={isSearchActive}
+              isSearchActive={isWebSearchEnabled}
               isDeepResearchActive={isDeepResearchActive}
               onSearchAction={handleSearchAction}
               onDeepResearchAction={handleDeepResearchAction}

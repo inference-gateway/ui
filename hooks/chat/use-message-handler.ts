@@ -1,10 +1,18 @@
 'use client';
 
 import logger from '@/lib/logger';
+import { ToolHandlers, WebSearchTool } from '@/lib/tools';
 import { Message, StorageService } from '@/types/chat';
-import { InferenceGatewayClient, MessageRole, SchemaCompletionUsage } from '@inference-gateway/sdk';
+import {
+  InferenceGatewayClient,
+  MessageRole,
+  SchemaChatCompletionMessageToolCall,
+  SchemaChatCompletionTool,
+  SchemaCompletionUsage,
+} from '@inference-gateway/sdk';
 import { useCallback, useRef } from 'react';
 import { ChatState, UIState } from './types';
+import { createNewChatId } from './utils';
 
 /**
  * Hook for managing sending messages and handling responses
@@ -17,10 +25,159 @@ export function useMessageHandler(
   setUIState: React.Dispatch<React.SetStateAction<UIState>>,
   setTokenUsage: React.Dispatch<React.SetStateAction<SchemaCompletionUsage>>,
   handleNewChat: () => Promise<void>,
-  storageService: StorageService
+  storageService: StorageService,
+  isWebSearchEnabled: boolean = false
 ) {
-  const latestMessageRef = useRef<string>('');
-  const reasoningContentRef = useRef<string>('');
+  const currentAssistantContent = useRef<string>('');
+  const currentReasoningContent = useRef<string>('');
+  const currentAssistantId = useRef<string>('');
+
+  /**
+   * Add a message to the chat and save to storage
+   */
+  const appendMessage = useCallback(
+    (message: Message) => {
+      const { activeId } = chatState;
+      if (!activeId) return;
+
+      setChatState(prev => {
+        const updatedMessages = [...prev.messages, message];
+
+        const updatedSessions = prev.sessions.map(chat => {
+          if (chat.id === activeId) {
+            let title = chat.title;
+            if (title === 'New Chat' && message.role === MessageRole.user && message.content) {
+              title = message.content.slice(0, 20) + (message.content.length > 20 ? '...' : '');
+            }
+
+            return {
+              ...chat,
+              messages: [...chat.messages, message],
+              title,
+            };
+          }
+          return chat;
+        });
+
+        storageService.saveChatSessions(updatedSessions);
+
+        return {
+          ...prev,
+          messages: updatedMessages,
+          sessions: updatedSessions,
+        };
+      });
+    },
+    [chatState, setChatState, storageService]
+  );
+
+  /**
+   * Update an existing message by ID and save to storage
+   */
+  const updateMessage = useCallback(
+    (messageId: string, updates: Partial<Message>) => {
+      const { activeId } = chatState;
+      if (!activeId) return;
+
+      setChatState(prev => {
+        const message = prev.messages.find(m => m.id === messageId);
+        if (!message) return prev;
+
+        const updatedMessage = {
+          ...message,
+          ...updates,
+          role: updates.role || message.role,
+        };
+
+        const updatedMessages = prev.messages.map(msg =>
+          msg.id === messageId ? updatedMessage : msg
+        );
+
+        const updatedSessions = prev.sessions.map(chat => {
+          if (chat.id === activeId) {
+            return {
+              ...chat,
+              messages: chat.messages.map(msg => (msg.id === messageId ? updatedMessage : msg)),
+            };
+          }
+          return chat;
+        });
+
+        storageService.saveChatSessions(updatedSessions);
+
+        return {
+          ...prev,
+          messages: updatedMessages,
+          sessions: updatedSessions,
+        };
+      });
+    },
+    [chatState, setChatState, storageService]
+  );
+
+  /**
+   * Update token usage and save to storage
+   */
+  const updateTokenUsage = useCallback(
+    (usage: SchemaCompletionUsage) => {
+      const { activeId } = chatState;
+      if (!activeId) return;
+
+      setTokenUsage(usage);
+
+      setChatState(prev => {
+        const updatedSessions = prev.sessions.map(chat => {
+          if (chat.id === activeId) {
+            return { ...chat, tokenUsage: usage };
+          }
+          return chat;
+        });
+
+        storageService.saveChatSessions(updatedSessions);
+        return { ...prev, sessions: updatedSessions };
+      });
+    },
+    [chatState, setChatState, setTokenUsage, storageService]
+  );
+
+  const updateChatStateWithMessage = useCallback(
+    (messageId: string) => {
+      const { activeId } = chatState;
+      if (!activeId) return;
+
+      setChatState(prev => {
+        const message = prev.messages.find(m => m.id === messageId);
+        if (!message) return prev;
+
+        const updatedSessions = prev.sessions.map(chat => {
+          if (chat.id === activeId) {
+            return {
+              ...chat,
+              messages: chat.messages.map(msg =>
+                msg.id === messageId
+                  ? {
+                      ...msg,
+                      content: message.content,
+                      reasoning_content: message.reasoning_content,
+                      role: message.role,
+                    }
+                  : msg
+              ),
+            };
+          }
+          return chat;
+        });
+
+        storageService.saveChatSessions(updatedSessions);
+
+        return {
+          ...prev,
+          sessions: updatedSessions,
+        };
+      });
+    },
+    [chatState, setChatState, storageService]
+  );
 
   const clearError = useCallback(() => {
     setUIState(prev => ({ ...prev, error: null }));
@@ -28,62 +185,42 @@ export function useMessageHandler(
 
   const handleSendMessage = useCallback(
     async (inputValue: string) => {
-      const { activeId, messages, sessions } = chatState;
-      const isLoading = false;
+      const { activeId } = chatState;
 
-      if (!inputValue.trim() || isLoading || !clientInstance) return;
-
+      if (!inputValue.trim() || !clientInstance) return;
       if (!activeId) {
         await handleNewChat();
         return;
       }
 
-      if (inputValue.startsWith('/')) {
-        if (inputValue.trim() === '/reset' || inputValue.trim() === '/clear') {
-          setChatState(prev => ({ ...prev, messages: [] }));
-          setTokenUsage({
-            prompt_tokens: 0,
-            completion_tokens: 0,
-            total_tokens: 0,
-          });
-          return;
-        }
+      if (
+        inputValue.startsWith('/') &&
+        (inputValue.trim() === '/reset' || inputValue.trim() === '/clear')
+      ) {
+        setChatState(prev => ({ ...prev, messages: [] }));
+        setTokenUsage({
+          prompt_tokens: 0,
+          completion_tokens: 0,
+          total_tokens: 0,
+        });
+        return;
       }
 
       const userMessage: Message = {
         role: MessageRole.user,
         content: inputValue,
-        id: Date.now().toString(),
+        id: createNewChatId(),
       };
-
-      const updatedMessages = [...messages, userMessage];
-      const updatedSessions = sessions.map(chat => {
-        if (chat.id === activeId) {
-          const updatedChat = {
-            ...chat,
-            messages: [...chat.messages, userMessage],
-          };
-
-          if (chat.title === 'New Chat' && userMessage.content) {
-            updatedChat.title =
-              userMessage.content.slice(0, 20) + (userMessage.content.length > 20 ? '...' : '');
-          }
-          return updatedChat;
-        }
-        return chat;
-      });
-
-      setChatState(prev => ({
-        ...prev,
-        messages: updatedMessages,
-        sessions: updatedSessions,
-      }));
+      appendMessage(userMessage);
 
       setUIState(prev => ({ ...prev, isLoading: true, isStreaming: true }));
-      latestMessageRef.current = '';
-      reasoningContentRef.current = '';
 
-      const assistantMessageId = Date.now().toString();
+      currentAssistantContent.current = '';
+      currentReasoningContent.current = '';
+
+      const assistantMessageId = createNewChatId();
+      currentAssistantId.current = assistantMessageId;
+
       const assistantMessage: Message = {
         role: MessageRole.assistant,
         content: '',
@@ -91,56 +228,95 @@ export function useMessageHandler(
         model: selectedModel,
       };
 
-      setChatState(prev => ({
-        ...prev,
-        messages: [...prev.messages, assistantMessage],
-      }));
+      appendMessage(assistantMessage);
+
+      const tools: SchemaChatCompletionTool[] = isWebSearchEnabled ? [WebSearchTool] : [];
 
       try {
+        const allMessages = chatState.messages.map(({ role, content }) => ({
+          role,
+          content: content || '',
+        }));
+
+        allMessages.push({
+          role: userMessage.role,
+          content: userMessage.content || '',
+        });
+
         await clientInstance.streamChatCompletion(
           {
             model: selectedModel,
-            messages: updatedMessages.map(({ role, content }) => ({
-              role,
-              content: content || '',
-            })),
+            messages: allMessages,
             stream: true,
+            tools,
           },
           {
-            onChunk: chunk => {
-              const content = chunk?.choices?.[0]?.delta?.content || '';
-              const reasoning = chunk?.choices?.[0]?.delta?.reasoning_content || '';
+            onTool: async (toolCall: SchemaChatCompletionMessageToolCall) => {
+              const args = JSON.parse(toolCall.function.arguments || '{}') as Record<
+                string,
+                unknown
+              >;
+              const formattedArgs = JSON.stringify(args, null, 2);
+              const assistantMessage: Message = {
+                role: MessageRole.assistant,
+                content: `I need to call the tool ${toolCall.function.name} with the arguments ${formattedArgs}`,
+                id: `tool_${createNewChatId()}`,
+                tool_call_id: toolCall.id,
+              };
 
-              if (content) latestMessageRef.current += content;
-              if (reasoning) reasoningContentRef.current += reasoning;
+              appendMessage(assistantMessage);
 
-              setChatState(prev => {
-                const updated = [...prev.messages];
-                const lastIndex = updated.length - 1;
-                if (lastIndex >= 0 && updated[lastIndex]?.id === assistantMessageId) {
-                  updated[lastIndex] = {
-                    ...updated[lastIndex],
-                    content: latestMessageRef.current,
-                    reasoning_content: reasoningContentRef.current || undefined,
+              const tool = ToolHandlers[toolCall.function.name];
+              if (tool) {
+                try {
+                  const result: unknown = await tool.call(args);
+                  const toolResponse: Message = {
+                    role: MessageRole.tool,
+                    content: `Tool response ${toolCall.function.name}: ${JSON.stringify(result, null, 2)}`,
+                    id: `tool_${createNewChatId()}`,
+                    tool_call_id: toolCall.id,
                   };
-                }
-                return { ...prev, messages: updated };
-              });
 
-              if (chunk?.usage) {
-                setTokenUsage(chunk.usage);
-
-                setChatState(prev => {
-                  const updatedSessions = prev.sessions.map(chat => {
-                    if (chat.id === activeId) {
-                      return { ...chat, tokenUsage: chunk.usage };
-                    }
-                    return chat;
+                  appendMessage(toolResponse);
+                } catch (error) {
+                  logger.error('Tool call error', {
+                    error: error instanceof Error ? error.message : error,
+                    stack: error instanceof Error ? error.stack : undefined,
                   });
-                  return { ...prev, sessions: updatedSessions };
-                });
+                  const errorMessage: Message = {
+                    role: MessageRole.tool,
+                    content: `Tool call error ${toolCall.function.name}: ${error instanceof Error ? error.message : error}`,
+                    id: `tool_${createNewChatId()}`,
+                    tool_call_id: toolCall.id,
+                  };
+                  appendMessage(errorMessage);
+                }
               }
             },
+            onReasoning(reasoningContent) {
+              currentReasoningContent.current += reasoningContent;
+
+              updateMessage(assistantMessageId, {
+                reasoning_content: currentReasoningContent.current,
+                role: MessageRole.assistant,
+              });
+            },
+
+            onContent(content) {
+              currentAssistantContent.current += content;
+
+              updateMessage(assistantMessageId, {
+                content: currentAssistantContent.current,
+                role: MessageRole.assistant,
+              });
+            },
+
+            onChunk: chunk => {
+              if (chunk?.usage) {
+                updateTokenUsage(chunk.usage);
+              }
+            },
+
             onError: error => {
               logger.error('Stream error', {
                 error: error instanceof Error ? error.message : error,
@@ -148,63 +324,30 @@ export function useMessageHandler(
               });
               throw error;
             },
+
+            onFinish() {
+              logger.debug('Stream finished');
+
+              updateMessage(assistantMessageId, {
+                content: currentAssistantContent.current || undefined,
+                reasoning_content: currentReasoningContent.current || undefined,
+                role: MessageRole.assistant,
+              });
+
+              updateChatStateWithMessage(assistantMessageId);
+            },
           }
         );
-
-        let currentTokenUsage: SchemaCompletionUsage = {
-          prompt_tokens: 0,
-          completion_tokens: 0,
-          total_tokens: 0,
-        };
-
-        setTokenUsage(prevTokenUsage => {
-          currentTokenUsage = prevTokenUsage;
-          return prevTokenUsage;
-        });
-
-        const finalAssistantMessage = {
-          role: MessageRole.assistant,
-          content: latestMessageRef.current,
-          id: assistantMessageId,
-          model: selectedModel,
-          reasoning_content: reasoningContentRef.current || undefined,
-        };
-
-        const updatedSessionsWithAssistant = updatedSessions.map(chat => {
-          if (chat.id === activeId) {
-            return {
-              ...chat,
-              messages: [...chat.messages, finalAssistantMessage],
-              tokenUsage: currentTokenUsage,
-            };
-          }
-          return chat;
-        });
-
-        setChatState(prev => ({
-          ...prev,
-          sessions: updatedSessionsWithAssistant,
-        }));
-
-        await storageService.saveChatSessions(updatedSessionsWithAssistant);
       } catch (error) {
         logger.error('Failed to get chat response', {
           error: error instanceof Error ? error.message : error,
           stack: error instanceof Error ? error.stack : undefined,
         });
 
-        setChatState(prev => {
-          const updated = [...prev.messages];
-          const lastIndex = updated.length - 1;
-          if (lastIndex >= 0 && updated[lastIndex].id === assistantMessageId) {
-            updated[lastIndex] = {
-              ...updated[lastIndex],
-              content:
-                latestMessageRef.current ||
-                'Sorry, I encountered an error. Please try again later.',
-            };
-          }
-          return { ...prev, messages: updated };
+        updateMessage(assistantMessageId, {
+          content:
+            currentAssistantContent.current ||
+            'Sorry, I encountered an error. Please try again later.',
         });
 
         setUIState(prev => ({
@@ -222,14 +365,18 @@ export function useMessageHandler(
       }
     },
     [
+      updateChatStateWithMessage,
       chatState,
       clientInstance,
       handleNewChat,
       selectedModel,
+      appendMessage,
+      updateMessage,
+      updateTokenUsage,
       setChatState,
       setTokenUsage,
       setUIState,
-      storageService,
+      isWebSearchEnabled,
     ]
   );
 

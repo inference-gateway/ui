@@ -12,6 +12,7 @@ export interface UIState {
   isStreaming: boolean;
   isDarkMode: boolean;
   error: string | null;
+  isWebSearchEnabled: boolean;
 }
 
 export interface ChatContextProps {
