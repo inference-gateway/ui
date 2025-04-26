@@ -1,7 +1,8 @@
+import { ChatCompletionToolType, SchemaChatCompletionTool } from '@inference-gateway/sdk';
 import logger from './logger';
 
-export const WebSearchTool = {
-  type: 'function',
+export const WebSearchTool: SchemaChatCompletionTool = {
+  type: 'function' as ChatCompletionToolType,
   function: {
     name: 'web_search',
     description: 'Search the web for information.',
@@ -12,6 +13,10 @@ export const WebSearchTool = {
         query: {
           type: 'string',
           description: 'The search query.',
+        },
+        limit: {
+          type: 'number',
+          description: 'The maximum number of results to return.',
         },
       } as unknown as Record<string, never>,
       required: ['query'],
@@ -26,8 +31,12 @@ export const ToolHandlers: Record<
   web_search: {
     call: async function (args: Record<string, unknown>): Promise<JSON> {
       const query = args.query as string;
+      const limit = args.limit as number | undefined;
       return new Promise(resolve => {
         logger.debug('Web search query:', query);
+        logger.debug('Limit:', limit);
+
+        // Mock search results for now
         setTimeout(() => {
           const results = {
             query,
