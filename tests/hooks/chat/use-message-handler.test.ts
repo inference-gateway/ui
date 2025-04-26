@@ -452,7 +452,7 @@ describe('useMessageHandler Hook', () => {
         const result = call[0](currentChatState);
         const messages = result.messages || [];
         return messages.some(
-          m =>
+          (m: Message) =>
             m.role === MessageRole.assistant &&
             m.content === 'The answer' &&
             m.reasoning_content === 'Let me think about this...'
