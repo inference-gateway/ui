@@ -20,6 +20,7 @@ export const WebSearchTool: SchemaChatCompletionTool = {
         },
       } as unknown as Record<string, never>,
       required: ['query'],
+      // additionalProperties: false, // TODO - Implement this field in the SDK and the inference-gateway (openai/o1-mini rejects the request if it's not there)
     },
   },
 };
