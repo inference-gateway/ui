@@ -32,24 +32,34 @@ export const ToolHandlers: Record<
   web_search: {
     call: async function (args: Record<string, unknown>): Promise<JSON> {
       const query = args.query as string;
-      const limit = args.limit as number | undefined;
-      return new Promise(resolve => {
-        logger.debug('Web search query:', query);
-        logger.debug('Limit:', limit);
+      const limit = (args.limit as number) || 5;
 
-        // Mock search results for now
-        setTimeout(() => {
-          const results = {
-            query,
-            results: [
-              { title: 'Result 1', url: 'http://example.com/1' },
-              { title: 'Result 2', url: 'http://example.com/2' },
-              { title: 'Result 3', url: 'http://example.com/3' },
-            ],
-          };
-          resolve(JSON.stringify(results) as unknown as JSON);
-        }, 1000);
-      });
+      logger.debug('Web search query:', query);
+      logger.debug('Limit:', limit);
+
+      try {
+        const url = new URL('/api/v1/tools/search', window.location.origin);
+        url.searchParams.append('query', query);
+        url.searchParams.append('limit', limit.toString());
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error(`Search request failed with status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        logger.debug('Search API response:', response.status);
+
+        return JSON.stringify(data) as unknown as JSON;
+      } catch (error) {
+        logger.error('Error during web search:', error);
+        return JSON.stringify({
+          query,
+          error: 'Failed to fetch search results',
+          results: [],
+        }) as unknown as JSON;
+      }
     },
   },
 };
