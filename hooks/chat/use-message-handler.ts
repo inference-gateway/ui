@@ -36,7 +36,7 @@ export function useMessageHandler(
    * Add a message to the chat and save to storage
    */
   const appendMessage = useCallback(
-    (message: Message) => {
+    (message: Message, saveToStorage = true) => {
       const { activeId } = chatState;
       if (!activeId) return;
 
@@ -59,7 +59,9 @@ export function useMessageHandler(
           return chat;
         });
 
-        storageService.saveChatSessions(updatedSessions);
+        if (saveToStorage) {
+          storageService.saveChatSessions(updatedSessions);
+        }
 
         return {
           ...prev,
@@ -75,7 +77,7 @@ export function useMessageHandler(
    * Update an existing message by ID and save to storage
    */
   const updateMessage = useCallback(
-    (messageId: string, updates: Partial<Message>) => {
+    (messageId: string, updates: Partial<Message>, saveToStorage = true) => {
       const { activeId } = chatState;
       if (!activeId) return;
 
@@ -103,7 +105,9 @@ export function useMessageHandler(
           return chat;
         });
 
-        storageService.saveChatSessions(updatedSessions);
+        if (saveToStorage) {
+          storageService.saveChatSessions(updatedSessions);
+        }
 
         return {
           ...prev,
@@ -140,45 +144,6 @@ export function useMessageHandler(
     [chatState, setChatState, setTokenUsage, storageService]
   );
 
-  const updateChatStateWithMessage = useCallback(
-    (messageId: string) => {
-      const { activeId } = chatState;
-      if (!activeId) return;
-
-      setChatState(prev => {
-        const message = prev.messages.find(m => m.id === messageId);
-        if (!message) return prev;
-
-        const updatedSessions = prev.sessions.map(chat => {
-          if (chat.id === activeId) {
-            return {
-              ...chat,
-              messages: chat.messages.map(msg =>
-                msg.id === messageId
-                  ? {
-                      ...msg,
-                      content: message.content,
-                      reasoning_content: message.reasoning_content,
-                      role: message.role,
-                    }
-                  : msg
-              ),
-            };
-          }
-          return chat;
-        });
-
-        storageService.saveChatSessions(updatedSessions);
-
-        return {
-          ...prev,
-          sessions: updatedSessions,
-        };
-      });
-    },
-    [chatState, setChatState, storageService]
-  );
-
   const clearError = useCallback(() => {
     setUIState(prev => ({ ...prev, error: null }));
   }, [setUIState]);
@@ -193,10 +158,7 @@ export function useMessageHandler(
         return;
       }
 
-      if (
-        inputValue.startsWith('/') &&
-        (inputValue.trim() === '/reset' || inputValue.trim() === '/clear')
-      ) {
+      if (inputValue.trim() === '/reset' || inputValue.trim() === '/clear') {
         setChatState(prev => ({ ...prev, messages: [] }));
         setTokenUsage({
           prompt_tokens: 0,
@@ -211,7 +173,7 @@ export function useMessageHandler(
         content: inputValue,
         id: createNewChatId(),
       };
-      appendMessage(userMessage);
+      appendMessage(userMessage, false);
 
       setUIState(prev => ({ ...prev, isLoading: true, isStreaming: true }));
 
@@ -227,21 +189,30 @@ export function useMessageHandler(
         id: assistantMessageId,
         model: selectedModel,
       };
-
-      appendMessage(assistantMessage);
+      appendMessage(assistantMessage, false);
 
       const tools: SchemaChatCompletionTool[] = isWebSearchEnabled ? [WebSearchTool] : [];
 
       try {
-        const allMessages = chatState.messages.map(({ role, content }) => ({
-          role,
-          content: content || '',
-        }));
+        const allMessages = [
+          ...chatState.messages.map(({ role, content, tool_call_id }) => {
+            const message: Message = {
+              id: assistantMessageId,
+              role: role,
+              content: content || '',
+            };
 
-        allMessages.push({
-          role: userMessage.role,
-          content: userMessage.content || '',
-        });
+            if (role === MessageRole.tool && tool_call_id) {
+              message.tool_call_id = tool_call_id;
+            }
+
+            return message;
+          }),
+          {
+            role: userMessage.role,
+            content: userMessage.content || '',
+          },
+        ];
 
         await clientInstance.streamChatCompletion(
           {
@@ -256,85 +227,177 @@ export function useMessageHandler(
                 string,
                 unknown
               >;
-              const formattedArgs = JSON.stringify(args, null, 2);
-              const assistantMessage: Message = {
+
+              updateMessage(
+                assistantMessageId,
+                {
+                  tool_calls: [toolCall],
+                },
+                false
+              );
+
+              const toolCallMessage: Message = {
                 role: MessageRole.assistant,
-                content: `I need to call the tool ${toolCall.function.name} with the arguments ${formattedArgs}`,
-                id: `tool_${createNewChatId()}`,
+                content: `Calling tool: ${toolCall.function.name}`,
+                id: createNewChatId(),
                 tool_call_id: toolCall.id,
               };
-
-              appendMessage(assistantMessage);
+              appendMessage(toolCallMessage, false);
 
               const tool = ToolHandlers[toolCall.function.name];
-              if (tool) {
-                try {
-                  const result: unknown = await tool.call(args);
-                  const toolResponse: Message = {
-                    role: MessageRole.tool,
-                    content: `Tool response ${toolCall.function.name}: ${JSON.stringify(result, null, 2)}`,
-                    id: `tool_${createNewChatId()}`,
-                    tool_call_id: toolCall.id,
-                  };
+              if (!tool) {
+                throw new Error(`Tool ${toolCall.function.name} not found`);
+              }
 
-                  appendMessage(toolResponse);
-                } catch (error) {
-                  logger.error('Tool call error', {
-                    error: error instanceof Error ? error.message : error,
-                    stack: error instanceof Error ? error.stack : undefined,
-                  });
-                  const errorMessage: Message = {
+              try {
+                const result = await tool.call(args);
+
+                const toolResponseMessage: Message = {
+                  role: MessageRole.tool,
+                  content: JSON.stringify(result),
+                  id: createNewChatId(),
+                  tool_call_id: toolCall.id,
+                };
+                appendMessage(toolResponseMessage, false);
+
+                const analysisMessages = [
+                  ...allMessages,
+                  {
                     role: MessageRole.tool,
-                    content: `Tool call error ${toolCall.function.name}: ${error instanceof Error ? error.message : error}`,
-                    id: `tool_${createNewChatId()}`,
+                    content: JSON.stringify(result),
                     tool_call_id: toolCall.id,
-                  };
-                  appendMessage(errorMessage);
-                }
+                  },
+                  {
+                    role: MessageRole.system,
+                    content: `You are responding after a web search for the user's query. Follow these instructions carefully:
+                    1. Always start by presenting the search results in a clear, organized way
+                    2. For each relevant result, include the title and a brief summary of the content
+                    3. If the results contain links or sources, mention them
+                    4. After presenting the results, provide your analysis and additional insights
+                    5. Answer the user's original question thoroughly based on the search results
+                    6. If the search results are insufficient, acknowledge this limitation
+                    7. End with a follow-up question or suggestion related to the topic`,
+                  },
+                ];
+
+                let analysisContentBuffer = '';
+                let analysisReasoningBuffer = '';
+
+                const analysisMessageId = createNewChatId();
+                const analysisMessage: Message = {
+                  role: MessageRole.assistant,
+                  content: '',
+                  id: analysisMessageId,
+                  model: selectedModel,
+                };
+                appendMessage(analysisMessage, false);
+
+                await clientInstance.streamChatCompletion(
+                  {
+                    model: selectedModel,
+                    messages: analysisMessages,
+                    stream: true,
+                  },
+                  {
+                    onReasoning: reasoningContent => {
+                      analysisReasoningBuffer += reasoningContent;
+                      updateMessage(analysisMessageId, {
+                        reasoning_content: analysisReasoningBuffer,
+                      });
+                    },
+                    onContent: content => {
+                      analysisContentBuffer += content;
+                      updateMessage(analysisMessageId, {
+                        content: analysisContentBuffer,
+                      });
+                      setChatState(prev => ({ ...prev }));
+                    },
+                    onChunk: chunk => {
+                      if (chunk?.usage) {
+                        updateTokenUsage(chunk.usage);
+                      }
+                    },
+                    onError: error => {
+                      logger.error('Stream error after tool call', {
+                        error: error instanceof Error ? error.message : error,
+                        stack: error instanceof Error ? error.stack : undefined,
+                      });
+                      updateMessage(analysisMessageId, {
+                        content: `${analysisContentBuffer}\n\nSorry, I had trouble processing the tool results. Please ask me anything else.`,
+                      });
+                    },
+                    onFinish: () => {
+                      currentAssistantContent.current = '';
+                      currentReasoningContent.current = '';
+
+                      setUIState(prev => ({
+                        ...prev,
+                        isLoading: false,
+                        isStreaming: false,
+                      }));
+                    },
+                  }
+                );
+              } catch (error) {
+                logger.error('Tool call failed', {
+                  error: error instanceof Error ? error.message : error,
+                  stack: error instanceof Error ? error.stack : undefined,
+                });
+                updateMessage(assistantMessageId, {
+                  content: `Failed to call tool ${toolCall.function.name}: ${
+                    error instanceof Error ? error.message : error
+                  }`,
+                });
               }
             },
-            onReasoning(reasoningContent) {
+            onReasoning: reasoningContent => {
               currentReasoningContent.current += reasoningContent;
-
               updateMessage(assistantMessageId, {
                 reasoning_content: currentReasoningContent.current,
-                role: MessageRole.assistant,
               });
             },
-
-            onContent(content) {
+            onContent: content => {
               currentAssistantContent.current += content;
-
               updateMessage(assistantMessageId, {
                 content: currentAssistantContent.current,
-                role: MessageRole.assistant,
               });
             },
-
             onChunk: chunk => {
               if (chunk?.usage) {
                 updateTokenUsage(chunk.usage);
               }
             },
-
             onError: error => {
               logger.error('Stream error', {
                 error: error instanceof Error ? error.message : error,
                 stack: error instanceof Error ? error.stack : undefined,
               });
-              throw error;
-            },
-
-            onFinish() {
-              logger.debug('Stream finished');
-
               updateMessage(assistantMessageId, {
-                content: currentAssistantContent.current || undefined,
-                reasoning_content: currentReasoningContent.current || undefined,
-                role: MessageRole.assistant,
+                content:
+                  currentAssistantContent.current ||
+                  'Sorry, I encountered an error. Please try again.',
               });
-
-              updateChatStateWithMessage(assistantMessageId);
+              setUIState(prev => ({
+                ...prev,
+                isLoading: false,
+                isStreaming: false,
+                error: error instanceof Error ? error.message : 'Failed to get response',
+              }));
+            },
+            onFinish: () => {
+              updateMessage(
+                assistantMessageId,
+                {
+                  content: currentAssistantContent.current,
+                  reasoning_content: currentReasoningContent.current,
+                },
+                true
+              );
+              setUIState(prev => ({
+                ...prev,
+                isLoading: false,
+                isStreaming: false,
+              }));
             },
           }
         );
@@ -365,7 +428,6 @@ export function useMessageHandler(
       }
     },
     [
-      updateChatStateWithMessage,
       chatState,
       clientInstance,
       handleNewChat,

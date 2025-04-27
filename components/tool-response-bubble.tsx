@@ -1,18 +1,26 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, Terminal } from 'lucide-react';
-import { SchemaChatCompletionMessageToolCall } from '@inference-gateway/sdk';
+import { ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react';
 
-interface ToolCallBubbleProps {
-  toolCalls: SchemaChatCompletionMessageToolCall[] | undefined;
+interface ToolResponseBubbleProps {
+  response: string;
+  toolName?: string;
 }
 
-export default function ToolCallBubble({ toolCalls }: ToolCallBubbleProps) {
+export default function ToolResponseBubble({ response, toolName }: ToolResponseBubbleProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleExpanded = () => setIsExpanded(prev => !prev);
 
-  if (!toolCalls || toolCalls.length === 0) {
+  if (!response) {
     return null;
+  }
+
+  let responseContent;
+  try {
+    responseContent = JSON.parse(response);
+    responseContent = JSON.stringify(responseContent, null, 2);
+  } catch {
+    responseContent = response;
   }
 
   return (
@@ -22,8 +30,8 @@ export default function ToolCallBubble({ toolCalls }: ToolCallBubbleProps) {
           onClick={toggleExpanded}
           className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs bg-[hsl(var(--thinking-bubble-bg))] border border-[hsl(var(--thinking-bubble-border))] hover:bg-[hsl(var(--thinking-bubble-hover-bg))] transition-colors duration-200 text-[hsl(var(--thinking-bubble-text))] z-10"
         >
-          <Terminal className="h-3 w-3" />
-          <span>Tool Calls ({toolCalls.length})</span>
+          <ArrowLeft className="h-3 w-3" />
+          <span>{toolName ? `${toolName} Response` : 'Tool Response'}</span>
           {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
         </button>
       </div>
@@ -31,9 +39,7 @@ export default function ToolCallBubble({ toolCalls }: ToolCallBubbleProps) {
       {isExpanded && (
         <div className="flex items-start gap-4 rounded-lg p-4 mt-1 mb-1 bg-[hsl(var(--thinking-bubble-content-bg))] border border-[hsl(var(--thinking-bubble-content-border))] shadow-sm transition-all overflow-hidden">
           <div className="flex-1 space-y-2">
-            <pre className="whitespace-pre-wrap break-all text-sm">
-              {JSON.stringify(toolCalls, null, 2)}
-            </pre>
+            <pre className="whitespace-pre-wrap break-all text-sm">{responseContent}</pre>
           </div>
         </div>
       )}

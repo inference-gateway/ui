@@ -1,12 +1,18 @@
 import { ChatCompletionToolType, SchemaChatCompletionTool } from '@inference-gateway/sdk';
 import logger from './logger';
 
+interface SearchResult {
+  title: string;
+  url: string;
+  snippet: string;
+}
+
 export const WebSearchTool: SchemaChatCompletionTool = {
   type: 'function' as ChatCompletionToolType,
   function: {
     name: 'web_search',
     description: 'Search the web for information.',
-    strict: true,
+    strict: false,
     parameters: {
       type: 'object',
       properties: {
@@ -20,7 +26,7 @@ export const WebSearchTool: SchemaChatCompletionTool = {
         },
       } as unknown as Record<string, never>,
       required: ['query'],
-      // additionalProperties: false, // TODO - Implement this field in the SDK and the inference-gateway (openai/o1-mini rejects the request if it's not there)
+      additionalProperties: false,
     },
   },
 };
@@ -51,7 +57,16 @@ export const ToolHandlers: Record<
         const data = await response.json();
         logger.debug('Search API response:', response.status);
 
-        return JSON.stringify(data) as unknown as JSON;
+        const formattedResults = {
+          query,
+          results:
+            data.results?.map((result: SearchResult) => ({
+              title: result.title,
+              url: result.url,
+              snippet: result.snippet,
+            })) || [],
+        };
+        return JSON.stringify(formattedResults) as unknown as JSON;
       } catch (error) {
         logger.error('Error during web search:', error);
         return JSON.stringify({

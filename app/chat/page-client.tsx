@@ -69,7 +69,6 @@ export default function PageClient({ session }: PageClientProps) {
 
   const handleDeepResearchAction = () => {
     setIsDeepResearchActive(prev => !prev);
-    // If enabling deep research, disable web search
     if (!isDeepResearchActive && isWebSearchEnabled) {
       toggleWebSearch();
     }

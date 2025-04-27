@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import ThinkingBubble from '@/components/thinking-bubble';
+import ToolCallBubble from '@/components/tool-call-bubble';
+import ToolResponseBubble from '@/components/tool-response-bubble';
 import type { Message } from '@/types/chat';
 import { CodeBlock } from '@/components/code-block';
 import { cn } from '@/lib/utils';
@@ -35,6 +37,21 @@ export function ChatArea({ messages, isStreaming }: ChatAreaProps) {
     }
   }, [isStreaming, messages]);
 
+  const getToolNameForResponse = (toolCallId: string | undefined): string | undefined => {
+    if (!toolCallId) return undefined;
+
+    for (const msg of messages) {
+      if (msg.tool_calls) {
+        for (const toolCall of msg.tool_calls) {
+          if (toolCall.id === toolCallId) {
+            return toolCall.function.name;
+          }
+        }
+      }
+    }
+    return undefined;
+  };
+
   return (
     <div className="flex-1 overflow-y-auto">
       <div className={cn('mx-auto max-w-2xl px-4', messages.length > 0 ? 'py-6' : 'py-2')}>
@@ -43,16 +60,30 @@ export function ChatArea({ messages, isStreaming }: ChatAreaProps) {
             {messages.map((message, index) => {
               const isUser = message.role === 'user';
               const showReasoning = !isUser && message.reasoning_content;
+              const showToolCalls = !isUser && message.tool_calls;
+              const showToolResponse = message.role === 'tool' && message.content;
               const isLastMessage = index === messages.length - 1;
               const wasStreamed = streamedMessageIds.has(message.id);
               const showThinking =
                 !isUser && (showReasoning || (isLastMessage && isStreaming) || wasStreamed);
 
               const isThinkingModel = !!message.reasoning_content;
+              const toolName = getToolNameForResponse(message.tool_call_id);
+
+              if (message.role === 'tool' && !message.content) {
+                return null;
+              }
 
               return (
                 <div key={`${message.role + message.id}`} className="flex flex-col">
                   <div className={cn('w-full flex flex-col', isUser ? 'items-end' : 'items-start')}>
+                    {isStreaming && isLastMessage && (
+                      <div className="flex items-center space-x-2 mt-2">
+                        <div className="h-2 w-2 rounded-full bg-[hsl(var(--chat-typing-indicator))] animate-pulse"></div>
+                        <div className="h-2 w-2 rounded-full bg-[hsl(var(--chat-typing-indicator))] animate-pulse delay-150"></div>
+                        <div className="h-2 w-2 rounded-full bg-[hsl(var(--chat-typing-indicator))] animate-pulse delay-300"></div>
+                      </div>
+                    )}
                     {showThinking && (
                       <div className="mb-1">
                         <ThinkingBubble
@@ -64,24 +95,37 @@ export function ChatArea({ messages, isStreaming }: ChatAreaProps) {
                         />
                       </div>
                     )}
+                    {showToolCalls && (
+                      <div className="mb-1 w-full">
+                        <ToolCallBubble toolCalls={message.tool_calls} />
+                      </div>
+                    )}
+                    {showToolResponse && (
+                      <div className="mb-1 w-full">
+                        <ToolResponseBubble response={message.content} toolName={toolName} />
+                      </div>
+                    )}
 
-                    <div
-                      className={cn(
-                        'rounded-lg px-4 py-3',
-                        isUser
-                          ? 'bg-[hsl(var(--chat-user-message-bg))] text-[hsl(var(--chat-user-message-text))]'
-                          : 'bg-[hsl(var(--chat-ai-message-bg))] text-[hsl(var(--chat-ai-message-text))]',
-                        'max-w-[85%]'
-                      )}
-                    >
-                      {isUser ? (
-                        <div>
-                          <p className="whitespace-pre-wrap">{message.content}</p>
-                        </div>
-                      ) : (
-                        <div>
-                          <div className="prose prose-invert max-w-none">
-                            {message.content ? (
+                    {(isUser ||
+                      (message.role === 'assistant' &&
+                        message.content &&
+                        !message.tool_call_id)) && (
+                      <div
+                        className={cn(
+                          'rounded-lg px-4 py-3',
+                          isUser
+                            ? 'bg-[hsl(var(--chat-user-message-bg))] text-[hsl(var(--chat-user-message-text))]'
+                            : 'bg-[hsl(var(--chat-ai-message-bg))] text-[hsl(var(--chat-ai-message-text))]',
+                          'max-w-[85%]'
+                        )}
+                      >
+                        {isUser ? (
+                          <div>
+                            <p className="whitespace-pre-wrap">{message.content}</p>
+                          </div>
+                        ) : (
+                          <div>
+                            <div className="prose prose-invert max-w-none">
                               <ReactMarkdown
                                 components={{
                                   code: CodeBlock,
@@ -89,17 +133,11 @@ export function ChatArea({ messages, isStreaming }: ChatAreaProps) {
                               >
                                 {message.content}
                               </ReactMarkdown>
-                            ) : isStreaming && isLastMessage ? (
-                              <div className="flex items-center space-x-2">
-                                <div className="h-2 w-2 rounded-full bg-[hsl(var(--chat-typing-indicator))] animate-pulse"></div>
-                                <div className="h-2 w-2 rounded-full bg-[hsl(var(--chat-typing-indicator))] animate-pulse delay-150"></div>
-                                <div className="h-2 w-2 rounded-full bg-[hsl(var(--chat-typing-indicator))] animate-pulse delay-300"></div>
-                              </div>
-                            ) : null}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               );

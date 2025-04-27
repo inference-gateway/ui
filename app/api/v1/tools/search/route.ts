@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const searchQuery = encodeURIComponent(query);
-    const url = `https://html.duckduckgo.com/html/?q=${searchQuery}`;
+    const url = `https://html.duckduckgo.com/html/?q=${searchQuery}&limit=${limit}`;
 
     logger.debug(`Server-side search request to ${url}`);
 
