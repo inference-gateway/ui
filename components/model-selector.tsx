@@ -68,9 +68,14 @@ export default function ModelSelector({
 
   useEffect(() => {
     if (open && searchInputRef.current) {
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 0);
+      const timer = setTimeout(() => {
+        if (searchInputRef.current) {
+          searchInputRef.current.focus();
+        }
+      }, 10);
+      return () => clearTimeout(timer);
+    } else if (!open) {
+      setSearchQuery('');
     }
   }, [open]);
 
@@ -85,6 +90,43 @@ export default function ModelSelector({
   const getDisplayName = (modelId: string) => {
     if (!modelId) return isLoading ? 'Loading...' : 'Select a model';
     return modelId;
+  };
+
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSearchQuery(e.target.value);
+    setTimeout(() => {
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+      }
+    }, 0);
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    e.stopPropagation();
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      const firstModelItem = document.querySelector(
+        '[data-testid^="model-option-"]'
+      ) as HTMLElement;
+      if (firstModelItem) {
+        firstModelItem.focus();
+      }
+    }
+
+    if (e.key === 'Enter') {
+      if (filteredModels.length === 1) {
+        handleModelSelect(filteredModels[0].id);
+        e.preventDefault();
+      }
+    }
+  };
+
+  const handleInputClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   return (
@@ -115,6 +157,11 @@ export default function ModelSelector({
           'bg-[hsl(var(--model-selector-bg))] border-[hsl(var(--model-selector-border))] text-[hsl(var(--model-selector-text))] max-h-[300px] mx-auto',
           isMobile ? 'w-[90vw]' : 'w-[240px] md:min-w-[330px] md:w-[350px]'
         )}
+        onCloseAutoFocus={e => {
+          if (searchQuery) {
+            e.preventDefault();
+          }
+        }}
       >
         <div className="flex items-center px-3 pb-2 sticky top-0 bg-[hsl(var(--model-selector-bg))] z-10">
           <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
@@ -123,12 +170,10 @@ export default function ModelSelector({
             placeholder="Search models..."
             className="h-8 bg-transparent border-[hsl(var(--model-selector-border))] text-[hsl(var(--model-selector-text))] placeholder:text-[hsl(var(--model-selector-disabled-text))]"
             value={searchQuery}
-            onChange={e => {
-              const query = e.target.value;
-              setSearchQuery(query);
-            }}
-            onClick={e => e.stopPropagation()}
-            onKeyDown={e => e.stopPropagation()}
+            onChange={handleSearchInputChange}
+            onClick={handleInputClick}
+            onKeyDown={handleSearchKeyDown}
+            autoComplete="off"
             data-testid="search-input"
           />
         </div>
