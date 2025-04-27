@@ -11,7 +11,6 @@ jest.mock('@/hooks/use-mobile', () => ({
 
 describe('InputArea Component', () => {
   const mockProps = {
-    inputValue: '',
     isLoading: false,
     selectedModel: 'gpt-4o',
     tokenUsage: {
@@ -19,8 +18,6 @@ describe('InputArea Component', () => {
       completion_tokens: 15,
       total_tokens: 25,
     } as SchemaCompletionUsage,
-    onInputChangeAction: jest.fn(),
-    onKeyDownAction: jest.fn(),
     onSendMessageAction: jest.fn(),
     onSearchAction: jest.fn(),
     onDeepResearchAction: jest.fn(),
@@ -65,19 +62,26 @@ describe('InputArea Component', () => {
   });
 
   test('enables send button when input has text', () => {
-    render(<InputArea {...mockProps} inputValue="Hello world" />);
+    render(<InputArea {...mockProps} />);
+
+    const input = screen.getByTestId('mock-input');
+    fireEvent.change(input, { target: { value: 'Hello world' } });
 
     const sendButton = screen.getByTestId('mock-send-button');
     expect(sendButton).not.toBeDisabled();
   });
 
-  test('calls onSendMessageAction when send button is clicked', () => {
-    render(<InputArea {...mockProps} inputValue="Hello world" />);
+  test('calls onSendMessage when send button is clicked', () => {
+    const onSendMessage = jest.fn();
+    render(<InputArea {...mockProps} onSendMessageAction={onSendMessage} />);
+
+    const input = screen.getByTestId('mock-input');
+    fireEvent.change(input, { target: { value: 'Hello world' } });
 
     const sendButton = screen.getByTestId('mock-send-button');
     fireEvent.click(sendButton);
 
-    expect(mockProps.onSendMessageAction).toHaveBeenCalled();
+    expect(onSendMessage).toHaveBeenCalledWith('Hello world');
   });
 
   test('shows all UI elements from the screenshot design', () => {

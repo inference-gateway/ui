@@ -7,13 +7,10 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useLayoutEffect, useRef, useState } from 'react';
 
 interface InputAreaProps {
-  inputValue: string;
   isLoading: boolean;
   selectedModel: string;
   tokenUsage: SchemaCompletionUsage;
-  onInputChangeAction: (value: string) => void;
-  onKeyDownAction: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
-  onSendMessageAction: () => void;
+  onSendMessageAction: (message: string) => void;
   onSearchAction?: () => void;
   onDeepResearchAction?: () => void;
   isSearchActive?: boolean;
@@ -21,18 +18,16 @@ interface InputAreaProps {
 }
 
 export function InputArea({
-  inputValue,
   isLoading,
   selectedModel,
   tokenUsage,
-  onInputChangeAction,
-  onKeyDownAction,
   onSendMessageAction,
   onSearchAction,
   onDeepResearchAction,
   isSearchActive = false,
   isDeepResearchActive = false,
 }: InputAreaProps) {
+  const [inputValue, setInputValue] = useState('');
   const isMobile = useIsMobile();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [, setTextareaHeight] = useState<number>(0);
@@ -52,6 +47,20 @@ export function InputArea({
     }
   }, [inputValue, isMobile]);
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  const handleSendMessage = () => {
+    if (inputValue.trim() && !isLoading && selectedModel) {
+      onSendMessageAction(inputValue);
+      setInputValue('');
+    }
+  };
+
   return (
     <div className={cn('py-4', isMobile && 'pb-6')}>
       <div className="w-full">
@@ -69,8 +78,8 @@ export function InputArea({
             <textarea
               ref={textareaRef}
               value={inputValue}
-              onChange={e => onInputChangeAction(e.target.value)}
-              onKeyDown={onKeyDownAction}
+              onChange={e => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder="Ask anything"
               rows={isMobile ? 2 : 1}
               disabled={isLoading || !selectedModel}
@@ -163,7 +172,7 @@ export function InputArea({
               </button>
 
               <button
-                onClick={onSendMessageAction}
+                onClick={handleSendMessage}
                 disabled={!inputValue.trim() || isLoading || !selectedModel}
                 className={cn(
                   isMobile ? 'p-2 rounded-lg' : 'p-1.5 rounded-md',

@@ -38,7 +38,6 @@ export default function PageClient({ session }: PageClientProps) {
     toggleWebSearch,
   } = useChat();
 
-  const [inputValue, setInputValue] = useState('');
   const isMobile = useIsMobile();
   const [showSidebar, setShowSidebar] = useState(!isMobile);
   const [hasMessages, setHasMessages] = useState(messages.length > 0);
@@ -51,16 +50,6 @@ export default function PageClient({ session }: PageClientProps) {
   useEffect(() => {
     setHasMessages(messages.length > 0);
   }, [messages]);
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      if (inputValue.trim()) {
-        handleSendMessage(inputValue);
-        setInputValue('');
-      }
-    }
-  };
 
   const handleSearchAction = () => {
     toggleWebSearch();
@@ -149,18 +138,10 @@ export default function PageClient({ session }: PageClientProps) {
         >
           <div className={cn('mx-auto', hasMessages ? 'max-w-[800px]' : '')}>
             <InputArea
-              inputValue={inputValue}
               isLoading={isLoading}
               selectedModel={selectedModel}
               tokenUsage={tokenUsage}
-              onInputChangeAction={setInputValue}
-              onKeyDownAction={handleKeyDown}
-              onSendMessageAction={() => {
-                if (inputValue.trim()) {
-                  handleSendMessage(inputValue);
-                  setInputValue('');
-                }
-              }}
+              onSendMessageAction={handleSendMessage}
               isSearchActive={isWebSearchEnabled}
               isDeepResearchActive={isDeepResearchActive}
               onSearchAction={handleSearchAction}
