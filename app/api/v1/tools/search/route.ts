@@ -45,8 +45,6 @@ export async function GET(request: NextRequest) {
 
     const htmlText = await response.text();
 
-    logger.debug(`HTML response preview: ${htmlText.substring(0, 500).replace(/\n/g, ' ')}...`);
-
     const $ = cheerio.load(htmlText);
     const searchResults: SearchResult[] = [];
 

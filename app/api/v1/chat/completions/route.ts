@@ -43,11 +43,9 @@ export async function POST(req: Request) {
       fetch: fetchWithAuth,
     });
     const body = await req.json();
-    logger.debug('[Chat Completions] Request body received', {
-      stream: body.stream,
-      model: body.model,
-      messages: body.messages?.length,
-    });
+
+    logger.debug('[Chat Completions] Request body received', { body: JSON.stringify(body) });
+
     const { stream } = body;
 
     if (stream) {
@@ -103,9 +101,13 @@ export async function POST(req: Request) {
         try {
           await safeWrite(': ping\n\n');
 
+          logger.debug('[Chat Completions] Starting streaming request to gateway');
           await clientWithAuth.streamChatCompletion(body, {
             onChunk: async chunk => {
               if (isWriterClosed) return;
+              logger.debug('[Chat Completions] Received chunk', {
+                chunk,
+              });
 
               try {
                 if (chunk.choices?.[0]?.delta?.content) {
@@ -151,10 +153,48 @@ export async function POST(req: Request) {
                 }
 
                 await safeWrite(`data: ${JSON.stringify(chunk)}\n\n`);
-
                 await safeWrite(': keep-alive\n\n');
               } catch (error) {
                 logger.error('[Chat Completions] Error processing chunk', {
+                  error,
+                });
+              }
+            },
+            onTool: async toolCall => {
+              if (isWriterClosed) return;
+              logger.debug('[Chat Completions] Received tool call', {
+                toolCall,
+              });
+
+              try {
+                const formattedToolCall = {
+                  id: toolCall.id,
+                  type: toolCall.type,
+                  function: {
+                    name: toolCall.function.name,
+                    arguments: toolCall.function.arguments,
+                  },
+                };
+
+                const streamPayload = {
+                  id: body.id || `chatcmpl-${Date.now()}`,
+                  object: 'chat.completion.chunk',
+                  created: Math.floor(Date.now() / 1000),
+                  model: body.model,
+                  choices: [
+                    {
+                      index: 0,
+                      delta: {
+                        tool_calls: [formattedToolCall],
+                      },
+                    },
+                  ],
+                };
+
+                await safeWrite(`data: ${JSON.stringify(streamPayload)}\n\n`);
+                await safeWrite(': keep-alive\n\n');
+              } catch (error) {
+                logger.error('[Chat Completions] Error processing tool call', {
                   error,
                 });
               }
@@ -171,6 +211,7 @@ export async function POST(req: Request) {
               }
             },
             onFinish: () => {
+              logger.debug('[Chat Completions] Stream completed successfully');
               if (!isWriterClosed) {
                 safeWrite('data: [DONE]\n\n');
                 safeClose();
@@ -197,10 +238,6 @@ export async function POST(req: Request) {
       try {
         logger.debug('[Chat Completions] Starting non-streaming completion');
         const completionData = await clientWithAuth.createChatCompletion(body);
-        logger.debug('[Chat Completions] Completed non-streaming completion', {
-          model: completionData.model,
-          usage: completionData.usage,
-        });
 
         if (completionData.choices?.[0]?.message?.content) {
           const content = completionData.choices[0].message.content || '';
@@ -221,7 +258,10 @@ export async function POST(req: Request) {
 
         return NextResponse.json(completionData);
       } catch (error) {
-        logger.error('[Chat Completions] Error in completion', { error });
+        logger.error('[Chat Completions] Error in completion', {
+          error,
+          requestModel: body.model,
+        });
         return NextResponse.json(
           {
             error: error instanceof Error ? error.message : 'Unknown error',
