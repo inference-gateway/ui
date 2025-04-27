@@ -4,7 +4,7 @@ import { SendHorizonal, Plus, Globe, Mic, MoreHorizontal } from 'lucide-react';
 import { SchemaCompletionUsage } from '@inference-gateway/sdk';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 interface InputAreaProps {
   isLoading: boolean;
@@ -30,22 +30,6 @@ export function InputArea({
   const [inputValue, setInputValue] = useState('');
   const isMobile = useIsMobile();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [, setTextareaHeight] = useState<number>(0);
-
-  useLayoutEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-
-      const defaultHeight = isMobile ? '58px' : '44px';
-
-      const scrollHeight = inputValue.trim()
-        ? Math.min(textareaRef.current.scrollHeight, isMobile ? 150 : 120)
-        : parseInt(defaultHeight);
-
-      textareaRef.current.style.height = `${scrollHeight}px`;
-      setTextareaHeight(scrollHeight);
-    }
-  }, [inputValue, isMobile]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -81,11 +65,11 @@ export function InputArea({
               onChange={e => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Ask anything"
-              rows={isMobile ? 2 : 1}
+              rows={2}
               disabled={isLoading || !selectedModel}
               className={cn(
                 'w-full py-3 px-14 resize-none',
-                'min-h-[44px] max-h-[120px]',
+                'min-h-[55px] max-h-[120px]',
                 'bg-transparent text-chat-input-text',
                 'focus:outline-none',
                 'disabled:opacity-50 disabled:cursor-not-allowed',
@@ -192,3 +176,14 @@ export function InputArea({
     </div>
   );
 }
+
+// Add this CSS utility to your global styles or include it here
+// If you don't have a scrollbar-hide utility in your tailwind config,
+// you can use these inline styles instead:
+// style={{
+//   height: `${defaultHeight}px`,
+//   overflowY: 'auto',
+//   msOverflowStyle: 'none',
+//   scrollbarWidth: 'none'
+// }}
+// and add this to className: '[&::-webkit-scrollbar]:hidden'
