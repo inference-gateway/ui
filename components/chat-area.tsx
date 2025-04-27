@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import ThinkingBubble from '@/components/thinking-bubble';
 import ToolCallBubble from '@/components/tool-call-bubble';
 import ToolResponseBubble from '@/components/tool-response-bubble';
+import RequestBubble from '@/components/request-bubble';
 import type { Message } from '@/types/chat';
 import { CodeBlock } from '@/components/code-block';
 import { cn } from '@/lib/utils';
@@ -50,6 +51,36 @@ export function ChatArea({ messages, isStreaming }: ChatAreaProps) {
       }
     }
     return undefined;
+  };
+
+  const createRequestObject = (message: Message, index: number) => {
+    const messageHistory = messages.slice(0, index + 1).map(msg => ({
+      role: msg.role,
+      content: msg.content || '',
+      ...(msg.tool_call_id && { tool_call_id: msg.tool_call_id }),
+    }));
+
+    const getFullUrl = () => {
+      if (typeof window !== 'undefined') {
+        const origin = window.location.origin;
+        return `${origin}/api/v1/chat/completions`;
+      }
+      return '/api/v1/chat/completions';
+    };
+
+    return {
+      method: 'POST',
+      url: getFullUrl(),
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: {
+        model: message.model || 'default-model',
+        messages: messageHistory,
+        stream: true,
+      },
+    };
   };
 
   return (
@@ -103,6 +134,12 @@ export function ChatArea({ messages, isStreaming }: ChatAreaProps) {
                     {showToolResponse && (
                       <div className="mb-1 w-full">
                         <ToolResponseBubble response={message.content} toolName={toolName} />
+                      </div>
+                    )}
+
+                    {isUser && (
+                      <div className="mb-1 w-full">
+                        <RequestBubble request={createRequestObject(message, index)} />
                       </div>
                     )}
 
