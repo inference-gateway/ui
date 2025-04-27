@@ -161,6 +161,19 @@ export function useMessageHandler(
 
       if (inputValue.trim() === '/reset' || inputValue.trim() === '/clear') {
         setChatState(prev => ({ ...prev, messages: [] }));
+        setChatState(prev => ({
+          ...prev,
+          sessions: prev.sessions.map(chat => 
+            chat.id === activeId 
+              ? { ...chat, messages: [], title: 'New Chat' } 
+              : chat
+          )
+        }));
+        storageService.saveChatSessions(chatState.sessions.map(chat => 
+          chat.id === activeId 
+            ? { ...chat, messages: [], title: 'New Chat' } 
+            : chat
+        ));
         setTokenUsage({
           prompt_tokens: 0,
           completion_tokens: 0,
