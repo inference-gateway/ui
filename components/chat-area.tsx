@@ -10,6 +10,8 @@ import type { Message } from '@/types/chat';
 import { CodeBlock } from '@/components/code-block';
 import { cn } from '@/lib/utils';
 
+const isDevelopment = process.env.NEXT_PUBLIC_NODE_ENV === 'development';
+
 interface ChatAreaProps {
   messages: Message[];
   isStreaming: boolean;
@@ -140,7 +142,9 @@ export function ChatArea({ messages, isStreaming, selectedModel }: ChatAreaProps
 
                     {isUser && (
                       <div className="mb-1 w-full">
-                        <RequestBubble request={createRequestObject(message, index)} />
+                        {isDevelopment && (
+                          <RequestBubble request={createRequestObject(message, index)} />
+                        )}
                       </div>
                     )}
 
