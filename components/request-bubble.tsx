@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, Terminal } from 'lucide-react';
 import { CodeBlock } from './code-block';
+import { SchemaChatCompletionTool } from '@inference-gateway/sdk';
 
 interface RequestBubbleProps {
   request: {
@@ -8,6 +9,7 @@ interface RequestBubbleProps {
     url: string;
     headers?: Record<string, string>;
     body?: string | Record<string, unknown>;
+    tools?: SchemaChatCompletionTool[];
   };
 }
 
@@ -21,7 +23,7 @@ export default function RequestBubble({ request }: RequestBubbleProps) {
   }
 
   const generateCurlCommand = () => {
-    const { method, url, headers = {}, body } = request;
+    const { method, url, headers = {}, body, tools } = request;
 
     let curlCommand = `curl -X ${method} '${url}'`;
 
@@ -29,9 +31,15 @@ export default function RequestBubble({ request }: RequestBubbleProps) {
       curlCommand += `\\\n  -H '${key}: ${value}'`;
     });
 
-    if (body) {
-      const bodyJson = typeof body === 'string' ? body : JSON.stringify(body, null, 2);
+    if (body || tools) {
+      const bodyObject = typeof body === 'string' ? JSON.parse(body) : body || {};
 
+      const modifiedBody = {
+        ...bodyObject,
+        ...(tools && tools.length > 0 ? { tools } : {}),
+      };
+
+      const bodyJson = JSON.stringify(modifiedBody, null, 2);
       const escapedBody = bodyJson.replace(/'/g, "'\\''");
 
       curlCommand += `\\\n  -d '${escapedBody}'`;

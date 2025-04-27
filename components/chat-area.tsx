@@ -9,6 +9,9 @@ import RequestBubble from '@/components/request-bubble';
 import type { Message } from '@/types/chat';
 import { CodeBlock } from '@/components/code-block';
 import { cn } from '@/lib/utils';
+import { WebSearchTool, FetchPageTool } from '@/lib/tools';
+import { MessageRole } from '@inference-gateway/sdk';
+import { SYSTEM_PROMPT } from '@/lib/constants';
 
 const isDevelopment = process.env.NEXT_PUBLIC_NODE_ENV === 'development';
 
@@ -57,11 +60,17 @@ export function ChatArea({ messages, isStreaming, selectedModel }: ChatAreaProps
   };
 
   const createRequestObject = (message: Message, index: number) => {
-    const messageHistory = messages.slice(0, index + 1).map(msg => ({
-      role: msg.role,
-      content: msg.content || '',
-      ...(msg.tool_call_id && { tool_call_id: msg.tool_call_id }),
-    }));
+    const fullMessageHistory = [
+      {
+        role: MessageRole.system,
+        content: SYSTEM_PROMPT,
+      },
+      ...messages.slice(0, index + 1).map(msg => ({
+        role: msg.role,
+        content: msg.content || '',
+        ...(msg.tool_call_id && { tool_call_id: msg.tool_call_id }),
+      })),
+    ];
 
     const getFullUrl = () => {
       if (typeof window !== 'undefined') {
@@ -80,8 +89,9 @@ export function ChatArea({ messages, isStreaming, selectedModel }: ChatAreaProps
       },
       body: {
         model: message.model || selectedModel || 'default-model',
-        messages: messageHistory,
+        messages: fullMessageHistory,
         stream: true,
+        tools: [WebSearchTool, FetchPageTool],
       },
     };
   };
