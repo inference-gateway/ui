@@ -5,6 +5,14 @@ interface SearchResult {
   title: string;
   url: string;
   snippet: string;
+  error?: string;
+}
+
+interface PageContent {
+  title: string;
+  url: string;
+  content: string;
+  error?: string;
 }
 
 export const WebSearchTool: SchemaChatCompletionTool = {
@@ -26,6 +34,26 @@ export const WebSearchTool: SchemaChatCompletionTool = {
         },
       } as unknown as Record<string, never>,
       required: ['query'],
+      additionalProperties: false,
+    },
+  },
+};
+
+export const FetchPageTool: SchemaChatCompletionTool = {
+  type: 'function' as ChatCompletionToolType,
+  function: {
+    name: 'fetch_page',
+    description: 'Fetch content from a specific URL.',
+    strict: false,
+    parameters: {
+      type: 'object',
+      properties: {
+        url: {
+          type: 'string',
+          description: 'The URL to fetch content from.',
+        },
+      } as unknown as Record<string, never>,
+      required: ['url'],
       additionalProperties: false,
     },
   },
@@ -64,12 +92,7 @@ export const ToolHandlers: Record<
 
         return {
           query,
-          results:
-            data.results?.map((result: SearchResult) => ({
-              title: result.title,
-              url: result.url,
-              snippet: result.snippet,
-            })) || [],
+          results: (data.results as SearchResult[]) || [],
         };
       } catch (error) {
         logger.error('Error during web search:', error);
@@ -77,6 +100,54 @@ export const ToolHandlers: Record<
           query,
           error: 'Failed to fetch search results',
           results: [],
+        };
+      }
+    },
+  },
+  fetch_page: {
+    call: async function (args: Record<string, unknown>): Promise<unknown> {
+      const url = args.url as string;
+
+      logger.debug('Fetching page content from:', url);
+
+      try {
+        const apiUrl = new URL('/api/v1/tools/fetch-page', window.location.origin);
+        apiUrl.searchParams.append('url', url);
+
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Page fetch request failed with status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        logger.debug('Fetch page API response status:', response.status);
+
+        return {
+          query: {
+            url,
+          },
+          results: {
+            title: data.title || '',
+            content: data.content || '',
+          } as PageContent,
+        };
+      } catch (error) {
+        logger.error('Error during page fetching:', error);
+        return {
+          query: {
+            url,
+          },
+          error: 'Failed to fetch page content',
+          results: {
+            title: '',
+            content: '',
+          } as PageContent,
         };
       }
     },
