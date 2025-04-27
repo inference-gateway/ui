@@ -13,9 +13,10 @@ import { cn } from '@/lib/utils';
 interface ChatAreaProps {
   messages: Message[];
   isStreaming: boolean;
+  selectedModel?: string;
 }
 
-export function ChatArea({ messages, isStreaming }: ChatAreaProps) {
+export function ChatArea({ messages, isStreaming, selectedModel }: ChatAreaProps) {
   const [streamedTokens, setStreamedTokens] = useState<string>('');
   const [streamedMessageIds, setStreamedMessageIds] = useState<Set<string>>(new Set());
 
@@ -76,7 +77,7 @@ export function ChatArea({ messages, isStreaming }: ChatAreaProps) {
         Accept: 'application/json',
       },
       body: {
-        model: message.model || 'default-model',
+        model: message.model || selectedModel || 'default-model',
         messages: messageHistory,
         stream: true,
       },

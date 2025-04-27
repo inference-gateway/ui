@@ -136,7 +136,7 @@ export default function PageClient({ session }: PageClientProps) {
           )}
           onClick={() => isMobile && setShowSidebar(false)}
         >
-          <ChatArea messages={messages} isStreaming={isStreaming} />
+          <ChatArea messages={messages} isStreaming={isStreaming} selectedModel={selectedModel} />
         </div>
 
         <div
