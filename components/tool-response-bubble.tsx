@@ -1,5 +1,17 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react';
+import { CodeBlock } from './code-block';
+import logger from '@/lib/logger';
+
+interface ToolResponse {
+  query: string;
+  results: Array<{
+    title: string;
+    url: string;
+    snippet: string;
+  }>;
+  error?: string;
+}
 
 interface ToolResponseBubbleProps {
   response: string;
@@ -15,12 +27,17 @@ export default function ToolResponseBubble({ response, toolName }: ToolResponseB
     return null;
   }
 
-  let responseContent;
+  let formattedResponse = null;
   try {
-    responseContent = JSON.parse(response);
-    responseContent = JSON.stringify(responseContent, null, 2);
-  } catch {
-    responseContent = response;
+    const parsedResponse: ToolResponse = JSON.parse(response);
+    if (parsedResponse.error) {
+      logger.error('Tool response error:', parsedResponse.results);
+      return null;
+    }
+    formattedResponse = JSON.stringify(parsedResponse.results, null, 2);
+  } catch (err) {
+    logger.error('Error parsing tool response:', err);
+    return null;
   }
 
   return (
@@ -37,9 +54,11 @@ export default function ToolResponseBubble({ response, toolName }: ToolResponseB
       </div>
 
       {isExpanded && (
-        <div className="flex items-start gap-4 rounded-lg p-4 mt-1 mb-1 bg-[hsl(var(--thinking-bubble-content-bg))] border border-[hsl(var(--thinking-bubble-content-border))] shadow-sm transition-all overflow-hidden">
-          <div className="flex-1 space-y-2">
-            <pre className="whitespace-pre-wrap break-all text-sm">{responseContent}</pre>
+        <div className="flex items-start gap-4 rounded-lg p-4 mt-1 mb-1 bg-[hsl(var(--thinking-bubble-content-bg))] border border-[hsl(var(--thinking-bubble-content-border))] shadow-sm transition-all overflow-x-auto">
+          <div className="flex-1 space-y-2 min-w-0">
+            <div className="overflow-x-auto">
+              <CodeBlock className="language-json">{formattedResponse}</CodeBlock>
+            </div>
           </div>
         </div>
       )}

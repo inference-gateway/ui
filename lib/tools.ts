@@ -33,10 +33,10 @@ export const WebSearchTool: SchemaChatCompletionTool = {
 
 export const ToolHandlers: Record<
   string,
-  { call: (args: Record<string, unknown>) => Promise<JSON> }
+  { call: (args: Record<string, unknown>) => Promise<unknown> }
 > = {
   web_search: {
-    call: async function (args: Record<string, unknown>): Promise<JSON> {
+    call: async function (args: Record<string, unknown>): Promise<unknown> {
       const query = args.query as string;
       const limit = (args.limit as number) || 5;
 
@@ -48,7 +48,12 @@ export const ToolHandlers: Record<
         url.searchParams.append('query', query);
         url.searchParams.append('limit', limit.toString());
 
-        const response = await fetch(url);
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
         if (!response.ok) {
           throw new Error(`Search request failed with status: ${response.status}`);
@@ -57,7 +62,7 @@ export const ToolHandlers: Record<
         const data = await response.json();
         logger.debug('Search API response:', response.status);
 
-        const formattedResults = {
+        return {
           query,
           results:
             data.results?.map((result: SearchResult) => ({
@@ -66,14 +71,13 @@ export const ToolHandlers: Record<
               snippet: result.snippet,
             })) || [],
         };
-        return JSON.stringify(formattedResults) as unknown as JSON;
       } catch (error) {
         logger.error('Error during web search:', error);
-        return JSON.stringify({
+        return {
           query,
           error: 'Failed to fetch search results',
           results: [],
-        }) as unknown as JSON;
+        };
       }
     },
   },

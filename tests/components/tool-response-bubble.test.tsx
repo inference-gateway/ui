@@ -24,7 +24,12 @@ describe('ToolResponseBubble', () => {
   });
 
   test('renders collapsible content', () => {
-    render(<ToolResponseBubble response="Test content" toolName="web_search" />);
+    render(
+      <ToolResponseBubble
+        response={JSON.stringify({ content: 'Test content' })}
+        toolName="web_search"
+      />
+    );
     const button = screen.getByRole('button');
     expect(button).toBeInTheDocument();
     expect(button).toHaveTextContent('web_search Response');

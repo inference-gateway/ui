@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, Terminal } from 'lucide-react';
 import { SchemaChatCompletionMessageToolCall } from '@inference-gateway/sdk';
+import { CodeBlock } from './code-block';
 
 interface ToolCallBubbleProps {
   toolCalls: SchemaChatCompletionMessageToolCall[] | undefined;
@@ -14,6 +15,8 @@ export default function ToolCallBubble({ toolCalls }: ToolCallBubbleProps) {
   if (!toolCalls || toolCalls.length === 0) {
     return null;
   }
+
+  const formattedToolCalls = JSON.stringify(toolCalls, null, 2);
 
   return (
     <div className="w-full relative mb-0.5">
@@ -29,11 +32,11 @@ export default function ToolCallBubble({ toolCalls }: ToolCallBubbleProps) {
       </div>
 
       {isExpanded && (
-        <div className="flex items-start gap-4 rounded-lg p-4 mt-1 mb-1 bg-[hsl(var(--thinking-bubble-content-bg))] border border-[hsl(var(--thinking-bubble-content-border))] shadow-sm transition-all overflow-hidden">
-          <div className="flex-1 space-y-2">
-            <pre className="whitespace-pre-wrap break-all text-sm">
-              {JSON.stringify(toolCalls, null, 2)}
-            </pre>
+        <div className="flex items-start gap-4 rounded-lg p-4 mt-1 mb-1 bg-[hsl(var(--thinking-bubble-content-bg))] border border-[hsl(var(--thinking-bubble-content-border))] shadow-sm transition-all overflow-x-auto">
+          <div className="flex-1 space-y-2 min-w-0">
+            <div className="overflow-x-auto">
+              <CodeBlock className="language-json">{formattedToolCalls}</CodeBlock>
+            </div>
           </div>
         </div>
       )}

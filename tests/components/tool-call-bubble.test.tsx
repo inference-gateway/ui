@@ -5,6 +5,10 @@ import {
 } from '@inference-gateway/sdk';
 import ToolCallBubble from '@/components/tool-call-bubble';
 
+jest.mock('@/components/code-block', () => ({
+  CodeBlock: ({ children }: { children: string }) => <pre data-testid="code-block">{children}</pre>,
+}));
+
 describe('ToolCallBubble', () => {
   const mockToolCalls: SchemaChatCompletionMessageToolCall[] = [
     {
@@ -37,22 +41,24 @@ describe('ToolCallBubble', () => {
     render(<ToolCallBubble toolCalls={mockToolCalls} />);
     const button = screen.getByRole('button');
 
-    expect(screen.queryByText(/test_tool/)).not.toBeInTheDocument();
+    expect(screen.queryByTestId('code-block')).not.toBeInTheDocument();
 
     fireEvent.click(button);
-    expect(screen.getByText(/test_tool/)).toBeInTheDocument();
+    expect(screen.getByTestId('code-block')).toBeInTheDocument();
 
     fireEvent.click(button);
-    expect(screen.queryByText(/test_tool/)).not.toBeInTheDocument();
+    expect(screen.queryByTestId('code-block')).not.toBeInTheDocument();
   });
 
   test('displays formatted JSON when expanded', () => {
     render(<ToolCallBubble toolCalls={mockToolCalls} />);
     fireEvent.click(screen.getByRole('button'));
 
-    const jsonContent = screen.getByText(/test_tool/);
-    expect(jsonContent).toBeInTheDocument();
-    expect(jsonContent).toHaveTextContent(/"arguments": "{\\"param\\":\\"value\\"}"/);
+    const codeBlock = screen.getByTestId('code-block');
+    expect(codeBlock).toBeInTheDocument();
+    expect(codeBlock).toHaveTextContent(/test_tool/);
+    expect(codeBlock).toHaveTextContent(/param/);
+    expect(codeBlock).toHaveTextContent(/value/);
   });
 
   test('handles multiple tool calls correctly', () => {
@@ -73,7 +79,8 @@ describe('ToolCallBubble', () => {
     expect(button).toHaveTextContent('Tool Calls (2)');
 
     fireEvent.click(button);
-    expect(screen.getByText(/test_tool/)).toBeInTheDocument();
-    expect(screen.getByText(/another_tool/)).toBeInTheDocument();
+    const codeBlock = screen.getByTestId('code-block');
+    expect(codeBlock).toHaveTextContent(/test_tool/);
+    expect(codeBlock).toHaveTextContent(/another_tool/);
   });
 });
