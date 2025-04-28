@@ -12,6 +12,8 @@ import { cn } from '@/lib/utils';
 import { WebSearchTool, FetchPageTool } from '@/lib/tools';
 import { MessageRole } from '@inference-gateway/sdk';
 import { SYSTEM_PROMPT } from '@/lib/constants';
+import { PencilIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const isDevelopment = process.env.NEXT_PUBLIC_NODE_ENV === 'development';
 
@@ -19,9 +21,10 @@ interface ChatAreaProps {
   messages: Message[];
   isStreaming: boolean;
   selectedModel?: string;
+  onEditMessage?: (messageId: string) => void;
 }
 
-export function ChatArea({ messages, isStreaming, selectedModel }: ChatAreaProps) {
+export function ChatArea({ messages, isStreaming, selectedModel, onEditMessage }: ChatAreaProps) {
   const [streamedTokens, setStreamedTokens] = useState<string>('');
   const [streamedMessageIds, setStreamedMessageIds] = useState<Set<string>>(new Set());
 
@@ -164,13 +167,24 @@ export function ChatArea({ messages, isStreaming, selectedModel }: ChatAreaProps
                         !message.tool_call_id)) && (
                       <div
                         className={cn(
-                          'rounded-lg px-4 py-3',
+                          'rounded-lg px-4 py-3 relative group',
                           isUser
                             ? 'bg-[hsl(var(--chat-user-message-bg))] text-[hsl(var(--chat-user-message-text))]'
                             : 'bg-[hsl(var(--chat-ai-message-bg))] text-[hsl(var(--chat-ai-message-text))]',
                           'max-w-[85%]'
                         )}
                       >
+                        {isUser && onEditMessage && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => onEditMessage(message.id)}
+                            aria-label="Edit message"
+                          >
+                            <PencilIcon className="h-3 w-3" />
+                          </Button>
+                        )}
                         {isUser ? (
                           <div>
                             <p className="whitespace-pre-wrap">{message.content}</p>

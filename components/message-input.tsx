@@ -9,12 +9,14 @@ interface MessageInputProps {
   value: string;
   onChangeAction: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onKeyDownAction: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  placeholder?: string;
 }
 
 export default function MessageInput({
   value,
   onChangeAction,
   onKeyDownAction,
+  placeholder = 'Type a message...',
 }: MessageInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [rows, setRows] = useState(1);
@@ -36,7 +38,7 @@ export default function MessageInput({
       value={value}
       onChange={onChangeAction}
       onKeyDown={onKeyDownAction}
-      placeholder="Type a message..."
+      placeholder={placeholder}
       rows={rows}
       className="resize-none min-h-[38px] max-h-[200px] flex-1"
     />

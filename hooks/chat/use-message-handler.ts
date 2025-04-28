@@ -150,7 +150,7 @@ export function useMessageHandler(
   }, [setUIState]);
 
   const handleSendMessage = useCallback(
-    async (inputValue: string) => {
+    async (inputValue: string, editMessageId?: string) => {
       const { activeId } = chatState;
 
       if (!inputValue.trim() || !clientInstance) return;
@@ -163,23 +163,309 @@ export function useMessageHandler(
         setChatState(prev => ({ ...prev, messages: [] }));
         setChatState(prev => ({
           ...prev,
-          sessions: prev.sessions.map(chat => 
-            chat.id === activeId 
-              ? { ...chat, messages: [], title: 'New Chat' } 
-              : chat
-          )
+          sessions: prev.sessions.map(chat =>
+            chat.id === activeId ? { ...chat, messages: [], title: 'New Chat' } : chat
+          ),
         }));
-        storageService.saveChatSessions(chatState.sessions.map(chat => 
-          chat.id === activeId 
-            ? { ...chat, messages: [], title: 'New Chat' } 
-            : chat
-        ));
+        storageService.saveChatSessions(
+          chatState.sessions.map(chat =>
+            chat.id === activeId ? { ...chat, messages: [], title: 'New Chat' } : chat
+          )
+        );
         setTokenUsage({
           prompt_tokens: 0,
           completion_tokens: 0,
           total_tokens: 0,
         });
         return;
+      }
+
+      if (editMessageId) {
+        const messageToEdit = chatState.messages.find(m => m.id === editMessageId);
+        if (messageToEdit && messageToEdit.role === MessageRole.user) {
+          updateMessage(editMessageId, { content: inputValue }, true);
+
+          const messageIndex = chatState.messages.findIndex(m => m.id === editMessageId);
+
+          setChatState(prev => {
+            const newMessages = prev.messages.slice(0, messageIndex + 1);
+            const updatedSessions = prev.sessions.map(chat => {
+              if (chat.id === activeId) {
+                return {
+                  ...chat,
+                  messages: chat.messages
+                    .slice(0, messageIndex + 1)
+                    .map(msg => (msg.id === editMessageId ? { ...msg, content: inputValue } : msg)),
+                };
+              }
+              return chat;
+            });
+
+            storageService.saveChatSessions(updatedSessions);
+
+            return {
+              ...prev,
+              messages: newMessages,
+              sessions: updatedSessions,
+            };
+          });
+
+          setUIState(prev => ({ ...prev, isLoading: true, isStreaming: true }));
+
+          currentAssistantContent.current = '';
+          currentReasoningContent.current = '';
+
+          const assistantMessageId = createNewChatId();
+          currentAssistantId.current = assistantMessageId;
+
+          const assistantMessage: Message = {
+            role: MessageRole.assistant,
+            content: '',
+            id: assistantMessageId,
+            model: selectedModel,
+          };
+
+          setTimeout(async () => {
+            appendMessage(assistantMessage, false);
+
+            const tools: SchemaChatCompletionTool[] = isWebSearchEnabled
+              ? [WebSearchTool, FetchPageTool]
+              : [];
+
+            try {
+              const currentMessages =
+                chatState.messages.findIndex(m => m.id === editMessageId) >= 0
+                  ? chatState.messages.slice(
+                      0,
+                      chatState.messages.findIndex(m => m.id === editMessageId) + 1
+                    )
+                  : chatState.messages;
+
+              const allMessages = [
+                {
+                  role: MessageRole.system,
+                  content: SYSTEM_PROMPT,
+                },
+                ...currentMessages.map(msg => {
+                  if (msg.id === editMessageId) {
+                    return {
+                      role: msg.role,
+                      content: inputValue,
+                      ...(msg.tool_call_id && { tool_call_id: msg.tool_call_id }),
+                    };
+                  }
+                  return {
+                    role: msg.role,
+                    content: msg.content || '',
+                    ...(msg.tool_call_id && { tool_call_id: msg.tool_call_id }),
+                  };
+                }),
+              ];
+
+              await clientInstance.streamChatCompletion(
+                {
+                  model: selectedModel,
+                  messages: allMessages,
+                  stream: true,
+                  tools,
+                },
+                {
+                  onTool: async (toolCall: SchemaChatCompletionMessageToolCall) => {
+                    const args = JSON.parse(toolCall.function.arguments || '{}') as Record<
+                      string,
+                      unknown
+                    >;
+
+                    updateMessage(
+                      assistantMessageId,
+                      {
+                        tool_calls: [toolCall],
+                      },
+                      false
+                    );
+
+                    const toolCallMessage: Message = {
+                      role: MessageRole.assistant,
+                      content: `Calling tool: ${toolCall.function.name}`,
+                      id: createNewChatId(),
+                      tool_call_id: toolCall.id,
+                    };
+                    appendMessage(toolCallMessage, false);
+
+                    const tool = ToolHandlers[toolCall.function.name];
+                    if (!tool) {
+                      throw new Error(`Tool ${toolCall.function.name} not found`);
+                    }
+
+                    try {
+                      const result = await tool.call(args);
+
+                      const toolResponseMessage: Message = {
+                        role: MessageRole.tool,
+                        content: JSON.stringify(result),
+                        id: createNewChatId(),
+                        tool_call_id: toolCall.id,
+                      };
+                      appendMessage(toolResponseMessage, false);
+
+                      const analysisMessages = [
+                        ...allMessages,
+                        {
+                          role: MessageRole.tool,
+                          content: JSON.stringify(result),
+                          tool_call_id: toolCall.id,
+                        },
+                      ];
+
+                      let analysisContentBuffer = '';
+                      let analysisReasoningBuffer = '';
+
+                      const analysisMessageId = createNewChatId();
+                      const analysisMessage: Message = {
+                        role: MessageRole.assistant,
+                        content: '',
+                        id: analysisMessageId,
+                        model: selectedModel,
+                      };
+                      appendMessage(analysisMessage, false);
+
+                      await clientInstance.streamChatCompletion(
+                        {
+                          model: selectedModel,
+                          messages: analysisMessages,
+                          stream: true,
+                        },
+                        {
+                          onReasoning: reasoningContent => {
+                            analysisReasoningBuffer += reasoningContent;
+                            updateMessage(analysisMessageId, {
+                              reasoning_content: analysisReasoningBuffer,
+                            });
+                          },
+                          onContent: content => {
+                            analysisContentBuffer += content;
+                            updateMessage(analysisMessageId, {
+                              content: analysisContentBuffer,
+                            });
+                            setChatState(prev => ({ ...prev }));
+                          },
+                          onChunk: chunk => {
+                            if (chunk?.usage) {
+                              updateTokenUsage(chunk.usage);
+                            }
+                          },
+                          onError: error => {
+                            logger.error('Stream error after tool call', {
+                              error: error instanceof Error ? error.message : error,
+                              stack: error instanceof Error ? error.stack : undefined,
+                            });
+                            updateMessage(analysisMessageId, {
+                              content: `${analysisContentBuffer}\n\nSorry, I had trouble processing the tool results. Please ask me anything else.`,
+                            });
+                          },
+                          onFinish: () => {
+                            currentAssistantContent.current = '';
+                            currentReasoningContent.current = '';
+
+                            setUIState(prev => ({
+                              ...prev,
+                              isLoading: false,
+                              isStreaming: false,
+                            }));
+                          },
+                        }
+                      );
+                    } catch (error) {
+                      logger.error('Tool call failed', {
+                        error: error instanceof Error ? error.message : error,
+                        stack: error instanceof Error ? error.stack : undefined,
+                      });
+                      updateMessage(assistantMessageId, {
+                        content: `Failed to call tool ${toolCall.function.name}: ${
+                          error instanceof Error ? error.message : error
+                        }`,
+                      });
+                    }
+                  },
+                  onReasoning: reasoningContent => {
+                    currentReasoningContent.current += reasoningContent;
+                    updateMessage(assistantMessageId, {
+                      reasoning_content: currentReasoningContent.current,
+                    });
+                  },
+                  onContent: content => {
+                    currentAssistantContent.current += content;
+                    updateMessage(assistantMessageId, {
+                      content: currentAssistantContent.current,
+                    });
+                  },
+                  onChunk: chunk => {
+                    if (chunk?.usage) {
+                      updateTokenUsage(chunk.usage);
+                    }
+                  },
+                  onError: error => {
+                    logger.error('Stream error', {
+                      error: error instanceof Error ? error.message : error,
+                      stack: error instanceof Error ? error.stack : undefined,
+                    });
+                    updateMessage(assistantMessageId, {
+                      content:
+                        currentAssistantContent.current ||
+                        'Sorry, I encountered an error. Please try again.',
+                    });
+                    setUIState(prev => ({
+                      ...prev,
+                      isLoading: false,
+                      isStreaming: false,
+                      error: error instanceof Error ? error.message : 'Failed to get response',
+                    }));
+                  },
+                  onFinish: () => {
+                    updateMessage(
+                      assistantMessageId,
+                      {
+                        content: currentAssistantContent.current,
+                        reasoning_content: currentReasoningContent.current,
+                      },
+                      true
+                    );
+                    setUIState(prev => ({
+                      ...prev,
+                      isLoading: false,
+                      isStreaming: false,
+                    }));
+                  },
+                }
+              );
+            } catch (error) {
+              logger.error('Failed to get chat response', {
+                error: error instanceof Error ? error.message : error,
+                stack: error instanceof Error ? error.stack : undefined,
+              });
+
+              updateMessage(assistantMessageId, {
+                content:
+                  currentAssistantContent.current ||
+                  'Sorry, I encountered an error. Please try again later.',
+              });
+
+              setUIState(prev => ({
+                ...prev,
+                isLoading: false,
+                isStreaming: false,
+                error: error instanceof Error ? error.message : 'Failed to get response from model',
+              }));
+            } finally {
+              setUIState(prev => ({
+                ...prev,
+                isLoading: false,
+                isStreaming: false,
+              }));
+            }
+          }, 0);
+          return;
+        }
       }
 
       const userMessage: Message = {
@@ -448,6 +734,7 @@ export function useMessageHandler(
       }
     },
     [
+      storageService,
       chatState,
       clientInstance,
       handleNewChat,

@@ -1,10 +1,10 @@
 'use client';
 
-import { SendHorizonal, Plus, Globe, Mic, MoreHorizontal } from 'lucide-react';
+import { SendHorizonal, Plus, Globe, Mic, MoreHorizontal, X } from 'lucide-react';
 import { SchemaCompletionUsage } from '@inference-gateway/sdk';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 interface InputAreaProps {
   isLoading: boolean;
@@ -15,6 +15,9 @@ interface InputAreaProps {
   onDeepResearchAction?: () => void;
   isSearchActive?: boolean;
   isDeepResearchActive?: boolean;
+  editingMessageId?: string | null;
+  onCancelEdit?: () => void;
+  onEditLastUserMessage?: () => void;
 }
 
 export function InputArea({
@@ -26,15 +29,32 @@ export function InputArea({
   onDeepResearchAction,
   isSearchActive = false,
   isDeepResearchActive = false,
+  editingMessageId = null,
+  onCancelEdit,
+  onEditLastUserMessage,
 }: InputAreaProps) {
   const [inputValue, setInputValue] = useState('');
   const isMobile = useIsMobile();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  useEffect(() => {
+    if (textareaRef.current) {
+      (
+        textareaRef.current as HTMLTextAreaElement & { setInputValue: (value: string) => void }
+      ).setInputValue = setInputValue;
+    }
+  }, []);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
+    } else if (e.key === 'Escape' && editingMessageId && onCancelEdit) {
+      e.preventDefault();
+      onCancelEdit();
+    } else if (e.key === 'ArrowUp' && !inputValue.trim() && !editingMessageId) {
+      e.preventDefault();
+      onEditLastUserMessage?.();
     }
   };
 
@@ -56,6 +76,20 @@ export function InputArea({
               completion)
             </span>
           </div>
+          {editingMessageId && (
+            <div className="text-blue-500 font-medium flex items-center">
+              <span>Editing message</span>
+              {onCancelEdit && (
+                <button
+                  onClick={onCancelEdit}
+                  className="ml-2 hover:text-blue-700"
+                  aria-label="Cancel editing"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+          )}
         </div>
         <div className="relative rounded-xl bg-chat-input-bg border border-chat-input-border shadow-lg">
           <div className={cn('pb-10', isMobile && 'pb-11')}>
@@ -64,7 +98,7 @@ export function InputArea({
               value={inputValue}
               onChange={e => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask anything"
+              placeholder={editingMessageId ? 'Edit your message...' : 'Ask anything'}
               rows={2}
               disabled={isLoading || !selectedModel}
               className={cn(
@@ -73,7 +107,8 @@ export function InputArea({
                 'bg-transparent text-chat-input-text',
                 'focus:outline-none',
                 'disabled:opacity-50 disabled:cursor-not-allowed',
-                'placeholder:text-chat-input-placeholder'
+                'placeholder:text-chat-input-placeholder',
+                editingMessageId && 'border-l-2 border-blue-500'
               )}
               aria-label="Message input"
               data-testid="mock-input"
@@ -99,61 +134,69 @@ export function InputArea({
             )}
           >
             <div className="flex-1 flex justify-center items-center">
-              <button
-                onClick={onSearchAction}
-                className={cn(
-                  'flex items-center gap-1 rounded-lg mx-1',
-                  isMobile ? 'px-3 py-1.5' : 'px-3 py-1',
-                  isSearchActive
-                    ? 'bg-button-active text-button-active-text font-medium'
-                    : 'text-chat-input-text-muted hover:bg-chat-input-hover-bg',
-                  'transition-colors text-sm'
-                )}
-                aria-label="Search"
-                data-testid="search-button"
-              >
-                <Globe className={cn(isMobile ? 'h-5 w-5' : 'h-4 w-4')} />
-                <span>Search</span>
-              </button>
-              <button
-                onClick={onDeepResearchAction}
-                className={cn(
-                  'flex items-center gap-1 rounded-lg mx-1',
-                  isMobile ? 'px-3 py-1.5' : 'px-3 py-1',
-                  isDeepResearchActive
-                    ? 'bg-button-active text-button-active-text font-medium'
-                    : 'text-chat-input-text-muted hover:bg-chat-input-hover-bg',
-                  'transition-colors text-sm'
-                )}
-                aria-label="Deep research"
-                data-testid="deep-research-button"
-              >
-                <span>Deep research</span>
-              </button>
+              {!editingMessageId && (
+                <>
+                  <button
+                    onClick={onSearchAction}
+                    className={cn(
+                      'flex items-center gap-1 rounded-lg mx-1',
+                      isMobile ? 'px-3 py-1.5' : 'px-3 py-1',
+                      isSearchActive
+                        ? 'bg-button-active text-button-active-text font-medium'
+                        : 'text-chat-input-text-muted hover:bg-chat-input-hover-bg',
+                      'transition-colors text-sm'
+                    )}
+                    aria-label="Search"
+                    data-testid="search-button"
+                  >
+                    <Globe className={cn(isMobile ? 'h-5 w-5' : 'h-4 w-4')} />
+                    <span>Search</span>
+                  </button>
+                  <button
+                    onClick={onDeepResearchAction}
+                    className={cn(
+                      'flex items-center gap-1 rounded-lg mx-1',
+                      isMobile ? 'px-3 py-1.5' : 'px-3 py-1',
+                      isDeepResearchActive
+                        ? 'bg-button-active text-button-active-text font-medium'
+                        : 'text-chat-input-text-muted hover:bg-chat-input-hover-bg',
+                      'transition-colors text-sm'
+                    )}
+                    aria-label="Deep research"
+                    data-testid="deep-research-button"
+                  >
+                    <span>Deep research</span>
+                  </button>
+                </>
+              )}
             </div>
 
             <div className="flex items-center gap-1.5">
-              <button
-                className={cn(
-                  'text-chat-input-text-muted hover:text-chat-input-text',
-                  isMobile ? 'p-1.5' : 'p-1'
-                )}
-                aria-label="Voice input"
-                data-testid="mic-button"
-              >
-                <Mic className={cn(isMobile ? 'h-5 w-5' : 'h-4 w-4')} />
-              </button>
+              {!editingMessageId && (
+                <>
+                  <button
+                    className={cn(
+                      'text-chat-input-text-muted hover:text-chat-input-text',
+                      isMobile ? 'p-1.5' : 'p-1'
+                    )}
+                    aria-label="Voice input"
+                    data-testid="mic-button"
+                  >
+                    <Mic className={cn(isMobile ? 'h-5 w-5' : 'h-4 w-4')} />
+                  </button>
 
-              <button
-                className={cn(
-                  'text-chat-input-text-muted hover:text-chat-input-text',
-                  isMobile ? 'p-1.5' : 'p-1'
-                )}
-                aria-label="More options"
-                data-testid="more-options-button"
-              >
-                <MoreHorizontal className={cn(isMobile ? 'h-5 w-5' : 'h-4 w-4')} />
-              </button>
+                  <button
+                    className={cn(
+                      'text-chat-input-text-muted hover:text-chat-input-text',
+                      isMobile ? 'p-1.5' : 'p-1'
+                    )}
+                    aria-label="More options"
+                    data-testid="more-options-button"
+                  >
+                    <MoreHorizontal className={cn(isMobile ? 'h-5 w-5' : 'h-4 w-4')} />
+                  </button>
+                </>
+              )}
 
               <button
                 onClick={handleSendMessage}
@@ -176,14 +219,3 @@ export function InputArea({
     </div>
   );
 }
-
-// Add this CSS utility to your global styles or include it here
-// If you don't have a scrollbar-hide utility in your tailwind config,
-// you can use these inline styles instead:
-// style={{
-//   height: `${defaultHeight}px`,
-//   overflowY: 'auto',
-//   msOverflowStyle: 'none',
-//   scrollbarWidth: 'none'
-// }}
-// and add this to className: '[&::-webkit-scrollbar]:hidden'

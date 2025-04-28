@@ -3,31 +3,45 @@
 import type React from 'react';
 
 import { useState, useRef, useEffect } from 'react';
-import MessageList from './message-list';
 import MessageInput from './message-input';
 import type { Message } from '@/types/chat';
 import { Button } from '@/components/ui/button';
 import { signIn } from 'next-auth/react';
 import { Trash2 } from 'lucide-react';
+import { ChatArea } from './chat-area';
 
 interface ChatInterfaceProps {
   messages: Message[];
   onSendMessageAction: (content: string) => void;
   onClearChatAction: () => void;
+  isStreaming?: boolean;
+  selectedModel?: string;
 }
 
 export default function ChatInterface({
   messages,
   onSendMessageAction,
   onClearChatAction,
+  isStreaming = false,
+  selectedModel,
 }: ChatInterfaceProps) {
   const [inputValue, setInputValue] = useState('');
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const handleEditMessage = (messageId: string) => {
+    const messageToEdit = messages.find(message => message.id === messageId);
+    if (messageToEdit && messageToEdit.content) {
+      setInputValue(messageToEdit.content);
+      setEditingMessageId(messageId);
+    }
+  };
 
   const handleSendMessage = () => {
     if (inputValue.trim()) {
       onSendMessageAction(inputValue);
       setInputValue('');
+      setEditingMessageId(null);
     }
   };
 
@@ -76,7 +90,12 @@ export default function ChatInterface({
     <div className="flex flex-col flex-1 overflow-hidden">
       <div className="flex-1 overflow-y-auto p-4">
         {messages.length > 0 ? (
-          <MessageList messages={messages} />
+          <ChatArea
+            messages={messages}
+            isStreaming={isStreaming}
+            selectedModel={selectedModel}
+            onEditMessage={handleEditMessage}
+          />
         ) : (
           <div className="flex items-center justify-center h-full">
             <div className="text-center text-[hsl(var(--chat-empty-text))] dark:text-[hsl(var(--chat-empty-desc-text))]">
@@ -96,10 +115,23 @@ export default function ChatInterface({
                 value={inputValue}
                 onChangeAction={e => setInputValue(e.target.value)}
                 onKeyDownAction={handleKeyDown}
+                placeholder={editingMessageId ? 'Edit your message...' : 'Type a message...'}
               />
               <Button type="submit" disabled={!inputValue.trim()}>
-                Send
+                {editingMessageId ? 'Update' : 'Send'}
               </Button>
+              {editingMessageId && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setEditingMessageId(null);
+                    setInputValue('');
+                  }}
+                >
+                  Cancel
+                </Button>
+              )}
             </form>
             <Button variant="outline" onClick={() => signIn('oidc')}>
               Login

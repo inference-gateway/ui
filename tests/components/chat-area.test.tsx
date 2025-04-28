@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ChatArea } from '@/components/chat-area';
 import type { Message } from '@/types/chat';
 import { MessageRole } from '@inference-gateway/sdk';
@@ -18,6 +18,8 @@ describe('ChatArea Component', () => {
       model: 'gpt-4o',
     },
   ];
+
+  const mockOnEditMessage = jest.fn();
 
   test('renders empty state when no messages', () => {
     render(<ChatArea messages={[]} isStreaming={false} />);
@@ -49,5 +51,26 @@ describe('ChatArea Component', () => {
 
     const animationElements = document.querySelectorAll('.animate-pulse');
     expect(animationElements.length).toBeGreaterThan(0);
+  });
+
+  test('renders edit button for user messages only', () => {
+    render(
+      <ChatArea messages={mockMessages} isStreaming={false} onEditMessage={mockOnEditMessage} />
+    );
+
+    const editButtons = screen.getAllByLabelText('Edit message');
+
+    expect(editButtons.length).toBe(1);
+  });
+
+  test('calls onEditMessage when edit button is clicked', () => {
+    render(
+      <ChatArea messages={mockMessages} isStreaming={false} onEditMessage={mockOnEditMessage} />
+    );
+
+    const editButton = screen.getByLabelText('Edit message');
+    fireEvent.click(editButton);
+
+    expect(mockOnEditMessage).toHaveBeenCalledWith('1');
   });
 });

@@ -42,6 +42,8 @@ export default function PageClient({ session }: PageClientProps) {
   const [showSidebar, setShowSidebar] = useState(!isMobile);
   const [hasMessages, setHasMessages] = useState(messages.length > 0);
   const [isDeepResearchActive, setIsDeepResearchActive] = useState(false);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editMessageContent, setEditMessageContent] = useState<string>('');
 
   useEffect(() => {
     setShowSidebar(!isMobile);
@@ -50,6 +52,25 @@ export default function PageClient({ session }: PageClientProps) {
   useEffect(() => {
     setHasMessages(messages.length > 0);
   }, [messages]);
+
+  useEffect(() => {
+    if (editingMessageId && editMessageContent) {
+      const textarea = document.querySelector('textarea');
+      if (textarea) {
+        const inputArea = textarea as HTMLTextAreaElement & {
+          setInputValue?: (value: string) => void;
+        };
+        if (inputArea.setInputValue) {
+          inputArea.setInputValue(editMessageContent);
+        } else {
+          textarea.value = editMessageContent;
+          const event = new Event('input', { bubbles: true });
+          textarea.dispatchEvent(event);
+        }
+        textarea.focus();
+      }
+    }
+  }, [editingMessageId, editMessageContent]);
 
   const handleSearchAction = () => {
     toggleWebSearch();
@@ -60,6 +81,15 @@ export default function PageClient({ session }: PageClientProps) {
     setIsDeepResearchActive(prev => !prev);
     if (!isDeepResearchActive && isWebSearchEnabled) {
       toggleWebSearch();
+    }
+  };
+
+  const handleEditLastUserMessage = () => {
+    const lastUserMessage = [...messages].reverse().find(msg => msg.role === 'user');
+
+    if (lastUserMessage) {
+      setEditingMessageId(lastUserMessage.id);
+      setEditMessageContent(lastUserMessage.content || '');
     }
   };
 
@@ -125,7 +155,18 @@ export default function PageClient({ session }: PageClientProps) {
           )}
           onClick={() => isMobile && setShowSidebar(false)}
         >
-          <ChatArea messages={messages} isStreaming={isStreaming} selectedModel={selectedModel} />
+          <ChatArea
+            messages={messages}
+            isStreaming={isStreaming}
+            selectedModel={selectedModel}
+            onEditMessage={messageId => {
+              const messageToEdit = messages.find(msg => msg.id === messageId);
+              if (messageToEdit && messageToEdit.content) {
+                setEditingMessageId(messageId);
+                setEditMessageContent(messageToEdit.content);
+              }
+            }}
+          />
         </div>
 
         <div
@@ -141,11 +182,25 @@ export default function PageClient({ session }: PageClientProps) {
               isLoading={isLoading}
               selectedModel={selectedModel}
               tokenUsage={tokenUsage}
-              onSendMessageAction={handleSendMessage}
+              onSendMessageAction={content => {
+                if (editingMessageId) {
+                  handleSendMessage(content, editingMessageId);
+                  setEditingMessageId(null);
+                  setEditMessageContent('');
+                } else {
+                  handleSendMessage(content);
+                }
+              }}
               isSearchActive={isWebSearchEnabled}
               isDeepResearchActive={isDeepResearchActive}
               onSearchAction={handleSearchAction}
               onDeepResearchAction={handleDeepResearchAction}
+              editingMessageId={editingMessageId}
+              onCancelEdit={() => {
+                setEditingMessageId(null);
+                setEditMessageContent('');
+              }}
+              onEditLastUserMessage={handleEditLastUserMessage}
             />
           </div>
         </div>
