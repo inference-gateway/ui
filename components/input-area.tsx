@@ -14,7 +14,7 @@ import {
 import { SchemaCompletionUsage } from '@inference-gateway/sdk';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useMemo } from 'react';
 import { TokenUsage } from './token-usage';
 
 interface CommandOption {
@@ -62,26 +62,29 @@ export function InputArea({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const commandsRef = useRef<HTMLDivElement>(null);
 
-  const commands: CommandOption[] = [
-    {
-      name: 'clear',
-      description: 'Clear the conversation history',
-      icon: Trash2,
-      action: onClearChatAction,
-    },
-    {
-      name: 'search',
-      description: 'Toggle web search',
-      icon: Search,
-      action: onSearchAction,
-    },
-    {
-      name: 'research',
-      description: 'Toggle deep research mode',
-      icon: FileSearch,
-      action: onDeepResearchAction,
-    },
-  ];
+  const commands = useMemo<CommandOption[]>(
+    () => [
+      {
+        name: 'clear',
+        description: 'Clear the conversation history',
+        icon: Trash2,
+        action: onClearChatAction,
+      },
+      {
+        name: 'search',
+        description: 'Toggle web search',
+        icon: Search,
+        action: onSearchAction,
+      },
+      {
+        name: 'research',
+        description: 'Toggle deep research mode',
+        icon: FileSearch,
+        action: onDeepResearchAction,
+      },
+    ],
+    [onClearChatAction, onSearchAction, onDeepResearchAction]
+  );
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -115,7 +118,7 @@ export function InputArea({
         setSelectedCommandIndex(firstMatchIndex);
       }
     }
-  }, [inputValue]);
+  }, [inputValue, commands]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
