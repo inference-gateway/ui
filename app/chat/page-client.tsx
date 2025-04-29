@@ -402,6 +402,24 @@ export default function PageClient({ session }: PageClientProps) {
 
         setMessages(updatedMessages);
 
+        let updatedChatSessions = [...chatSessions];
+        let newTitle = '';
+        const currentChat = chatSessions.find(chat => chat.id === activeChatId);
+        if (
+          currentChat &&
+          currentChat.title === 'New Chat' &&
+          messages.length === 0 &&
+          !editMessageId
+        ) {
+          newTitle = content.trim().slice(0, 10) || 'New Chat';
+
+          updatedChatSessions = chatSessions.map(chat =>
+            chat.id === activeChatId ? { ...chat, title: newTitle } : chat
+          );
+
+          setChatSessions(updatedChatSessions);
+        }
+
         const tools: SchemaChatCompletionTool[] | undefined = isWebSearchEnabled
           ? [WebSearchTool, FetchPageTool]
           : undefined;
@@ -430,18 +448,20 @@ export default function PageClient({ session }: PageClientProps) {
           },
         });
 
-        const updatedSessions = chatSessions.map(session =>
+        // Save the session with the updated messages, token usage, AND the new title if it was set
+        const finalUpdatedSessions = updatedChatSessions.map(session =>
           session.id === activeChatId
             ? {
                 ...session,
-                messages,
+                title: newTitle || session.title, // Keep the new title if it was set
+                messages: updatedMessages, // Use the most current messages
                 tokenUsage,
               }
             : session
         );
 
-        setChatSessions(updatedSessions);
-        await storageService.saveChatSessions(updatedSessions);
+        setChatSessions(finalUpdatedSessions);
+        await storageService.saveChatSessions(finalUpdatedSessions);
       } catch (error) {
         logger.error('Failed to send message', {
           error: error instanceof Error ? error.message : error,
