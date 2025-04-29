@@ -20,7 +20,7 @@ describe('LocalStorageService', () => {
     id: 'test-id',
     title: 'Test Session',
     messages: [],
-    createdAt: Date.now(),
+    createdAt: new Date().toISOString(),
     tokenUsage: {
       prompt_tokens: 100,
       completion_tokens: 150,
@@ -65,7 +65,7 @@ describe('LocalStorageService', () => {
         id: 'token-test',
         title: 'Token Test Session',
         messages: [],
-        createdAt: Date.now(),
+        createdAt: new Date().toISOString(),
         tokenUsage: {
           prompt_tokens: 200,
           completion_tokens: 300,

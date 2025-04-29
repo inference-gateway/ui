@@ -10,6 +10,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint:fix": "next lint --fix",
+    "typecheck": "tsc --noEmit",
     "oas-download": "curl -X GET \"https://raw.githubusercontent.com/inference-gateway/inference-gateway/main/openapi.yaml\" -o openapi.yaml",
     "test": "jest --detectOpenHandles",
     "test:watch": "jest --watch",
