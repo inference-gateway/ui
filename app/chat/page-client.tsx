@@ -314,6 +314,7 @@ export default function PageClient({ session }: PageClientProps) {
         session.id === activeChatId
           ? {
               ...session,
+              title: 'New Chat',
               messages: [],
               tokenUsage: {
                 prompt_tokens: 0,
