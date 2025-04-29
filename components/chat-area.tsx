@@ -147,10 +147,19 @@ export function ChatArea({ messages, isStreaming, selectedModel, onEditMessage }
                 <div key={message.id} className="flex flex-col">
                   <div className={cn('w-full flex flex-col', isUser ? 'items-end' : 'items-start')}>
                     {isStreaming && isLastMessage && (
-                      <div className="flex items-center space-x-2 mt-2">
-                        <div className="h-2 w-2 rounded-full bg-[hsl(var(--chat-typing-indicator))] animate-pulse"></div>
-                        <div className="h-2 w-2 rounded-full bg-[hsl(var(--chat-typing-indicator))] animate-pulse delay-150"></div>
-                        <div className="h-2 w-2 rounded-full bg-[hsl(var(--chat-typing-indicator))] animate-pulse delay-300"></div>
+                      <div className="flex items-center space-x-2 mt-2 ml-1">
+                        <div
+                          className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--chat-typing-indicator))] animate-bounce animate-pulse opacity-70"
+                          style={{ animationDuration: '1s', animationDelay: '0ms' }}
+                        ></div>
+                        <div
+                          className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--chat-typing-indicator))] animate-bounce animate-pulse opacity-70"
+                          style={{ animationDuration: '1s', animationDelay: '200ms' }}
+                        ></div>
+                        <div
+                          className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--chat-typing-indicator))] animate-bounce animate-pulse opacity-70"
+                          style={{ animationDuration: '1s', animationDelay: '400ms' }}
+                        ></div>
                       </div>
                     )}
                     {showThinking && (
