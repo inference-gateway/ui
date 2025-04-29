@@ -63,5 +63,5 @@ jobs:
 
       - name: Test Container image
         run: |
-          echo "Docker image built and tested successfully"
+          echo "OCI image built and tested successfully"
           docker images
