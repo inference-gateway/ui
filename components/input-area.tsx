@@ -5,17 +5,20 @@ import { SchemaCompletionUsage } from '@inference-gateway/sdk';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useRef, useState, useEffect } from 'react';
+import { TokenUsage } from './token-usage';
 
 interface InputAreaProps {
   isLoading: boolean;
   selectedModel: string;
   tokenUsage: SchemaCompletionUsage;
   onSendMessageAction: (message: string) => void;
+  onClearChatAction?: () => void;
   onSearchAction?: () => void;
   onDeepResearchAction?: () => void;
   isSearchActive?: boolean;
   isDeepResearchActive?: boolean;
   editingMessageId?: string | null;
+  editMessageContent?: string;
   onCancelEdit?: () => void;
   onEditLastUserMessage?: () => void;
 }
@@ -25,11 +28,13 @@ export function InputArea({
   selectedModel,
   tokenUsage,
   onSendMessageAction,
+  onClearChatAction,
   onSearchAction,
   onDeepResearchAction,
   isSearchActive = false,
   isDeepResearchActive = false,
   editingMessageId = null,
+  editMessageContent = '',
   onCancelEdit,
   onEditLastUserMessage,
 }: InputAreaProps) {
@@ -45,6 +50,12 @@ export function InputArea({
     }
   }, []);
 
+  useEffect(() => {
+    if (editingMessageId && editMessageContent) {
+      setInputValue(editMessageContent);
+    }
+  }, [editingMessageId, editMessageContent]);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -58,8 +69,29 @@ export function InputArea({
     }
   };
 
+  const processCommand = (input: string) => {
+    const trimmedInput = input.trim();
+
+    if (trimmedInput === '/clear' || trimmedInput === '/reset') {
+      if (onClearChatAction) {
+        onClearChatAction();
+        return true;
+      }
+    }
+
+    return false;
+  };
+
   const handleSendMessage = () => {
     if (inputValue.trim() && !isLoading && selectedModel) {
+      if (inputValue.startsWith('/')) {
+        const isCommand = processCommand(inputValue);
+        if (isCommand) {
+          setInputValue('');
+          return;
+        }
+      }
+
       onSendMessageAction(inputValue);
       setInputValue('');
     }
@@ -68,16 +100,10 @@ export function InputArea({
   return (
     <div className={cn('py-4', isMobile && 'pb-6')}>
       <div className="w-full">
-        <div className="mb-2 text-xs text-chat-input-text-muted flex justify-between">
-          <div>
-            <span className="mr-2">Tokens: {tokenUsage.total_tokens || 0}</span>
-            <span className={cn(isMobile ? 'hidden' : 'inline')}>
-              ({tokenUsage.prompt_tokens || 0} prompt / {tokenUsage.completion_tokens || 0}{' '}
-              completion)
-            </span>
-          </div>
+        <div className="mb-2 flex justify-between">
+          <TokenUsage tokenUsage={tokenUsage} />
           {editingMessageId && (
-            <div className="text-blue-500 font-medium flex items-center">
+            <div className="text-blue-500 font-medium flex items-center text-xs">
               <span>Editing message</span>
               {onCancelEdit && (
                 <button
@@ -98,7 +124,9 @@ export function InputArea({
               value={inputValue}
               onChange={e => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={editingMessageId ? 'Edit your message...' : 'Ask anything'}
+              placeholder={
+                editingMessageId ? 'Edit your message...' : 'Ask anything or type / for commands'
+              }
               rows={2}
               disabled={isLoading || !selectedModel}
               className={cn(
@@ -215,6 +243,9 @@ export function InputArea({
             </div>
           </div>
         </div>
+      </div>
+      <div className="mt-2 text-xs text-[hsl(var(--chat-footer-subtext))] dark:text-gray-400">
+        <span>Try typing a message or commands like /clear or /reset</span>
       </div>
     </div>
   );

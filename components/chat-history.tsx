@@ -10,7 +10,7 @@ interface ChatHistoryProps {
     id: string;
     title: string;
     messages: Message[];
-    createdAt?: number;
+    createdAt?: string;
   }[];
   activeChatId: string;
   onNewChatAction: () => void;

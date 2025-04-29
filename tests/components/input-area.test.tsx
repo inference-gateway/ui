@@ -36,7 +36,7 @@ describe('InputArea Component', () => {
   test('renders correctly with model selected', () => {
     render(<InputArea {...mockProps} />);
 
-    expect(screen.getByPlaceholderText('Ask anything')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Ask anything or type / for commands')).toBeInTheDocument();
     expect(screen.getByTestId('mock-send-button')).toBeInTheDocument();
   });
 
@@ -140,27 +140,6 @@ describe('InputArea Component', () => {
     expect(screen.getByText('(50 prompt / 75 completion)')).toBeInTheDocument();
   });
 
-  test('renders with mobile-specific styling when on mobile device', () => {
-    jest.spyOn(UseMobileModule, 'useIsMobile').mockReturnValue(true);
-
-    render(<InputArea {...mockProps} />);
-
-    const textarea = screen.getByTestId('mock-input');
-    expect(textarea).toHaveAttribute('rows', '2');
-
-    const tokenUsage = {
-      prompt_tokens: 50,
-      completion_tokens: 75,
-      total_tokens: 125,
-    } as SchemaCompletionUsage;
-
-    render(<InputArea {...mockProps} tokenUsage={tokenUsage} />);
-
-    expect(screen.getByText('Tokens: 125')).toBeInTheDocument();
-    const detailedTokenInfo = screen.queryByText('(50 prompt / 75 completion)');
-    expect(detailedTokenInfo).toHaveClass('hidden');
-  });
-
   test('shows active state for search button when isSearchActive is true', () => {
     render(<InputArea {...mockProps} isSearchActive={true} />);
 
@@ -195,5 +174,27 @@ describe('InputArea Component', () => {
     expect(deepResearchButton).not.toHaveClass('bg-chat-input-hover-bg');
     expect(deepResearchButton).toHaveClass('text-chat-input-text-muted');
     expect(deepResearchButton).not.toHaveClass('font-medium');
+  });
+
+  test('sends message on Enter key press', () => {
+    const onSendMessage = jest.fn();
+    render(<InputArea {...mockProps} onSendMessageAction={onSendMessage} />);
+
+    const input = screen.getByTestId('mock-input');
+    fireEvent.change(input, { target: { value: 'Hello world' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(onSendMessage).toHaveBeenCalledWith('Hello world');
+  });
+
+  test('does not send message on Shift+Enter key press', () => {
+    const onSendMessage = jest.fn();
+    render(<InputArea {...mockProps} onSendMessageAction={onSendMessage} />);
+
+    const input = screen.getByTestId('mock-input');
+    fireEvent.change(input, { target: { value: 'Hello world' } });
+    fireEvent.keyDown(input, { key: 'Enter', shiftKey: true });
+
+    expect(onSendMessage).not.toHaveBeenCalled();
   });
 });

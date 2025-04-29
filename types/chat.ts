@@ -15,7 +15,7 @@ export interface ChatSession {
   id: string;
   title: string;
   messages: Message[];
-  createdAt?: number;
+  createdAt?: string;
   tokenUsage?: SchemaCompletionUsage;
 }
 

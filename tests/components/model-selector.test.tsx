@@ -257,4 +257,33 @@ describe('ModelSelector Component', () => {
       expect(mockOnSelectModelAction).toHaveBeenCalledWith('');
     });
   });
+
+  test('persists selected model to storage', async () => {
+    (fetchModels as jest.Mock).mockImplementation(mockFetchModelsSuccess);
+
+    const { unmount } = render(
+      <ModelSelector selectedModel="" onSelectModelAction={mockOnSelectModelAction} />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('selector-display-text')).toHaveTextContent('Select a model');
+    });
+
+    document.dispatchEvent(new CustomEvent('trigger-clicked'));
+
+    const modelOption = await screen.findByTestId('model-option-openai/gpt-4o');
+    fireEvent.click(modelOption);
+
+    expect(mockOnSelectModelAction).toHaveBeenCalledWith('openai/gpt-4o');
+
+    unmount();
+
+    render(
+      <ModelSelector selectedModel="openai/gpt-4o" onSelectModelAction={mockOnSelectModelAction} />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('selector-display-text')).toHaveTextContent('openai/gpt-4o');
+    });
+  });
 });

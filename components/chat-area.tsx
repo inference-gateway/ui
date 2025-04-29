@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import ThinkingBubble from '@/components/thinking-bubble';
 import ToolCallBubble from '@/components/tool-call-bubble';
@@ -27,6 +27,28 @@ interface ChatAreaProps {
 export function ChatArea({ messages, isStreaming, selectedModel, onEditMessage }: ChatAreaProps) {
   const [streamedTokens, setStreamedTokens] = useState<string>('');
   const [streamedMessageIds, setStreamedMessageIds] = useState<Set<string>>(new Set());
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  // Scroll management logic
+  const scrollToBottom = useCallback(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isStreaming, scrollToBottom]);
+
+  useEffect(() => {
+    let scrollInterval: NodeJS.Timeout | null = null;
+    if (isStreaming) {
+      scrollInterval = setInterval(scrollToBottom, 100);
+    }
+    return () => {
+      if (scrollInterval) clearInterval(scrollInterval);
+    };
+  }, [isStreaming, scrollToBottom]);
 
   useEffect(() => {
     if (!isStreaming) {
@@ -100,7 +122,7 @@ export function ChatArea({ messages, isStreaming, selectedModel, onEditMessage }
   };
 
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 overflow-y-auto" ref={chatContainerRef}>
       <div className={cn('mx-auto max-w-2xl px-4', messages.length > 0 ? 'py-6' : 'py-2')}>
         {messages.length > 0 ? (
           <div className="flex flex-col space-y-4 pb-14">
@@ -122,7 +144,7 @@ export function ChatArea({ messages, isStreaming, selectedModel, onEditMessage }
               }
 
               return (
-                <div key={`${message.role + message.id}`} className="flex flex-col">
+                <div key={message.id} className="flex flex-col">
                   <div className={cn('w-full flex flex-col', isUser ? 'items-end' : 'items-start')}>
                     {isStreaming && isLastMessage && (
                       <div className="flex items-center space-x-2 mt-2">
