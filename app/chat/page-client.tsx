@@ -441,11 +441,11 @@ export default function PageClient({ session }: PageClientProps) {
             }
           },
           onUpdateUsage: usage => {
-            setTokenUsage(prev => ({
-              prompt_tokens: prev.prompt_tokens + (usage.prompt_tokens || 0),
-              completion_tokens: prev.completion_tokens + (usage.completion_tokens || 0),
-              total_tokens: prev.total_tokens + (usage.total_tokens || 0),
-            }));
+            setTokenUsage({
+              prompt_tokens: usage.prompt_tokens || 0,
+              completion_tokens: usage.completion_tokens || 0,
+              total_tokens: usage.total_tokens || 0,
+            });
           },
         });
 
@@ -455,7 +455,7 @@ export default function PageClient({ session }: PageClientProps) {
                 ...session,
                 title: newTitle || session.title,
                 messages: updatedMessages,
-                tokenUsage,
+                tokenUsage: tokenUsage,
               }
             : session
         );
