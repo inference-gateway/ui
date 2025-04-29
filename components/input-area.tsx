@@ -1,11 +1,28 @@
 'use client';
 
-import { SendHorizonal, Plus, Globe, Mic, MoreHorizontal, X } from 'lucide-react';
+import {
+  SendHorizonal,
+  Plus,
+  Globe,
+  Mic,
+  MoreHorizontal,
+  X,
+  Search,
+  Trash2,
+  FileSearch,
+} from 'lucide-react';
 import { SchemaCompletionUsage } from '@inference-gateway/sdk';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useRef, useState, useEffect } from 'react';
 import { TokenUsage } from './token-usage';
+
+interface CommandOption {
+  name: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+  action?: () => void;
+}
 
 interface InputAreaProps {
   isLoading: boolean;
@@ -39,8 +56,32 @@ export function InputArea({
   onEditLastUserMessage,
 }: InputAreaProps) {
   const [inputValue, setInputValue] = useState('');
+  const [showCommands, setShowCommands] = useState(false);
+  const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
   const isMobile = useIsMobile();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const commandsRef = useRef<HTMLDivElement>(null);
+
+  const commands: CommandOption[] = [
+    {
+      name: 'clear',
+      description: 'Clear the conversation history',
+      icon: Trash2,
+      action: onClearChatAction,
+    },
+    {
+      name: 'search',
+      description: 'Toggle web search',
+      icon: Search,
+      action: onSearchAction,
+    },
+    {
+      name: 'research',
+      description: 'Toggle deep research mode',
+      icon: FileSearch,
+      action: onDeepResearchAction,
+    },
+  ];
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -56,17 +97,79 @@ export function InputArea({
     }
   }, [editingMessageId, editMessageContent]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    } else if (e.key === 'Escape' && editingMessageId && onCancelEdit) {
-      e.preventDefault();
-      onCancelEdit();
-    } else if (e.key === 'ArrowUp' && !inputValue.trim() && !editingMessageId) {
-      e.preventDefault();
-      onEditLastUserMessage?.();
+  useEffect(() => {
+    if (inputValue === '/') {
+      setShowCommands(true);
+      setSelectedCommandIndex(0);
+    } else if (!inputValue.startsWith('/') || inputValue.includes(' ')) {
+      setShowCommands(false);
     }
+
+    if (inputValue.startsWith('/') && !inputValue.includes(' ')) {
+      const query = inputValue.substring(1).toLowerCase();
+      const hasMatches = commands.some(cmd => cmd.name.includes(query));
+      setShowCommands(hasMatches);
+
+      const firstMatchIndex = commands.findIndex(cmd => cmd.name.includes(query));
+      if (firstMatchIndex !== -1) {
+        setSelectedCommandIndex(firstMatchIndex);
+      }
+    }
+  }, [inputValue]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (commandsRef.current && !commandsRef.current.contains(event.target as Node)) {
+        setShowCommands(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (showCommands) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedCommandIndex(prev => (prev + 1) % filteredCommands.length);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedCommandIndex(
+          prev => (prev - 1 + filteredCommands.length) % filteredCommands.length
+        );
+      } else if (e.key === 'Tab' || e.key === 'Enter') {
+        e.preventDefault();
+        selectCommand(filteredCommands[selectedCommandIndex].name);
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        setShowCommands(false);
+      }
+    } else {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSendMessage();
+      } else if (e.key === 'Escape' && editingMessageId && onCancelEdit) {
+        e.preventDefault();
+        onCancelEdit();
+      } else if (e.key === 'ArrowUp' && !inputValue.trim() && !editingMessageId) {
+        e.preventDefault();
+        onEditLastUserMessage?.();
+      }
+    }
+  };
+
+  const selectCommand = (commandName: string) => {
+    const command = commands.find(cmd => cmd.name === commandName);
+    if (command && command.action) {
+      command.action();
+      setInputValue('');
+    } else {
+      setInputValue(`/${commandName} `);
+    }
+    setShowCommands(false);
   };
 
   const processCommand = (input: string) => {
@@ -88,14 +191,28 @@ export function InputArea({
         const isCommand = processCommand(inputValue);
         if (isCommand) {
           setInputValue('');
+          requestAnimationFrame(() => {
+            textareaRef.current?.focus();
+          });
           return;
         }
       }
 
       onSendMessageAction(inputValue);
       setInputValue('');
+
+      requestAnimationFrame(() => {
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+        }
+      });
     }
   };
+
+  const filteredCommands =
+    inputValue.startsWith('/') && !inputValue.includes(' ')
+      ? commands.filter(cmd => cmd.name.includes(inputValue.substring(1).toLowerCase()))
+      : commands;
 
   return (
     <div className={cn('py-4', isMobile && 'pb-6')}>
@@ -142,6 +259,56 @@ export function InputArea({
               data-testid="mock-input"
             />
           </div>
+
+          {showCommands && filteredCommands.length > 0 && (
+            <div
+              ref={commandsRef}
+              className="absolute left-3 bottom-[150px] border rounded-lg shadow-lg z-10 w-64"
+              style={{
+                backgroundColor: 'hsl(var(--command-dropdown-bg))',
+                borderColor: 'hsl(var(--command-dropdown-border))',
+                boxShadow: '0 4px 6px -1px hsl(var(--command-dropdown-shadow))',
+              }}
+            >
+              <div className="p-1">
+                {filteredCommands.map((command, index) => (
+                  <div
+                    key={command.name}
+                    onClick={() => selectCommand(command.name)}
+                    className={cn(
+                      'flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer',
+                      index === selectedCommandIndex
+                        ? 'text-button-active-text'
+                        : 'hover:bg-chat-input-hover-bg'
+                    )}
+                    style={{
+                      backgroundColor:
+                        index === selectedCommandIndex
+                          ? 'hsl(var(--command-dropdown-active-bg))'
+                          : 'transparent',
+                      color:
+                        index === selectedCommandIndex
+                          ? 'hsl(var(--command-dropdown-active-text))'
+                          : 'hsl(var(--command-dropdown-text))',
+                    }}
+                  >
+                    <command.icon className="h-4 w-4" />
+                    <div>
+                      <div className="font-medium text-sm">/{command.name}</div>
+                      <div
+                        className="text-xs"
+                        style={{
+                          color: 'hsl(var(--command-dropdown-text-muted))',
+                        }}
+                      >
+                        {command.description}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="absolute left-3 top-3 flex gap-1.5">
             <button
@@ -245,7 +412,7 @@ export function InputArea({
         </div>
       </div>
       <div className="mt-2 text-xs text-[hsl(var(--chat-footer-subtext))] dark:text-gray-400">
-        <span>Try typing a message or commands like /clear or /reset</span>
+        <span>Try typing a message or type / for available commands</span>
       </div>
     </div>
   );
