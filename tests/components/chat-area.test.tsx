@@ -49,7 +49,7 @@ describe('ChatArea Component', () => {
 
     render(<ChatArea messages={streamingMessages} isStreaming={true} />);
 
-    const animationElements = document.querySelectorAll('.animate-pulse');
+    const animationElements = document.querySelectorAll('.animate-bounce');
     expect(animationElements.length).toBeGreaterThan(0);
   });
 

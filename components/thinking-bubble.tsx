@@ -75,15 +75,15 @@ export default function ThinkingBubble({
               {isActivelyThinking ? (
                 <div className="flex items-center space-x-2">
                   <div
-                    className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--thinking-bubble-indicator))] animate-bounce animate-pulse opacity-70"
+                    className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--thinking-bubble-indicator))] animate-bounce opacity-70"
                     style={{ animationDuration: '1s', animationDelay: '0ms' }}
                   ></div>
                   <div
-                    className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--thinking-bubble-indicator))] animate-bounce animate-pulse opacity-70"
+                    className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--thinking-bubble-indicator))] animate-bounce opacity-70"
                     style={{ animationDuration: '1s', animationDelay: '200ms' }}
                   ></div>
                   <div
-                    className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--thinking-bubble-indicator))] animate-bounce animate-pulse opacity-70"
+                    className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--thinking-bubble-indicator))] animate-bounce opacity-70"
                     style={{ animationDuration: '1s', animationDelay: '400ms' }}
                   ></div>
                 </div>
