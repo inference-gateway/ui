@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import ThinkingBubble from '@/components/thinking-bubble';
 import ToolCallBubble from '@/components/tool-call-bubble';
@@ -217,6 +217,7 @@ export function ChatArea({ messages, isStreaming, selectedModel, onEditMessage }
                               <ReactMarkdown
                                 components={{
                                   code: CodeBlock,
+                                  p: React.Fragment,
                                 }}
                               >
                                 {message.content}
