@@ -23,7 +23,7 @@ export default function ToolCallBubble({ toolCalls }: ToolCallBubbleProps) {
       <div className="flex flex-col">
         <button
           onClick={toggleExpanded}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs bg-[hsl(var(--thinking-bubble-bg))] border border-[hsl(var(--thinking-bubble-border))] hover:bg-[hsl(var(--thinking-bubble-hover-bg))] transition-colors duration-200 text-[hsl(var(--thinking-bubble-text))] z-10"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs bg-[hsl(var(--thinking-bubble-bg))] border border-[hsl(var(--thinking-bubble-border))] hover:bg-[hsl(var(--thinking-bubble-hover-bg))] transition-colors duration-200 text-[hsl(var(--thinking-bubble-text))]"
         >
           <Terminal className="h-3 w-3" />
           <span>Tool Calls ({toolCalls.length})</span>

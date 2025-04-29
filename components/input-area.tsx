@@ -266,11 +266,13 @@ export function InputArea({
           {showCommands && filteredCommands.length > 0 && (
             <div
               ref={commandsRef}
-              className="absolute left-3 bottom-[150px] border rounded-lg shadow-lg z-10 w-64"
+              className="absolute left-3 bottom-[150px] border rounded-lg shadow-lg w-64"
               style={{
                 backgroundColor: 'hsl(var(--command-dropdown-bg))',
                 borderColor: 'hsl(var(--command-dropdown-border))',
                 boxShadow: '0 4px 6px -1px hsl(var(--command-dropdown-shadow))',
+                position: 'absolute',
+                zIndex: 9999,
               }}
             >
               <div className="p-1">
