@@ -1,7 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import Chat from '@/app/chat/page-client';
-import { useChat } from '@/hooks/use-chat';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MockModelSelectorProps {
@@ -39,10 +38,6 @@ jest.mock('react-syntax-highlighter/dist/esm/styles/hljs', () => ({
   dark: () => ({}),
 }));
 
-jest.mock('@/hooks/use-chat', () => ({
-  useChat: jest.fn(),
-}));
-
 jest.mock('@/hooks/use-mobile', () => ({
   useIsMobile: jest.fn(),
 }));
@@ -78,22 +73,6 @@ describe('Home Component', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    (useChat as jest.Mock).mockReturnValue({
-      chatSessions: [{ id: '1', title: 'Test Chat' }],
-      activeChatId: '1',
-      messages: [],
-      selectedModel: 'gpt-4o',
-      isLoading: false,
-      isStreaming: false,
-      tokenUsage: { prompttTokens: 0, completion_tokens: 0, total_tokens: 0 },
-      setSelectedModel: mockSetSelectedModel,
-      handleNewChat: jest.fn(),
-      handleSendMessage: mockHandleSendMessage,
-      handleSelectChat: jest.fn(),
-      handleDeleteChat: jest.fn(),
-      chatContainerRef: { current: null },
-    });
 
     (useIsMobile as jest.Mock).mockReturnValue(false);
 
