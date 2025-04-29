@@ -123,7 +123,7 @@ export function ChatArea({ messages, isStreaming, selectedModel, onEditMessage }
 
   return (
     <div className="flex-1 overflow-y-auto" ref={chatContainerRef}>
-      <div className={cn('mx-auto max-w-2xl px-4', messages.length > 0 ? 'py-6' : 'py-2')}>
+      <div className={cn('mx-auto max-w-3xl px-6 sm:px-8', messages.length > 0 ? 'py-6' : 'py-2')}>
         {messages.length > 0 ? (
           <div className="flex flex-col space-y-4 pb-14">
             {messages.map((message, index) => {
