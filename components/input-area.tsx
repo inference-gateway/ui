@@ -1,16 +1,6 @@
 'use client';
 
-import {
-  SendHorizonal,
-  Plus,
-  Globe,
-  Mic,
-  MoreHorizontal,
-  X,
-  Search,
-  Trash2,
-  FileSearch,
-} from 'lucide-react';
+import { SendHorizonal, Plus, Globe, Mic, MoreHorizontal, X, Search, Trash2 } from 'lucide-react';
 import { SchemaCompletionUsage } from '@inference-gateway/sdk';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -31,9 +21,7 @@ interface InputAreaProps {
   onSendMessageAction: (message: string) => void;
   onClearChatAction?: () => void;
   onSearchAction?: () => void;
-  onDeepResearchAction?: () => void;
   isSearchActive?: boolean;
-  isDeepResearchActive?: boolean;
   editingMessageId?: string | null;
   editMessageContent?: string;
   onCancelEdit?: () => void;
@@ -47,9 +35,7 @@ export function InputArea({
   onSendMessageAction,
   onClearChatAction,
   onSearchAction,
-  onDeepResearchAction,
   isSearchActive = false,
-  isDeepResearchActive = false,
   editingMessageId = null,
   editMessageContent = '',
   onCancelEdit,
@@ -76,14 +62,8 @@ export function InputArea({
         icon: Search,
         action: onSearchAction,
       },
-      {
-        name: 'research',
-        description: 'Toggle deep research mode',
-        icon: FileSearch,
-        action: onDeepResearchAction,
-      },
     ],
-    [onClearChatAction, onSearchAction, onDeepResearchAction]
+    [onClearChatAction, onSearchAction]
   );
 
   useEffect(() => {
@@ -351,21 +331,6 @@ export function InputArea({
                   >
                     <Globe className={cn(isMobile ? 'h-5 w-5' : 'h-4 w-4')} />
                     <span>Search</span>
-                  </button>
-                  <button
-                    onClick={onDeepResearchAction}
-                    className={cn(
-                      'flex items-center gap-1 rounded-lg mx-1',
-                      isMobile ? 'px-3 py-1.5' : 'px-3 py-1',
-                      isDeepResearchActive
-                        ? 'bg-button-active text-button-active-text font-medium'
-                        : 'text-chat-input-text-muted hover:bg-chat-input-hover-bg',
-                      'transition-colors text-sm'
-                    )}
-                    aria-label="Deep research"
-                    data-testid="deep-research-button"
-                  >
-                    <span>Deep research</span>
                   </button>
                 </>
               )}

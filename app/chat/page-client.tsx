@@ -49,7 +49,6 @@ export default function PageClient({ session }: PageClientProps) {
     total_tokens: 0,
   });
   const [error, setError] = useState<string | null>(null);
-  const [isDeepResearchActive, setIsDeepResearchActive] = useState(false);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editMessageContent, setEditMessageContent] = useState<string>('');
 
@@ -352,15 +351,7 @@ export default function PageClient({ session }: PageClientProps) {
 
   const handleSearchAction = useCallback(() => {
     toggleWebSearch();
-    setIsDeepResearchActive(false);
   }, [toggleWebSearch]);
-
-  const handleDeepResearchAction = useCallback(() => {
-    setIsDeepResearchActive(prev => !prev);
-    if (!isDeepResearchActive && isWebSearchEnabled) {
-      toggleWebSearch();
-    }
-  }, [isDeepResearchActive, isWebSearchEnabled, toggleWebSearch]);
 
   const handleEditLastUserMessage = useCallback(() => {
     const lastUserMessage = [...messages].reverse().find(msg => msg.role === MessageRole.user);
@@ -584,9 +575,7 @@ export default function PageClient({ session }: PageClientProps) {
               }}
               onClearChatAction={handleClearChat}
               isSearchActive={isWebSearchEnabled}
-              isDeepResearchActive={isDeepResearchActive}
               onSearchAction={handleSearchAction}
-              onDeepResearchAction={handleDeepResearchAction}
               editingMessageId={editingMessageId}
               editMessageContent={editMessageContent}
               onCancelEdit={() => {

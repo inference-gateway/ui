@@ -20,9 +20,7 @@ describe('InputArea Component', () => {
     } as SchemaCompletionUsage,
     onSendMessageAction: jest.fn(),
     onSearchAction: jest.fn(),
-    onDeepResearchAction: jest.fn(),
     isSearchActive: false,
-    isDeepResearchActive: false,
   };
 
   beforeEach(() => {
@@ -99,9 +97,6 @@ describe('InputArea Component', () => {
     expect(screen.getByTestId('search-button')).toBeInTheDocument();
     expect(screen.getByText('Search')).toBeInTheDocument();
 
-    expect(screen.getByTestId('deep-research-button')).toBeInTheDocument();
-    expect(screen.getByText('Deep research')).toBeInTheDocument();
-
     expect(screen.getByTestId('mic-button')).toBeInTheDocument();
 
     expect(screen.getByTestId('more-options-button')).toBeInTheDocument();
@@ -116,15 +111,6 @@ describe('InputArea Component', () => {
     fireEvent.click(searchButton);
 
     expect(mockProps.onSearchAction).toHaveBeenCalled();
-  });
-
-  test('calls onDeepResearchAction when Deep research button is clicked', () => {
-    render(<InputArea {...mockProps} />);
-
-    const deepResearchButton = screen.getByTestId('deep-research-button');
-    fireEvent.click(deepResearchButton);
-
-    expect(mockProps.onDeepResearchAction).toHaveBeenCalled();
   });
 
   test('displays token usage when totalTokens > 0', () => {
@@ -156,24 +142,6 @@ describe('InputArea Component', () => {
     expect(searchButton).not.toHaveClass('bg-chat-input-hover-bg');
     expect(searchButton).toHaveClass('text-chat-input-text-muted');
     expect(searchButton).not.toHaveClass('font-medium');
-  });
-
-  test('shows active state for deep research button when isDeepResearchActive is true', () => {
-    render(<InputArea {...mockProps} isDeepResearchActive={true} />);
-
-    const deepResearchButton = screen.getByTestId('deep-research-button');
-    expect(deepResearchButton).toHaveClass('bg-button-active');
-    expect(deepResearchButton).toHaveClass('text-button-active-text');
-    expect(deepResearchButton).toHaveClass('font-medium');
-  });
-
-  test('shows inactive state for deep research button when isDeepResearchActive is false', () => {
-    render(<InputArea {...mockProps} isDeepResearchActive={false} />);
-
-    const deepResearchButton = screen.getByTestId('deep-research-button');
-    expect(deepResearchButton).not.toHaveClass('bg-chat-input-hover-bg');
-    expect(deepResearchButton).toHaveClass('text-chat-input-text-muted');
-    expect(deepResearchButton).not.toHaveClass('font-medium');
   });
 
   test('sends message on Enter key press', () => {
