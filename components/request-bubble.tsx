@@ -28,7 +28,8 @@ export default function RequestBubble({ request }: RequestBubbleProps) {
     let curlCommand = `curl -X ${method} '${url}'`;
 
     Object.entries(headers).forEach(([key, value]) => {
-      curlCommand += `\\\n  -H '${key}: ${value}'`;
+      curlCommand += ` \\
+  -H '${key}: ${value}'`;
     });
 
     if (body || tools) {
@@ -42,7 +43,8 @@ export default function RequestBubble({ request }: RequestBubbleProps) {
       const bodyJson = JSON.stringify(modifiedBody, null, 2);
       const escapedBody = bodyJson.replace(/'/g, "'\\''");
 
-      curlCommand += `\\\n  -d '${escapedBody}'`;
+      curlCommand += ` \\
+  -d '${escapedBody}'`;
     }
 
     return curlCommand;

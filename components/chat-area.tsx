@@ -110,7 +110,7 @@ export function ChatArea({ messages, isStreaming, selectedModel, onEditMessage }
       url: getFullUrl(),
       headers: {
         'Content-Type': 'application/json',
-        Accept: 'application/json',
+        Accept: 'text/event-stream',
       },
       body: {
         model: message.model || selectedModel || 'default-model',
