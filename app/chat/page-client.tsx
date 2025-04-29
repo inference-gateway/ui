@@ -412,14 +412,14 @@ export default function PageClient({ session }: PageClientProps) {
           messages.length === 0 &&
           !editMessageId
         ) {
-          newTitle = content.trim().slice(0, 10) || 'New Chat';
+          newTitle = content.trim().slice(0, 15) + '...' || 'New Chat';
 
           updatedChatSessions = chatSessions.map(chat =>
             chat.id === activeChatId ? { ...chat, title: newTitle } : chat
           );
-
-          setChatSessions(updatedChatSessions);
         }
+
+        setChatSessions(updatedChatSessions);
 
         const tools: SchemaChatCompletionTool[] | undefined = isWebSearchEnabled
           ? [WebSearchTool, FetchPageTool]
@@ -449,13 +449,12 @@ export default function PageClient({ session }: PageClientProps) {
           },
         });
 
-        // Save the session with the updated messages, token usage, AND the new title if it was set
         const finalUpdatedSessions = updatedChatSessions.map(session =>
           session.id === activeChatId
             ? {
                 ...session,
-                title: newTitle || session.title, // Keep the new title if it was set
-                messages: updatedMessages, // Use the most current messages
+                title: newTitle || session.title,
+                messages: updatedMessages,
                 tokenUsage,
               }
             : session
