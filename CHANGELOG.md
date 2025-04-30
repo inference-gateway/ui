@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.0](https://github.com/inference-gateway/ui/compare/v0.6.2...v0.7.0) (2025-04-30)
+
+### ✨ Features
+
+* Implement web search functionality and enhance message handling ([#36](https://github.com/inference-gateway/ui/issues/36)) ([2b73478](https://github.com/inference-gateway/ui/commit/2b73478ec88dc9d8fad17db23af83602290f3e55)), closes [#38](https://github.com/inference-gateway/ui/issues/38)
+
 ## [0.7.0-rc.1](https://github.com/inference-gateway/ui/compare/v0.6.2...v0.7.0-rc.1) (2025-04-29)
 
 ### ✨ Features
