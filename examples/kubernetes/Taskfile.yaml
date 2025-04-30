@@ -3,7 +3,7 @@ version: "3"
 vars:
   NAMESPACE: inference-gateway
   UI_RELEASE: inference-gateway-ui
-  CHART_VERSION: 0.6.2
+  CHART_VERSION: 0.7.0-rc.1
 
 tasks:
   deploy-infrastructure:
@@ -313,9 +313,10 @@ tasks:
           --create-namespace \
           --namespace {{.NAMESPACE}} \
           --set replicaCount=1 \
-          --set config.ENABLE_AUTH=false \
+          --set gateway.envFrom.secretRef=inference-gateway \
           --set gateway.enabled=true \
           --set gateway.config.ENABLE_AUTH=false \
+          --set config.ENABLE_AUTH=false \
           --set ingress.enabled=true \
           --set ingress.className=nginx \
           --set ingress.hosts[0].host=ui.inference-gateway.local \

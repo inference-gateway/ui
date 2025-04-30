@@ -128,7 +128,7 @@ export function ChatArea({ messages, isStreaming, selectedModel, onEditMessage }
           <div className="flex flex-col space-y-4 pb-14">
             {messages.map((message, index) => {
               const isUser = message.role === 'user';
-              const showReasoning = !isUser && message.reasoning_content;
+              const showReasoning = !isUser && message.reasoning;
               const showToolCalls = !isUser && message.tool_calls;
               const showToolResponse = message.role === 'tool' && message.content;
               const isLastMessage = index === messages.length - 1;
@@ -136,7 +136,7 @@ export function ChatArea({ messages, isStreaming, selectedModel, onEditMessage }
               const showThinking =
                 !isUser && (showReasoning || (isLastMessage && isStreaming) || wasStreamed);
 
-              const isThinkingModel = !!message.reasoning_content;
+              const isThinkingModel = !!message.reasoning;
               const toolName = getToolNameForResponse(message.tool_call_id);
 
               if (message.role === 'tool' && !message.content) {
@@ -165,7 +165,7 @@ export function ChatArea({ messages, isStreaming, selectedModel, onEditMessage }
                     {showThinking && (
                       <div className="mb-1">
                         <ThinkingBubble
-                          content={message.reasoning_content || ''}
+                          content={message.reasoning || ''}
                           isVisible={!!showThinking}
                           isStreaming={isLastMessage && isStreaming}
                           streamTokens={streamedTokens}

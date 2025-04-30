@@ -2,6 +2,70 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.0-rc.1](https://github.com/inference-gateway/ui/compare/v0.6.2...v0.7.0-rc.1) (2025-04-29)
+
+### ✨ Features
+
+* Add command dropdown functionality with clear, search, and research options ([4f219a9](https://github.com/inference-gateway/ui/commit/4f219a90820a78416838ef57707587c972fea69e))
+* Add message editing functionality and enhance chat interface interactions ([59b1457](https://github.com/inference-gateway/ui/commit/59b1457930216d5170b05200fd1aae42913dc761))
+* add RequestBubble component to display cURL requests in ChatArea ([a18dcc0](https://github.com/inference-gateway/ui/commit/a18dcc018b9df91ca0e7cfebcc07408cb8930d05))
+* conditionally render RequestBubble in ChatArea based on if we're on development environment ([87a8259](https://github.com/inference-gateway/ui/commit/87a82598f6b4b1a5a477ec445cda18f3b543daee))
+* Enhance WebSearchTool with limit parameter and type annotations ([590d520](https://github.com/inference-gateway/ui/commit/590d5205ddd44f126dc51521af03e6c4837d3e98))
+* implement FetchPageTool for fetching content from a URL and integrate it into useMessageHandler ([6e604e0](https://github.com/inference-gateway/ui/commit/6e604e0dfe5db3d1f1cfe11b2d89383160b7d798))
+* Implement server-side web search functionality with cheerio integration ([d0545ea](https://github.com/inference-gateway/ui/commit/d0545ea323be870c9714d339478706ffacf10d4c))
+* Implement web search functionality and enhance message handling ([363b1d5](https://github.com/inference-gateway/ui/commit/363b1d57f55623613e1daef106457210e2f11da4))
+* integrate CodeBlock component for formatted JSON display in ToolCallBubble and ToolResponseBubble ([af770c0](https://github.com/inference-gateway/ui/commit/af770c0ac76af3f3849f65ae376dc144992ef3f2))
+* pass selectedModel prop to ChatArea for dynamic model selection ([70b1a1e](https://github.com/inference-gateway/ui/commit/70b1a1e908fb27f24a56181e6c31021b80a8d4ef))
+* update WebSearchTool to allow additional properties and format search results ([32f64a3](https://github.com/inference-gateway/ui/commit/32f64a39336e5ad29d8f4d5d24d048605d8f4644))
+
+### ♻️ Improvements
+
+* **ci:** Update message to reflect OCI image instead of Docker image in CI workflow ([a28a666](https://github.com/inference-gateway/ui/commit/a28a666b586379b0303809738b3d54237a99b544))
+* enhance logger to better format object arguments and remove HTML response preview logging ([97645f0](https://github.com/inference-gateway/ui/commit/97645f0f2b811b9d48ad54da5cf57f381d2edafa))
+* Improve search input handling and focus management in ModelSelector component ([a234cdf](https://github.com/inference-gateway/ui/commit/a234cdfbc106f9aca3137713708aa8838e84a896))
+* integrate SYSTEM_PROMPT and tools into message handling and request bubble components ([db85bcf](https://github.com/inference-gateway/ui/commit/db85bcf74704c08d28b36c6b6d2a73f3d58cad0d))
+* Move the state from page-client  to  InputArea so it can be self-contained ([2daf3e9](https://github.com/inference-gateway/ui/commit/2daf3e91a0a184fc279b80ef81e54f7de6cbe75c))
+* Optimize command options definition using useMemo for performance ([fa948c9](https://github.com/inference-gateway/ui/commit/fa948c9df27f4934421f22f6f9f0bd3ec2196185))
+* Optimize textarea height management in InputArea component ([0d6e7cf](https://github.com/inference-gateway/ui/commit/0d6e7cf6fb3f61091913d11a882f85aedd2c9dae))
+* Remove ChatInterface component and associated logic ([d7c8626](https://github.com/inference-gateway/ui/commit/d7c86264ce14588df4a328ff9c4668829965ccdc))
+* Remove deep research functionality and related tests for simplification ([76be0de](https://github.com/inference-gateway/ui/commit/76be0ded81b1ea01fdb6385d604a1abf1629e2c2))
+* Remove deprecated chat-related custom hooks and components - simplify unnecessary abstraction ([4d35e5d](https://github.com/inference-gateway/ui/commit/4d35e5d8d46c2bac5f976ec76c34c2f87af253a5))
+* Remove useChat hook and related mocks from tests after its deletion ([a06c236](https://github.com/inference-gateway/ui/commit/a06c23619235561503bd005eb6c9eeaa70ff8b3b))
+* Rename build step to clarify purpose in CI workflow - it's not a docker image it's an OCI image, could be build with any other OCI compatible tool ([32a6be6](https://github.com/inference-gateway/ui/commit/32a6be63e7f21ec6684754db794448d6280c4960))
+* Simplify chat completion request handling and remove unused dependencies ([d4c37f3](https://github.com/inference-gateway/ui/commit/d4c37f3ebcbcf92fd33bb55ec66506495ae2ec91))
+* Simplify over-use of custom hooks - remove unnecessary abstractions, easier to maintain like this ([d6f8bdb](https://github.com/inference-gateway/ui/commit/d6f8bdb920a6abe56ea976c2686ea937369ee0b3))
+* Update createdAt to use ISO string format in LocalStorageService tests ([ea33b65](https://github.com/inference-gateway/ui/commit/ea33b65d1e3d173e343865a830a5ebb28aa54913))
+
+### 🐛 Bug Fixes
+
+* Add type annotation for message in handleSendMessage test ([27df71f](https://github.com/inference-gateway/ui/commit/27df71f5dc45be3ee0381817858e4f437fde400b))
+* Adjust layout in ChatArea component by modifying container width and padding ([c566d02](https://github.com/inference-gateway/ui/commit/c566d02f552a3b6a6e848f52798179c82d6fdf50))
+* Import React explicitly and adjust paragraph rendering in ChatArea component, div cannot be a child of a p tag ([e92251c](https://github.com/inference-gateway/ui/commit/e92251c5ddfb15c7ec35c71e654d9c9967dce1f8))
+* Remove explicit React import and adjust paragraph rendering in ChatArea component ([5fe09cb](https://github.com/inference-gateway/ui/commit/5fe09cb7ccfe1f36468f163d01fd14d3cae07ba8))
+* Remove oas-download command from pre-commit hook ([14ea398](https://github.com/inference-gateway/ui/commit/14ea398ab2e4e2768d8d3f50a564e1f447488f66))
+* Reset chat messages and update session title on '/reset' or '/clear' command ([efbc2aa](https://github.com/inference-gateway/ui/commit/efbc2aa886a198374b9084695af8ee11c37f76a7))
+* Set default title for new chat sessions ([3049834](https://github.com/inference-gateway/ui/commit/3049834586e6c584c75afb04ea4c0fb1abd079eb))
+* Simplify content rendering in ThinkingBubble component by removing unnecessary loading indicators ([cd74b14](https://github.com/inference-gateway/ui/commit/cd74b146dffcbf17e1aff3684de3a7ce4f6263e8))
+* Simplify token usage state update logic in PageClient component ([28dbd58](https://github.com/inference-gateway/ui/commit/28dbd5896bafd1050072ce5f55e6d5f2eb25da40))
+* Update animation classes in ChatArea and ThinkingBubble components for consistency ([1b658f0](https://github.com/inference-gateway/ui/commit/1b658f08cc43eb2bdee2fc12ed0a535aefe6402f))
+* Update API request headers to accept text/event-stream for streaming responses ([ed56718](https://github.com/inference-gateway/ui/commit/ed56718e6bd7dbb5e57a46fadeaf8e3e8dc7b45a))
+* Update chat session title based on message content and enhance session management ([fb0792b](https://github.com/inference-gateway/ui/commit/fb0792bc5f3b90104c1af5049671cdcf069fbd19))
+* Update chat session title logic to allow longer titles and ensure state is set correctly ([1bd7ae8](https://github.com/inference-gateway/ui/commit/1bd7ae8ad723fa661ae2890b09c3452fbeb42d8b))
+* Update loading indicators in ChatArea and ThinkingBubble components for improved visibility and animation ([88b30eb](https://github.com/inference-gateway/ui/commit/88b30eb8ac312727e2d67a414c75300c2f3077e9))
+* Update SYSTEM_PROMPT to include the current date for context in AI interactions ([a1de30c](https://github.com/inference-gateway/ui/commit/a1de30c9080252c3613bc6752c2f9ce5534036d5))
+
+### 🔧 Miscellaneous
+
+* Add a TODO ([a75a989](https://github.com/inference-gateway/ui/commit/a75a989b0bfc8dca885b90e655aa7f7f4fead457))
+
+### 🎨 Miscellaneous
+
+* Remove unnecessary z-index from button styles in tool call and response bubbles ([290e6fb](https://github.com/inference-gateway/ui/commit/290e6fb52c2221e64af0cd223100fd5277be86ed))
+
+### ✅ Miscellaneous
+
+* Add comprehensive tests for runAgentLoop functionality in agent module ([44f68d8](https://github.com/inference-gateway/ui/commit/44f68d89ff9d4ce89e3fc5cb7f3b2d1e07f0ccdd))
+
 ## [0.6.2](https://github.com/inference-gateway/ui/compare/v0.6.1...v0.6.2) (2025-04-25)
 
 ### ♻️ Improvements

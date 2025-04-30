@@ -127,7 +127,7 @@ describe('agent module', () => {
 
       expect(mockUpdateMessages).toHaveBeenCalledTimes(4);
       const lastCall = mockUpdateMessages.mock.calls[3][0];
-      expect(lastCall[1].reasoning_content).toBe('First thought process');
+      expect(lastCall[1].reasoning).toBe('First thought process');
     });
 
     it('should handle tool calls properly', async () => {
