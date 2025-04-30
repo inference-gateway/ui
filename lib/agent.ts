@@ -110,13 +110,14 @@ function prepareMessages(messages: Message[], model: string) {
   const isO1Mini = model === 'openai/o1-mini';
   const systemMessage = { role: MessageRole.system, content: SYSTEM_PROMPT };
 
-  const formattedMessages = messages.map(msg => ({
-    role: msg.role,
-    content: msg.content || '',
-    ...(msg.tool_call_id && { tool_call_id: msg.tool_call_id }),
-    ...(msg.tool_calls && { tool_calls: msg.tool_calls }),
-    ...(msg.reasoning_content && { reasoning_content: msg.reasoning_content }),
-  }));
+  const formattedMessages = messages.map(msg => {
+    return {
+      role: msg.role,
+      content: msg.content || '',
+      ...(msg.tool_call_id && { tool_call_id: msg.tool_call_id }),
+      ...(msg.tool_calls && { tool_calls: msg.tool_calls }),
+    };
+  });
 
   return isO1Mini ? formattedMessages : [systemMessage, ...formattedMessages];
 }
@@ -126,7 +127,7 @@ function updateMessageContent(messages: Message[], id: string, content: string) 
 }
 
 function updateMessageReasoning(messages: Message[], id: string, reasoning: string) {
-  return messages.map(msg => (msg.id === id ? { ...msg, reasoning_content: reasoning } : msg));
+  return messages.map(msg => (msg.id === id ? { ...msg, reasoning } : msg));
 }
 
 function updateMessageToolCalls(
