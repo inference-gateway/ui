@@ -28,11 +28,11 @@ The fastest way to get started is using the provided Task automation:
 # Create a local k3d cluster with NGINX ingress controller and Cert-Manager
 task deploy-infrastructure
 
-# Set up secrets for providers (needed for OpenAI integration)
+# Set up secrets for providers (needed for DeepSeek integration)
 task setup-secrets
 
 # Deploy UI with Gateway
-task deploy # or task deploy-with-ingress
+task deploy-with-ingress
 
 # Access the UI (in another terminal)
 task port-forward
