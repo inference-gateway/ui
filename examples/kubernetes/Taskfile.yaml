@@ -3,7 +3,7 @@ version: "3"
 vars:
   NAMESPACE: inference-gateway
   UI_RELEASE: inference-gateway-ui
-  CHART_VERSION: 0.7.0-rc.1
+  CHART_VERSION: 0.7.0
 
 tasks:
   deploy-infrastructure:
