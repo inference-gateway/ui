@@ -31,7 +31,8 @@
         "ms-vscode.vscode-typescript-next",
         "dsznajder.es7-react-js-snippets",
         "github.vscode-github-actions",
-        "github.vscode-pull-request-github"
+        "github.vscode-pull-request-github",
+        "orta.vscode-jest"
       ]
     }
   },

@@ -72,15 +72,7 @@ export default function ThinkingBubble({
         <div className="flex items-start gap-4 rounded-lg p-4 mt-1 mb-1 bg-[hsl(var(--thinking-bubble-content-bg))] border border-[hsl(var(--thinking-bubble-content-border))] shadow-sm transition-all overflow-hidden">
           <div className="flex-1 space-y-2">
             <div className="prose prose-sm dark:prose-invert max-w-none">
-              {isStreaming && !content ? (
-                <div className="flex items-center space-x-2">
-                  <div className="h-2 w-2 rounded-full bg-[hsl(var(--thinking-bubble-indicator))] animate-pulse"></div>
-                  <div className="h-2 w-2 rounded-full bg-[hsl(var(--thinking-bubble-indicator))] animate-pulse delay-150"></div>
-                  <div className="h-2 w-2 rounded-full bg-[hsl(var(--thinking-bubble-indicator))] animate-pulse delay-300"></div>
-                </div>
-              ) : (
-                <ReactMarkdown>{displayContent}</ReactMarkdown>
-              )}
+              <ReactMarkdown>{displayContent}</ReactMarkdown>
             </div>
           </div>
         </div>

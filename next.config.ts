@@ -12,6 +12,9 @@ const nextConfig: NextConfig = {
     parallelServerCompiles: true,
     forceSwcTransforms: true,
   },
+  env: {
+    NEXT_PUBLIC_NODE_ENV: process.env.NODE_ENV || 'development',
+  },
   webpack: config => {
     config.resolve.fallback = { fs: false };
     return config;

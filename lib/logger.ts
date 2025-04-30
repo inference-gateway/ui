@@ -1,3 +1,5 @@
+import util from 'util';
+
 type LogLevel = 'error' | 'warn' | 'info' | 'debug';
 
 interface Logger {
@@ -34,7 +36,21 @@ const createLogger = (logLevel: LogLevel): Logger => {
     if (levels[level] > levels[logLevel]) return;
     const consoleMethod = level === 'debug' ? 'log' : level;
     const timestamp = new Date().toISOString();
-    console[consoleMethod](`[${timestamp}] [${level}]`, ...args);
+
+    const processedArgs = args.map(arg => {
+      if (typeof arg === 'object' && arg !== null) {
+        return util.inspect(arg, {
+          depth: 5,
+          colors: false,
+          maxArrayLength: 10,
+          breakLength: Infinity,
+          compact: true,
+        });
+      }
+      return arg;
+    });
+
+    console[consoleMethod](`[${timestamp}] [${level}]`, ...processedArgs);
   };
 
   return {

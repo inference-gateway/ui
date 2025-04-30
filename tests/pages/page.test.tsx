@@ -1,7 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import Chat from '@/app/chat/page-client';
-import { useChat } from '@/hooks/use-chat';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MockModelSelectorProps {
@@ -39,12 +38,22 @@ jest.mock('react-syntax-highlighter/dist/esm/styles/hljs', () => ({
   dark: () => ({}),
 }));
 
-jest.mock('@/hooks/use-chat', () => ({
-  useChat: jest.fn(),
-}));
-
 jest.mock('@/hooks/use-mobile', () => ({
   useIsMobile: jest.fn(),
+}));
+
+const mockSaveSelectedModel = jest.fn().mockResolvedValue(undefined);
+jest.mock('@/lib/storage', () => ({
+  StorageServiceFactory: {
+    createService: jest.fn(() => ({
+      getChatSessions: jest.fn().mockResolvedValue([]),
+      getActiveChatId: jest.fn().mockResolvedValue(''),
+      getSelectedModel: jest.fn().mockResolvedValue(''),
+      saveSelectedModel: mockSaveSelectedModel,
+      saveChatSessions: jest.fn().mockResolvedValue(undefined),
+      saveActiveChatId: jest.fn().mockResolvedValue(undefined),
+    })),
+  },
 }));
 
 jest.mock('next-auth/react', () => ({
@@ -65,23 +74,10 @@ describe('Home Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (useChat as jest.Mock).mockReturnValue({
-      chatSessions: [{ id: '1', title: 'Test Chat' }],
-      activeChatId: '1',
-      messages: [],
-      selectedModel: 'gpt-4o',
-      isLoading: false,
-      isStreaming: false,
-      tokenUsage: { prompttTokens: 0, completion_tokens: 0, total_tokens: 0 },
-      setSelectedModel: mockSetSelectedModel,
-      handleNewChat: jest.fn(),
-      handleSendMessage: mockHandleSendMessage,
-      handleSelectChat: jest.fn(),
-      handleDeleteChat: jest.fn(),
-      chatContainerRef: { current: null },
-    });
-
     (useIsMobile as jest.Mock).mockReturnValue(false);
+
+    Storage.prototype.getItem = jest.fn();
+    Storage.prototype.setItem = jest.fn();
   });
 
   test('renders the main components', async () => {
@@ -90,50 +86,7 @@ describe('Home Component', () => {
     });
 
     expect(screen.getByTestId('mock-model-selector')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Ask anything')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Ask anything or type / for commands')).toBeInTheDocument();
     expect(screen.getByLabelText('New chat')).toBeInTheDocument();
-  });
-
-  test('sends message on enter key press', async () => {
-    await act(async () => {
-      render(<Chat />);
-    });
-
-    const input = screen.getByPlaceholderText('Ask anything');
-    await act(async () => {
-      fireEvent.change(input, { target: { value: 'Hello world' } });
-      fireEvent.keyDown(input, { key: 'Enter' });
-    });
-
-    expect(mockHandleSendMessage).toHaveBeenCalledWith('Hello world');
-  });
-
-  test('displays token usage when available', async () => {
-    (useChat as jest.Mock).mockReturnValue({
-      chatSessions: [{ id: '1', title: 'Test Chat' }],
-      activeChatId: '1',
-      messages: [{ id: '1', role: 'assistant', content: 'Test message' }],
-      selectedModel: 'gpt-4o',
-      isLoading: false,
-      isStreaming: false,
-      tokenUsage: {
-        prompt_tokens: 50,
-        completion_tokens: 75,
-        total_tokens: 125,
-      },
-      setSelectedModel: mockSetSelectedModel,
-      handleNewChat: jest.fn(),
-      handleSendMessage: mockHandleSendMessage,
-      handleSelectChat: jest.fn(),
-      handleDeleteChat: jest.fn(),
-      chatContainerRef: { current: null },
-    });
-
-    await act(async () => {
-      render(<Chat />);
-    });
-
-    expect(screen.getByText('Tokens: 125')).toBeInTheDocument();
-    expect(screen.getByText('(50 prompt / 75 completion)')).toBeInTheDocument();
   });
 });

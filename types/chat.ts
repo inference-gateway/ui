@@ -1,4 +1,10 @@
-import { SchemaCompletionUsage, SchemaMessage } from '@inference-gateway/sdk';
+import {
+  MessageRole as MessageRoleType,
+  SchemaCompletionUsage,
+  SchemaMessage,
+} from '@inference-gateway/sdk';
+
+export const MessageRole = MessageRoleType;
 
 export interface Message extends SchemaMessage {
   id: string;
@@ -9,7 +15,7 @@ export interface ChatSession {
   id: string;
   title: string;
   messages: Message[];
-  createdAt?: number;
+  createdAt?: string;
   tokenUsage?: SchemaCompletionUsage;
 }
 

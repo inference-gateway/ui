@@ -11,7 +11,6 @@ jest.mock('@/hooks/use-mobile', () => ({
 
 describe('InputArea Component', () => {
   const mockProps = {
-    inputValue: '',
     isLoading: false,
     selectedModel: 'gpt-4o',
     tokenUsage: {
@@ -19,13 +18,9 @@ describe('InputArea Component', () => {
       completion_tokens: 15,
       total_tokens: 25,
     } as SchemaCompletionUsage,
-    onInputChangeAction: jest.fn(),
-    onKeyDownAction: jest.fn(),
     onSendMessageAction: jest.fn(),
     onSearchAction: jest.fn(),
-    onDeepResearchAction: jest.fn(),
     isSearchActive: false,
-    isDeepResearchActive: false,
   };
 
   beforeEach(() => {
@@ -39,7 +34,7 @@ describe('InputArea Component', () => {
   test('renders correctly with model selected', () => {
     render(<InputArea {...mockProps} />);
 
-    expect(screen.getByPlaceholderText('Ask anything')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Ask anything or type / for commands')).toBeInTheDocument();
     expect(screen.getByTestId('mock-send-button')).toBeInTheDocument();
   });
 
@@ -65,19 +60,26 @@ describe('InputArea Component', () => {
   });
 
   test('enables send button when input has text', () => {
-    render(<InputArea {...mockProps} inputValue="Hello world" />);
+    render(<InputArea {...mockProps} />);
+
+    const input = screen.getByTestId('mock-input');
+    fireEvent.change(input, { target: { value: 'Hello world' } });
 
     const sendButton = screen.getByTestId('mock-send-button');
     expect(sendButton).not.toBeDisabled();
   });
 
-  test('calls onSendMessageAction when send button is clicked', () => {
-    render(<InputArea {...mockProps} inputValue="Hello world" />);
+  test('calls onSendMessage when send button is clicked', () => {
+    const onSendMessage = jest.fn();
+    render(<InputArea {...mockProps} onSendMessageAction={onSendMessage} />);
+
+    const input = screen.getByTestId('mock-input');
+    fireEvent.change(input, { target: { value: 'Hello world' } });
 
     const sendButton = screen.getByTestId('mock-send-button');
     fireEvent.click(sendButton);
 
-    expect(mockProps.onSendMessageAction).toHaveBeenCalled();
+    expect(onSendMessage).toHaveBeenCalledWith('Hello world');
   });
 
   test('shows all UI elements from the screenshot design', () => {
@@ -95,9 +97,6 @@ describe('InputArea Component', () => {
     expect(screen.getByTestId('search-button')).toBeInTheDocument();
     expect(screen.getByText('Search')).toBeInTheDocument();
 
-    expect(screen.getByTestId('deep-research-button')).toBeInTheDocument();
-    expect(screen.getByText('Deep research')).toBeInTheDocument();
-
     expect(screen.getByTestId('mic-button')).toBeInTheDocument();
 
     expect(screen.getByTestId('more-options-button')).toBeInTheDocument();
@@ -114,15 +113,6 @@ describe('InputArea Component', () => {
     expect(mockProps.onSearchAction).toHaveBeenCalled();
   });
 
-  test('calls onDeepResearchAction when Deep research button is clicked', () => {
-    render(<InputArea {...mockProps} />);
-
-    const deepResearchButton = screen.getByTestId('deep-research-button');
-    fireEvent.click(deepResearchButton);
-
-    expect(mockProps.onDeepResearchAction).toHaveBeenCalled();
-  });
-
   test('displays token usage when totalTokens > 0', () => {
     const tokenUsage = {
       prompt_tokens: 50,
@@ -134,27 +124,6 @@ describe('InputArea Component', () => {
 
     expect(screen.getByText('Tokens: 125')).toBeInTheDocument();
     expect(screen.getByText('(50 prompt / 75 completion)')).toBeInTheDocument();
-  });
-
-  test('renders with mobile-specific styling when on mobile device', () => {
-    jest.spyOn(UseMobileModule, 'useIsMobile').mockReturnValue(true);
-
-    render(<InputArea {...mockProps} />);
-
-    const textarea = screen.getByTestId('mock-input');
-    expect(textarea).toHaveAttribute('rows', '2');
-
-    const tokenUsage = {
-      prompt_tokens: 50,
-      completion_tokens: 75,
-      total_tokens: 125,
-    } as SchemaCompletionUsage;
-
-    render(<InputArea {...mockProps} tokenUsage={tokenUsage} />);
-
-    expect(screen.getByText('Tokens: 125')).toBeInTheDocument();
-    const detailedTokenInfo = screen.queryByText('(50 prompt / 75 completion)');
-    expect(detailedTokenInfo).toHaveClass('hidden');
   });
 
   test('shows active state for search button when isSearchActive is true', () => {
@@ -175,21 +144,25 @@ describe('InputArea Component', () => {
     expect(searchButton).not.toHaveClass('font-medium');
   });
 
-  test('shows active state for deep research button when isDeepResearchActive is true', () => {
-    render(<InputArea {...mockProps} isDeepResearchActive={true} />);
+  test('sends message on Enter key press', () => {
+    const onSendMessage = jest.fn();
+    render(<InputArea {...mockProps} onSendMessageAction={onSendMessage} />);
 
-    const deepResearchButton = screen.getByTestId('deep-research-button');
-    expect(deepResearchButton).toHaveClass('bg-button-active');
-    expect(deepResearchButton).toHaveClass('text-button-active-text');
-    expect(deepResearchButton).toHaveClass('font-medium');
+    const input = screen.getByTestId('mock-input');
+    fireEvent.change(input, { target: { value: 'Hello world' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(onSendMessage).toHaveBeenCalledWith('Hello world');
   });
 
-  test('shows inactive state for deep research button when isDeepResearchActive is false', () => {
-    render(<InputArea {...mockProps} isDeepResearchActive={false} />);
+  test('does not send message on Shift+Enter key press', () => {
+    const onSendMessage = jest.fn();
+    render(<InputArea {...mockProps} onSendMessageAction={onSendMessage} />);
 
-    const deepResearchButton = screen.getByTestId('deep-research-button');
-    expect(deepResearchButton).not.toHaveClass('bg-chat-input-hover-bg');
-    expect(deepResearchButton).toHaveClass('text-chat-input-text-muted');
-    expect(deepResearchButton).not.toHaveClass('font-medium');
+    const input = screen.getByTestId('mock-input');
+    fireEvent.change(input, { target: { value: 'Hello world' } });
+    fireEvent.keyDown(input, { key: 'Enter', shiftKey: true });
+
+    expect(onSendMessage).not.toHaveBeenCalled();
   });
 });
