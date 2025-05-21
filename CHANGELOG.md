@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.1](https://github.com/inference-gateway/ui/compare/v0.7.0...v0.7.1) (2025-05-21)
+
+### ♻️ Improvements
+
+* Improve development experience and CD ([#39](https://github.com/inference-gateway/ui/issues/39)) ([8a32d22](https://github.com/inference-gateway/ui/commit/8a32d225eda04b4a6e70285e0ffc98bc25ae5273))
+
 ## [0.7.0](https://github.com/inference-gateway/ui/compare/v0.6.2...v0.7.0) (2025-04-30)
 
 ### ✨ Features
