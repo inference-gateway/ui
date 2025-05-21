@@ -21,6 +21,7 @@
         "files.associations": {
           "*.css": "tailwindcss"
         },
+        "git.alwaysSignOff": true,
         "githubPullRequests.experimental.chat": true,
         "githubPullRequests.experimental.notificationsView": true,
         "github.copilot.chat.codeGeneration.useInstructionFiles": true,
