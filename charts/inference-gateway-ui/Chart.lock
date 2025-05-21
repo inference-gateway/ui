@@ -1,6 +1,6 @@
 dependencies:
 - name: inference-gateway
   repository: oci://ghcr.io/inference-gateway/charts
-  version: 0.6.1
-digest: sha256:b3fc0d1406b294f8eec9a752bb99dc07bec04b5a8c4abdf3d89f3f6c6ecf117e
-generated: "2025-04-30T01:04:28.727870507Z"
+  version: 0.6.2
+digest: sha256:f050dcc3cd10ff862737bf2ff69c960a60e0b523e30e367efc767cc3d25d08b2
+generated: "2025-05-21T11:07:30.429045253Z"
