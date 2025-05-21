@@ -22,7 +22,13 @@
           "*.css": "tailwindcss"
         },
         "githubPullRequests.experimental.chat": true,
-        "githubPullRequests.experimental.notificationsView": true
+        "githubPullRequests.experimental.notificationsView": true,
+        "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+        "github.copilot.chat.commitMessageGeneration.instructions": [
+          {
+            "text": "Always use conventional commit message format."
+          }
+        ]
       },
       "extensions": [
         "dbaeumer.vscode-eslint",
