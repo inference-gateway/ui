@@ -145,7 +145,7 @@ The deployment uses Helm's `--set` parameters instead of values files for clarit
 
 ```bash
 # Remove the deployment
-helm uninstall inference-ui -n inference-gateway
+helm uninstall inference-gateway-ui -n inference-gateway
 
 # Delete the namespace
 kubectl delete namespace inference-gateway
