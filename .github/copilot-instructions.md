@@ -1,5 +1,11 @@
 # GitHub Copilot Instructions for Inference Gateway UI
 
+- Always use context7 MCP server to find out about the latest documentation of a project before assessing a task.
+- Always Use early return when possible to reduce nesting and improve readability.
+- Always Use `async/await` for asynchronous code instead of `.then()` and `.catch()`.
+- Always Use `const` for variables that are not reassigned and `let` for those that are.
+- Always Use `===` and `!==` for equality checks instead of `==` and `!=`.
+
 ## Project Overview
 
 This is a Next.js application serving as the UI for the Inference Gateway project. It enables interacting with AI models through a consistent interface. The UI connects to a backend API service for model inference.
