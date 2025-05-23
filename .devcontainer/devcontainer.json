@@ -10,6 +10,16 @@
   "forwardPorts": [3000],
   "customizations": {
     "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "ms-vscode.vscode-typescript-next",
+        "dsznajder.es7-react-js-snippets",
+        "github.vscode-github-actions",
+        "github.vscode-pull-request-github",
+        "orta.vscode-jest"
+      ],
       "settings": {
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -26,22 +36,28 @@
         "githubPullRequests.experimental.chat": true,
         "githubPullRequests.experimental.notificationsView": true,
         "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+        "github.copilot.chat.codeGeneration.instructions": [
+          {
+            "file": ".github/copilot-instructions.md"
+          },
+          {
+            "file": "../README.md"
+          }
+        ],
         "github.copilot.chat.commitMessageGeneration.instructions": [
           {
             "text": "Always use conventional commit message format."
           }
         ]
       },
-      "extensions": [
-        "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode",
-        "bradlc.vscode-tailwindcss",
-        "ms-vscode.vscode-typescript-next",
-        "dsznajder.es7-react-js-snippets",
-        "github.vscode-github-actions",
-        "github.vscode-pull-request-github",
-        "orta.vscode-jest"
-      ]
+      "mcp": {
+        "servers": {
+          "context7": {
+            "command": "docker",
+            "args": ["run", "-i", "--rm", "node:lts", "npx", "-y", "@upstash/context7-mcp@latest"]
+          }
+        }
+      }
     }
   },
   "containerEnv": {
