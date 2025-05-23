@@ -21,7 +21,8 @@ tasks:
         helm upgrade --install \
           --create-namespace \
           --namespace kube-system \
-          --version 4.12.1 \
+          --set controller.progressDeadlineSeconds=500 \
+          --version 4.12.2 \
           --wait \
           ingress-nginx ingress-nginx/ingress-nginx
       - echo "Installing cert-manager..."
@@ -29,7 +30,7 @@ tasks:
         helm upgrade --install \
           --create-namespace \
           --namespace cert-manager \
-          --version 1.17.1 \
+          --version 1.17.2 \
           --set crds.enabled=true \
           --wait \
           cert-manager jetstack/cert-manager
@@ -53,9 +54,9 @@ tasks:
           --set global.postgresql.auth.database=keycloak \
           keycloak-db bitnami/postgresql \
           --wait
-      - kubectl -n idp apply -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/26.1.4/kubernetes/keycloaks.k8s.keycloak.org-v1.yml
-      - kubectl -n idp apply -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/26.1.4/kubernetes/keycloakrealmimports.k8s.keycloak.org-v1.yml
-      - kubectl -n idp apply -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/26.1.4/kubernetes/kubernetes.yml
+      - kubectl -n idp apply -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/26.2.4/kubernetes/keycloaks.k8s.keycloak.org-v1.yml
+      - kubectl -n idp apply -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/26.2.4/kubernetes/keycloakrealmimports.k8s.keycloak.org-v1.yml
+      - kubectl -n idp apply -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/26.2.4/kubernetes/kubernetes.yml
       - |
         kubectl apply -f - <<EOF
         apiVersion: cert-manager.io/v1
@@ -93,7 +94,7 @@ tasks:
           labels:
             app.kubernetes.io/name: keycloak
             app.kubernetes.io/instance: keycloak
-            app.kubernetes.io/version: "26.1.4"
+            app.kubernetes.io/version: "26.2.4"
             app.kubernetes.io/component: identity-provider
             app.kubernetes.io/part-of: inference-gateway
         type: Opaque
@@ -110,7 +111,7 @@ tasks:
           labels:
             app.kubernetes.io/name: keycloak
             app.kubernetes.io/instance: keycloak
-            app.kubernetes.io/version: "26.1.4"
+            app.kubernetes.io/version: "26.2.4"
             app.kubernetes.io/component: identity-provider
             app.kubernetes.io/part-of: inference-gateway
         spec:
@@ -173,7 +174,7 @@ tasks:
           labels:
             app.kubernetes.io/name: keycloak
             app.kubernetes.io/instance: keycloak
-            app.kubernetes.io/version: "26.1.4"
+            app.kubernetes.io/version: "26.2.4"
             app.kubernetes.io/component: identity-provider
             app.kubernetes.io/part-of: inference-gateway
           annotations:
@@ -212,7 +213,7 @@ tasks:
           labels:
             app.kubernetes.io/name: keycloak
             app.kubernetes.io/instance: keycloak
-            app.kubernetes.io/version: "26.1.4"
+            app.kubernetes.io/version: "26.2.4"
             app.kubernetes.io/component: identity-provider
             app.kubernetes.io/part-of: inference-gateway
         spec:
@@ -428,26 +429,113 @@ tasks:
       - kubectl delete namespace {{.NAMESPACE}} || true
 
   setup-secrets:
-    desc: Set up API key secrets for providers
+    desc: Set up API key secrets for LLM providers
+    summary: |
+      Interactive wizard to set up API keys for various LLM providers
+      Supported providers:
+        - DeepSeek
+        - Anthropic
+        - OpenAI
+        - Mistral
+        - Cohere
     cmds:
-      - echo "Enter your DeepSeek API key:"
       - |
-        read -s DEEPSEEK_API_KEY && kubectl apply -f - <<EOF
+        echo "🔑 Inference Gateway API Key Setup Wizard 🔑"
+        echo "============================================"
+        echo "This wizard will help you set up API keys for LLM providers."
+        echo "Keys will be stored as Kubernetes secrets in the {{.NAMESPACE}} namespace."
+        echo "Press Ctrl+C at any time to cancel."
+        echo ""
+
+        # Initialize the secret data with empty values
+        SECRET_DATA=""
+
+        # DeepSeek API Key
+        echo "📝 DeepSeek API Key (press Enter to skip):"
+        read -s DEEPSEEK_API_KEY
+        if [[ ! -z "$DEEPSEEK_API_KEY" ]]; then
+          SECRET_DATA="${SECRET_DATA}  DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}\n"
+          echo "✅ DeepSeek API key added"
+        else
+          echo "⏭️  Skipped DeepSeek API key"
+        fi
+        echo ""
+
+        # Anthropic API Key
+        echo "📝 Anthropic API Key (press Enter to skip):"
+        read -s ANTHROPIC_API_KEY
+        if [[ ! -z "$ANTHROPIC_API_KEY" ]]; then
+          SECRET_DATA="${SECRET_DATA}  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}\n"
+          echo "✅ Anthropic API key added"
+        else
+          echo "⏭️  Skipped Anthropic API key"
+        fi
+        echo ""
+
+        # OpenAI API Key
+        echo "📝 OpenAI API Key (press Enter to skip):"
+        read -s OPENAI_API_KEY
+        if [[ ! -z "$OPENAI_API_KEY" ]]; then
+          SECRET_DATA="${SECRET_DATA}  OPENAI_API_KEY: ${OPENAI_API_KEY}\n"
+          echo "✅ OpenAI API key added"
+        else
+          echo "⏭️  Skipped OpenAI API key"
+        fi
+        echo ""
+
+        # Mistral API Key
+        echo "📝 Mistral API Key (press Enter to skip):"
+        read -s MISTRAL_API_KEY
+        if [[ ! -z "$MISTRAL_API_KEY" ]]; then
+          SECRET_DATA="${SECRET_DATA}  MISTRAL_API_KEY: ${MISTRAL_API_KEY}\n"
+          echo "✅ Mistral API key added"
+        else
+          echo "⏭️  Skipped Mistral API key"
+        fi
+        echo ""
+
+        # Cohere API Key
+        echo "📝 Cohere API Key (press Enter to skip):"
+        read -s COHERE_API_KEY
+        if [[ ! -z "$COHERE_API_KEY" ]]; then
+          SECRET_DATA="${SECRET_DATA}  COHERE_API_KEY: ${COHERE_API_KEY}\n"
+          echo "✅ Cohere API key added"
+        else
+          echo "⏭️  Skipped Cohere API key"
+        fi
+        echo ""
+
+        if [[ -z "$SECRET_DATA" ]]; then
+          echo "❌ No API keys provided. Secret creation cancelled."
+          exit 1
+        fi
+
+        if ! kubectl get namespace {{.NAMESPACE}} &>/dev/null; then
+          echo "🔨 Creating namespace {{.NAMESPACE}}..."
+          kubectl create namespace {{.NAMESPACE}}
+        else
+          echo "✓ Namespace {{.NAMESPACE}} already exists."
+        fi
+
+        echo "Creating secret in {{.NAMESPACE}} namespace..."
+        kubectl apply -f - <<EOF
         apiVersion: v1
         kind: Secret
         metadata:
           name: inference-gateway
-          namespace: inference-gateway
+          namespace: {{.NAMESPACE}}
           annotations:
-            meta.helm.sh/release-name: inference-gateway-ui
-            meta.helm.sh/release-namespace: inference-gateway
+            meta.helm.sh/release-name: {{.UI_RELEASE}}
+            meta.helm.sh/release-namespace: {{.NAMESPACE}}
           labels:
             app.kubernetes.io/managed-by: Helm
         type: Opaque
         stringData:
-          DEEPSEEK_API_KEY: $DEEPSEEK_API_KEY
+        $(echo -e "$SECRET_DATA")
         EOF
-      - echo "Secret created"
+
+        echo "✨ Secret 'inference-gateway' created successfully in namespace '{{.NAMESPACE}}'"
+        echo "🚀 You can now use task:deploy-with-ingress to deploy the UI with the configured API keys."
 
   logs-ui:
     desc: Show logs for UI pods

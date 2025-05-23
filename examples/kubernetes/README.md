@@ -55,7 +55,8 @@ helm repo update
 helm upgrade --install \
   --create-namespace \
   --namespace kube-system \
-  --version 4.12.1 \
+  --set controller.progressDeadlineSeconds=500 \
+  --version 4.12.2 \
   --wait \
   ingress-nginx ingress-nginx/ingress-nginx
 
@@ -65,7 +66,7 @@ helm repo update
 helm upgrade --install \
   --create-namespace \
   --namespace cert-manager \
-  --version 1.17.1 \
+  --version 1.17.2 \
   --set crds.enabled=true \
   --wait \
   cert-manager jetstack/cert-manager
@@ -104,7 +105,7 @@ EOF
 # Deploy UI with Gateway
 helm upgrade --install inference-gateway-ui \
   oci://ghcr.io/inference-gateway/charts/inference-gateway-ui \
-  --version 0.5.0 \
+  --version 0.7.1 \
   --create-namespace \
   --namespace inference-gateway \
   --set replicaCount=1 \
