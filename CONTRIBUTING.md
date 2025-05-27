@@ -55,7 +55,6 @@ The project follows Next.js 15 App Router structure:
 
 - `/app`: Next.js pages and layouts
 - `/components`: React components
-- `/components/ui`: shadcn/ui components
 - `/hooks`: Custom React hooks
 - `/lib`: Utilities and services
 - `/public`: Static assets

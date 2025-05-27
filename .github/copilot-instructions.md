@@ -5,6 +5,7 @@
 - Always Use `async/await` for asynchronous code instead of `.then()` and `.catch()`.
 - Always Use `const` for variables that are not reassigned and `let` for those that are.
 - Always Use `===` and `!==` for equality checks instead of `==` and `!=`.
+- Avoid using hooks when possible - prefer using standard state management patterns with less abstraction.
 
 ## Project Overview
 
@@ -12,30 +13,37 @@ This is a Next.js application serving as the UI for the Inference Gateway projec
 
 ## Related Repositories
 
-The UI is part of the Inference Gateway ecosystem. Here are the related repositories:
+- [Inference Gateway](https://github.com/inference-gateway)
+  - [Inference Gateway UI](https://github.com/inference-gateway/ui)
+  - [Go SDK](https://github.com/inference-gateway/go-sdk)
+  - [Rust SDK](https://github.com/inference-gateway/rust-sdk)
+  - [TypeScript SDK](https://github.com/inference-gateway/typescript-sdk)
+  - [Python SDK](https://github.com/inference-gateway/python-sdk)
+  - [Documentation](https://docs.inference-gateway.com)
 
-- [inference-gateway](https://github.com/inference-gateway/inference-gateway) - Main gateway service written in Go
-- [docs](https://github.com/inference-gateway/docs) - Documentation for the Inference Gateway
+## File Organization
+
+- `/app/chat`: The main chat interface
+- `/components`: React components
+- `/hooks`: Custom React hooks
+- `/lib`: Utility functions and services
+- `/public`: Static assets
+- `/tests`: Test files
+- `/types`: TypeScript type definitions
+- `/examples`: Example deployment configurations
+- `/charts`: Helm charts for Kubernetes deployment
 
 ## Tech Stack
 
 - **Framework**: Next.js 15 with App Router
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
-- **Components**: Radix UI with shadcn/ui component system
 - **Authentication**: NextAuth.js
 - **State Management**: React hooks
 - **Testing**: Jest and React Testing Library
 - **Deployment**: Kubernetes/Docker
 
 ## Coding Standards and Patterns
-
-### Component Structure
-
-- Components should be functional components with TypeScript interfaces for props
-- Use the shadcn/ui component system for new UI components
-- Place components in the `/components` directory
-- For component variants, use Tailwind's class-variance-authority (cva)
 
 ### Naming Conventions
 
@@ -49,7 +57,7 @@ The UI is part of the Inference Gateway ecosystem. Here are the related reposito
 ### Hooks
 
 - Custom hooks should be placed in the `/hooks` directory
-- Hook names should start with "use" (e.g., `useChat`)
+- Hook names should start with "use" (e.g., `useMobile`)
 - Hooks should be well-documented with TypeScript types
 
 ### API Interactions
@@ -90,19 +98,6 @@ The UI is part of the Inference Gateway ecosystem. Here are the related reposito
 - Authentication providers are configured in `app/auth-providers.tsx`
 - The chat interface is the main component for user interaction
 - The UI supports multiple language models through model selectors
-
-## File Organization
-
-- `/app`: Next.js App Router pages and layouts
-- `/components`: React components
-- `/components/ui`: shadcn/ui components
-- `/hooks`: Custom React hooks
-- `/lib`: Utility functions and services
-- `/public`: Static assets
-- `/tests`: Test files
-- `/types`: TypeScript type definitions
-- `/examples`: Example deployment configurations
-- `/charts`: Helm charts for Kubernetes deployment
 
 ## Common Tasks
 
