@@ -1,0 +1,68 @@
+---
+services:
+  ui:
+    build:
+      context: ../../..
+      target: dev
+      dockerfile: Dockerfile
+    volumes:
+      - ../../..:/app
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.frontend
+    depends_on:
+      - inference-gateway
+    deploy:
+      resources:
+        limits:
+          cpus: "2.5"
+          memory: 1512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    pull_policy: always
+    restart: unless-stopped
+
+  inference-gateway:
+    image: ghcr.io/inference-gateway/inference-gateway:latest
+    env_file:
+      - .env.backend
+    depends_on:
+      mcp-filesystem-server:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 100M
+    pull_policy: always
+    restart: unless-stopped
+
+  mcp-filesystem-server:
+    build:
+      context: ./filesystem-server
+      dockerfile: Dockerfile
+    volumes:
+      - ./filesystem-data:/tmp/mcp-files
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
+    restart: unless-stopped
+
+volumes:
+  mcp-data:

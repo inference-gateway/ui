@@ -7,7 +7,6 @@
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
-  "forwardPorts": [3000],
   "customizations": {
     "vscode": {
       "extensions": [
@@ -71,6 +70,6 @@
   },
   "postCreateCommand": "npm install",
   "remoteUser": "node",
-  "appPort": ["443:443", "80:80"],
+  "appPort": ["443:443", "80:80", "3000:3000"],
   "runArgs": ["--add-host=ui.inference-gateway.local:127.0.0.1"]
 }
