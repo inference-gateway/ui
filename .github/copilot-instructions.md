@@ -1,11 +1,12 @@
 # GitHub Copilot Instructions for Inference Gateway UI
 
 - Always use context7 MCP server to find out about the latest documentation of a project before assessing a task.
-- Always Use early return when possible to reduce nesting and improve readability.
-- Always Use `async/await` for asynchronous code instead of `.then()` and `.catch()`.
-- Always Use `const` for variables that are not reassigned and `let` for those that are.
-- Always Use `===` and `!==` for equality checks instead of `==` and `!=`.
+- Always use early return when possible to reduce nesting and improve readability.
+- Always use `async/await` for asynchronous code instead of `.then()` and `.catch()`.
+- Always use `const` for variables that are not reassigned and `let` for those that are.
+- Always use `===` and `!==` for equality checks instead of `==` and `!=`.
 - Avoid using hooks when possible - prefer using standard state management patterns with less abstraction.
+- Always use the Official Inference Gateway TypeScript SDK for API interactions instead of manually constructing requests.
 
 ## Project Overview
 
