@@ -7,6 +7,7 @@
 - Always use `===` and `!==` for equality checks instead of `==` and `!=`.
 - Avoid using hooks when possible - prefer using standard state management patterns with less abstraction.
 - Always use the Official Inference Gateway TypeScript SDK for API interactions instead of manually constructing requests.
+- Always use `npm test` for testing instead of IDE built-in testing.
 
 ## Project Overview
 

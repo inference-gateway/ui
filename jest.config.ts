@@ -26,7 +26,7 @@ const config: Config = {
     '^.+\\.(js|jsx)$': 'babel-jest',
   },
   transformIgnorePatterns: [
-    '/node_modules/(?!(react-markdown|rehype-raw|rehype-sanitize|hast-util-sanitize|micromark|decode-named-character-reference|character-entities|remark-rehype|mdast-util-to-hast|mdast-util-to-string|remark-parse|markdown-table|unist-util-stringify-position|unist-util-visit|unist-util-is|trough|unified|bail|is-plain-obj|vfile|vfile-message|@types|mdast-util-from-markdown|remark-gfm|ccount|escape-string-regexp|property-information)/)',
+    '/node_modules/(?!(react-markdown|rehype-raw|rehype-sanitize|hast-util-sanitize|micromark|decode-named-character-reference|character-entities|remark-rehype|mdast-util-to-hast|mdast-util-to-string|remark-parse|markdown-table|unist-util-stringify-position|unist-util-visit|unist-util-is|trough|unified|bail|is-plain-obj|vfile|vfile-message|@types|mdast-util-from-markdown|remark-gfm|ccount|escape-string-regexp|property-information|next-auth|@auth)/)',
   ],
   testMatch: ['**/__tests__/**/*.+(ts|tsx|js)', '**/?(*.)+(spec|test).+(ts|tsx|js)'],
   collectCoverage: process.env.COLLECT_COVERAGE === 'true',

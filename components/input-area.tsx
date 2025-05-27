@@ -1,11 +1,22 @@
 'use client';
 
-import { SendHorizonal, Plus, Globe, Mic, MoreHorizontal, X, Search, Trash2 } from 'lucide-react';
+import {
+  SendHorizonal,
+  Plus,
+  Globe,
+  Mic,
+  MoreHorizontal,
+  X,
+  Search,
+  Trash2,
+  Wrench,
+} from 'lucide-react';
 import { SchemaCompletionUsage } from '@inference-gateway/sdk';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useRef, useState, useEffect, useMemo } from 'react';
 import { TokenUsage } from './token-usage';
+import { MCPToolsButton } from './mcp-tools-button';
 
 interface CommandOption {
   name: string;
@@ -21,6 +32,7 @@ interface InputAreaProps {
   onSendMessageAction: (message: string) => void;
   onClearChatAction?: () => void;
   onSearchAction?: () => void;
+  onMCPToolsAction?: () => void;
   isSearchActive?: boolean;
   editingMessageId?: string | null;
   editMessageContent?: string;
@@ -35,6 +47,7 @@ export function InputArea({
   onSendMessageAction,
   onClearChatAction,
   onSearchAction,
+  onMCPToolsAction,
   isSearchActive = false,
   editingMessageId = null,
   editMessageContent = '',
@@ -62,8 +75,14 @@ export function InputArea({
         icon: Search,
         action: onSearchAction,
       },
+      {
+        name: 'tools',
+        description: 'View available MCP tools',
+        icon: Wrench,
+        action: onMCPToolsAction,
+      },
     ],
-    [onClearChatAction, onSearchAction]
+    [onClearChatAction, onSearchAction, onMCPToolsAction]
   );
 
   useEffect(() => {
@@ -332,6 +351,8 @@ export function InputArea({
                     <Globe className={cn(isMobile ? 'h-5 w-5' : 'h-4 w-4')} />
                     <span>Search</span>
                   </button>
+
+                  <MCPToolsButton isMobile={isMobile} />
                 </>
               )}
             </div>
