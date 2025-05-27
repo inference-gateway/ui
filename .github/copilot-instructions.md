@@ -21,6 +21,22 @@ This is a Next.js application serving as the UI for the Inference Gateway projec
   - [Python SDK](https://github.com/inference-gateway/python-sdk)
   - [Documentation](https://docs.inference-gateway.com)
 
+## Available Tools
+
+- context7 MCP server: Use this to access the latest documentation and project context.
+
+## Available Commands
+
+- `npm run dev`: Start the development server
+- `npm run build`: Build the application for production
+- `npm run start`: Start the production server
+- `npm run format`: Format code using Prettier
+- `npm run format:check`: Check code formatting without making changes
+- `npm run lint`: Run ESLint to check for code quality issues
+- `npm run lint:fix`: Automatically fix linting issues
+- `npm run typecheck`: Run TypeScript type checks
+- `npm run test`: Run tests using Jest and React Testing Library
+
 ## File Organization
 
 - `/app/chat`: The main chat interface
