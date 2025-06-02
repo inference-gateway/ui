@@ -4,9 +4,9 @@ This example demonstrates how to set up and use the Inference Gateway UI with an
 
 ## What's Included
 
-- **Inference Gateway UI**: The main chat interface
-- **Inference Gateway Backend**: The backend API service
 - **MCP Filesystem Server**: A TypeScript-based HTTP MCP server that provides file system operations following the Inference Gateway TypeScript SDK v0.7.3 patterns
+- **Inference Gateway Backend**: The backend API service
+- **Inference Gateway UI**: The main chat interface
 
 ## Prerequisites
 
@@ -15,12 +15,13 @@ This example demonstrates how to set up and use the Inference Gateway UI with an
 
 ## MCP Server Features
 
-The included TypeScript MCP server provides the following 7 tools:
+The included TypeScript MCP server provides the following 8 tools:
 
 - **read_file**: Read content from a file
 - **write_file**: Write content to a file (supports overwrite or append mode)
 - **list_directory**: List the contents of a directory (supports recursive listing)
 - **create_directory**: Create a new directory
+- **delete_directory**: Delete a directory
 - **delete_file**: Delete a file
 - **file_exists**: Check if a file or directory exists
 - **get_file_info**: Get detailed information about a file or directory (size, permissions, modification time, etc.)
@@ -51,13 +52,13 @@ All file operations are restricted to a sandboxed `/tmp/mcp-files` directory for
 
    This will start three services:
 
-   - UI on port 3000
+   - MCP Filesystem Server on port 3001 (internal)
    - Inference Gateway Backend (internal)
-   - MCP Filesystem Server on port 8081 (internal)
+   - UI on port 3000
 
 4. Open your web browser and navigate to `http://localhost:3000` to see the UI in action.
 
-You should see at the bottom Tools and that 7 tools are available, if you click it you can see more details about each tool.
+You should see at the bottom Tools and that 8 tools are available, if you click it you can see more details about each tool.
 
 ## Using MCP Tools
 
@@ -66,9 +67,12 @@ Once the services are running, you can use MCP tools in your conversations:
 1. In the chat interface, click on the "MCP Tools" button to see available tools
 2. The MCP filesystem server provides tools for file operations
 3. Example usage in chat:
+   - Ask the AI to "create a new directory named examples with a file hello.txt inside it"
    - Ask the AI to "list the files in the examples directory"
    - Request to "read the contents of examples/hello.txt"
    - Ask to "create a new file with some content"
+
+You have to verify that the LLM you are using supports the MCP tools. You will see an error in the logs indicating that the LLM selected does not support Tools.
 
 ## MCP Server Details
 
@@ -94,13 +98,13 @@ If MCP tools are not showing up in the UI:
    ```
    MCP_ENABLE=true
    MCP_EXPOSE=true
-   MCP_SERVERS=http://mcp-filesystem-server:8081/mcp
+   MCP_SERVERS=http://mcp-filesystem-server:3001/mcp
    ```
 
 2. Verify the MCP server is running:
 
    ```sh
-   curl http://localhost:8081/health
+   docker-compose ps
    ```
 
 3. Check the logs:

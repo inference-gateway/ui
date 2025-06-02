@@ -1,12 +1,7 @@
 ---
 services:
   ui:
-    build:
-      context: ../../..
-      target: dev
-      dockerfile: Dockerfile
-    volumes:
-      - ../../..:/app
+    image: ghcr.io/inference-gateway/ui:latest
     ports:
       - "3000:3000"
     env_file:
