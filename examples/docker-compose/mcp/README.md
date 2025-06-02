@@ -6,7 +6,7 @@ This example demonstrates how to set up and use the Inference Gateway UI with an
 
 - **Inference Gateway UI**: The main chat interface
 - **Inference Gateway Backend**: The backend API service
-- **MCP Filesystem Server**: A simple HTTP-based MCP server that provides file system operations
+- **MCP Filesystem Server**: A TypeScript-based HTTP MCP server that provides file system operations following the Inference Gateway TypeScript SDK v0.7.3 patterns
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ This example demonstrates how to set up and use the Inference Gateway UI with an
 
 ## MCP Server Features
 
-The included MCP server provides the following 7 tools:
+The included TypeScript MCP server provides the following 7 tools:
 
 - **read_file**: Read content from a file
 - **write_file**: Write content to a file (supports overwrite or append mode)
@@ -23,7 +23,7 @@ The included MCP server provides the following 7 tools:
 - **create_directory**: Create a new directory
 - **delete_file**: Delete a file
 - **file_exists**: Check if a file or directory exists
-- **file_info**: Get detailed information about a file or directory (size, permissions, modification time, etc.)
+- **get_file_info**: Get detailed information about a file or directory (size, permissions, modification time, etc.)
 
 All file operations are restricted to a sandboxed `/tmp/mcp-files` directory for security.
 
@@ -35,7 +35,7 @@ All file operations are restricted to a sandboxed `/tmp/mcp-files` directory for
    cp .env.backend.example .env.backend
    ```
 
-   **Note**: MCP is already enabled in the example configuration with the server URL set to `http://mcp-filesystem-server:8081/mcp`.
+   **Note**: MCP is already enabled in the example configuration with the server URL set to `http://mcp-filesystem-server:3001/mcp`.
 
 2. Copy the `.env.frontend.example` file to `.env.frontend` and update the environment variables as needed. This file contains configuration settings for the frontend service.
 

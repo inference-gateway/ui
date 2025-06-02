@@ -22,7 +22,7 @@ export function MCPToolsButton({ className, isMobile = false }: MCPToolsButtonPr
       const response = await fetchMCPTools();
       setToolsCount(response.data?.length || 0);
     } catch {
-      setToolsCount(null);
+      setToolsCount(0);
     } finally {
       setLoading(false);
     }
@@ -42,19 +42,28 @@ export function MCPToolsButton({ className, isMobile = false }: MCPToolsButtonPr
     [loadToolsCount]
   );
 
+  const handleButtonClick = useCallback(() => {
+    if (toolsCount === 0) {
+      return;
+    }
+    setDialogOpen(true);
+  }, [toolsCount]);
+
   return (
     <>
       <button
-        onClick={() => setDialogOpen(true)}
+        onClick={handleButtonClick}
         className={cn(
           'flex items-center gap-1 rounded-lg mx-1',
           isMobile ? 'px-3 py-1.5' : 'px-3 py-1',
           'text-chat-input-text-muted hover:bg-chat-input-hover-bg',
           'transition-colors text-sm',
+          toolsCount === 0 && 'opacity-50 cursor-not-allowed',
           className
         )}
         aria-label="MCP Tools"
         data-testid="mcp-tools-button"
+        disabled={toolsCount === 0}
       >
         <Wrench className={cn(isMobile ? 'h-5 w-5' : 'h-4 w-4')} />
         <span>Tools</span>

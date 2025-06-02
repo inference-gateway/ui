@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react';
+import { ChevronDown, ChevronUp, ArrowLeft, Wrench, CheckCircle, XCircle } from 'lucide-react';
 import { CodeBlock } from './code-block';
 import logger from '@/lib/logger';
+import { isMCPTool } from '@/lib/tools';
 
 interface ToolResponse {
   query: string;
@@ -11,6 +12,14 @@ interface ToolResponse {
     snippet: string;
   }>;
   error?: string;
+}
+
+interface MCPToolResponse {
+  content?: Array<{
+    type: 'text';
+    text: string;
+  }>;
+  isError?: boolean;
 }
 
 interface ToolResponseBubbleProps {
@@ -27,16 +36,41 @@ export default function ToolResponseBubble({ response, toolName }: ToolResponseB
     return null;
   }
 
+  const isMCP = isMCPTool(toolName || '');
   let formattedResponse = null;
+  let mcpResponse: MCPToolResponse | null = null;
+  let isError = false;
+
   try {
-    const parsedResponse: ToolResponse = JSON.parse(response);
-    if (parsedResponse.error) {
-      logger.error('Tool response error:', parsedResponse.results);
-      return null;
+    if (isMCP) {
+      try {
+        mcpResponse = JSON.parse(response) as MCPToolResponse;
+        isError = mcpResponse.isError || false;
+
+        if (mcpResponse.content && mcpResponse.content.length > 0) {
+          formattedResponse = mcpResponse.content.map(item => item.text).join('\n');
+        } else {
+          formattedResponse = response;
+        }
+      } catch {
+        formattedResponse = response;
+      }
+    } else {
+      const parsedResponse: ToolResponse = JSON.parse(response);
+      if (parsedResponse.error) {
+        logger.error('Tool response error:', parsedResponse.error);
+        isError = true;
+        formattedResponse = parsedResponse.error;
+      } else {
+        formattedResponse = JSON.stringify(parsedResponse.results, null, 2);
+      }
     }
-    formattedResponse = JSON.stringify(parsedResponse.results, null, 2);
   } catch (err) {
     logger.error('Error parsing tool response:', err);
+    formattedResponse = response;
+  }
+
+  if (!formattedResponse) {
     return null;
   }
 
@@ -45,19 +79,62 @@ export default function ToolResponseBubble({ response, toolName }: ToolResponseB
       <div className="flex flex-col">
         <button
           onClick={toggleExpanded}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs bg-[hsl(var(--thinking-bubble-bg))] border border-[hsl(var(--thinking-bubble-border))] hover:bg-[hsl(var(--thinking-bubble-hover-bg))] transition-colors duration-200 text-[hsl(var(--thinking-bubble-text))]"
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs border transition-colors duration-200 ${
+            isError
+              ? 'bg-red-50 border-red-200 hover:bg-red-100 text-red-800'
+              : 'bg-[hsl(var(--thinking-bubble-bg))] border-[hsl(var(--thinking-bubble-border))] hover:bg-[hsl(var(--thinking-bubble-hover-bg))] text-[hsl(var(--thinking-bubble-text))]'
+          }`}
         >
-          <ArrowLeft className="h-3 w-3" />
-          <span>{toolName ? `${toolName} Response` : 'Tool Response'}</span>
+          <div className="flex items-center gap-1">
+            <ArrowLeft className="h-3 w-3" />
+            {isMCP && <Wrench className="h-3 w-3 text-blue-500" />}
+            {isError ? (
+              <XCircle className="h-3 w-3 text-red-500" />
+            ) : (
+              <CheckCircle className="h-3 w-3 text-green-500" />
+            )}
+          </div>
+          <span>
+            {toolName ? `${toolName} Response` : 'Tool Response'}
+            {isMCP && (
+              <span className="ml-1 text-xs px-1 py-0.5 bg-blue-100 text-blue-800 rounded">
+                MCP
+              </span>
+            )}
+            {isError && (
+              <span className="ml-1 text-xs px-1 py-0.5 bg-red-100 text-red-800 rounded">
+                Error
+              </span>
+            )}
+          </span>
           {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
         </button>
       </div>
 
       {isExpanded && (
-        <div className="flex items-start gap-4 rounded-lg p-4 mt-1 mb-1 bg-[hsl(var(--thinking-bubble-content-bg))] border border-[hsl(var(--thinking-bubble-content-border))] shadow-sm transition-all overflow-x-auto">
-          <div className="flex-1 space-y-2 min-w-0">
+        <div
+          className={`mt-1 mb-1 rounded-lg p-4 shadow-sm transition-all ${
+            isError
+              ? 'bg-red-50 border border-red-200'
+              : 'bg-[hsl(var(--thinking-bubble-content-bg))] border border-[hsl(var(--thinking-bubble-content-border))]'
+          }`}
+        >
+          <div className="space-y-2">
+            {isMCP && !isError && (
+              <div className="text-xs text-green-600 font-medium flex items-center gap-1">
+                <CheckCircle className="h-3 w-3" />
+                MCP Tool executed successfully
+              </div>
+            )}
+
             <div className="overflow-x-auto">
-              <CodeBlock className="language-json">{formattedResponse}</CodeBlock>
+              {isMCP && formattedResponse && !formattedResponse.startsWith('{') ? (
+                <div className="text-sm whitespace-pre-wrap font-mono bg-[hsl(var(--thinking-bubble-bg))] p-3 rounded border">
+                  {formattedResponse}
+                </div>
+              ) : (
+                <CodeBlock className="language-json text-xs">{formattedResponse}</CodeBlock>
+              )}
             </div>
           </div>
         </div>

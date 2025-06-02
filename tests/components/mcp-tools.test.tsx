@@ -107,13 +107,17 @@ describe('MCPToolsButton', () => {
 
     const button = screen.getByRole('button', { name: /mcp tools/i });
 
+    await waitFor(() => {
+      expect(screen.getByText('0')).toBeInTheDocument();
+    });
+
+    expect(button).toBeDisabled();
+
     await act(async () => {
       fireEvent.click(button);
     });
 
-    await waitFor(() => {
-      expect(screen.getByText(/error loading mcp tools/i)).toBeInTheDocument();
-    });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 });
 

@@ -118,7 +118,7 @@ describe('MCPToolsButton with tool count', () => {
     expect(screen.queryByText(/\d+/)).not.toBeInTheDocument();
   });
 
-  it('hides count when API call fails', async () => {
+  it('shows 0 count when API call fails', async () => {
     mockFetchMCPTools.mockRejectedValue(new Error('API Error'));
 
     await act(async () => {
@@ -129,7 +129,7 @@ describe('MCPToolsButton with tool count', () => {
     expect(button).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(screen.queryByText(/\d+/)).not.toBeInTheDocument();
+      expect(screen.getByText('0')).toBeInTheDocument();
     });
   });
 

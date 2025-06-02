@@ -61,6 +61,11 @@ export async function GET() {
         return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
       }
 
+      if (error instanceof Error && error.message.includes('mcp tools endpoint is not exposed')) {
+        logger.warn('[MCP Tools] MCP tools endpoint not exposed');
+        return NextResponse.json({ error: 'mcp tools endpoint is not exposed' }, { status: 403 });
+      }
+
       logger.error('[MCP Tools] Error fetching tools from gateway', {
         error: error instanceof Error ? error.message : error,
         stack: error instanceof Error ? error.stack : undefined,
