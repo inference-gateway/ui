@@ -40,6 +40,7 @@ export function CodeBlock({ inline, className, children, ...props }: CodeBlockPr
         style={dark}
         PreTag="div"
         className="rounded-b-md"
+        data-testid="code-block"
         {...props}
       >
         {String(children).replace(/\n$/, '')}

@@ -24,6 +24,9 @@ const eslintConfig = [
       // Charts directory
       'charts/',
 
+      // Examples directory
+      'examples/',
+
       // Generated files
       '*.generated.*',
       '*.min.js',

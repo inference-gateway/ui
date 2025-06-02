@@ -15,6 +15,22 @@ interface PageContent {
   error?: string;
 }
 
+const BUILTIN_TOOLS = ['web_search', 'fetch_page'];
+
+/**
+ * Centralized function to detect if a tool is an MCP tool
+ * @param toolName - The name of the tool to check
+ * @param tools - Optional array of available tools
+ * @returns true if the tool is an MCP tool, false otherwise
+ */
+export const isMCPTool = (toolName: string, tools?: SchemaChatCompletionTool[]): boolean => {
+  if (tools && tools.length > 0) {
+    return !tools.some(tool => tool.function.name === toolName);
+  }
+
+  return !BUILTIN_TOOLS.includes(toolName);
+};
+
 export const WebSearchTool: SchemaChatCompletionTool = {
   type: 'function' as ChatCompletionToolType,
   function: {

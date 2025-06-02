@@ -15,8 +15,8 @@ describe('ToolCallBubble', () => {
       id: 'call_1',
       type: 'function' as ChatCompletionToolType.function,
       function: {
-        name: 'test_tool',
-        arguments: '{"param":"value"}',
+        name: 'web_search',
+        arguments: '{"query":"test search"}',
       },
     },
   ];
@@ -39,26 +39,35 @@ describe('ToolCallBubble', () => {
 
   test('toggles expand/collapse state', () => {
     render(<ToolCallBubble toolCalls={mockToolCalls} />);
-    const button = screen.getByRole('button');
+    const mainButton = screen.getByRole('button', { name: /Tool Calls/ });
 
-    expect(screen.queryByTestId('code-block')).not.toBeInTheDocument();
+    expect(screen.queryByText('Call ID:')).not.toBeInTheDocument();
 
-    fireEvent.click(button);
+    fireEvent.click(mainButton);
+
+    const toolButton = screen.getByRole('button', { name: /web_search/ });
+    expect(toolButton).toBeInTheDocument();
+
+    fireEvent.click(toolButton);
+    expect(screen.getByText('Call ID:')).toBeInTheDocument();
     expect(screen.getByTestId('code-block')).toBeInTheDocument();
 
-    fireEvent.click(button);
+    fireEvent.click(toolButton);
     expect(screen.queryByTestId('code-block')).not.toBeInTheDocument();
   });
 
   test('displays formatted JSON when expanded', () => {
     render(<ToolCallBubble toolCalls={mockToolCalls} />);
-    fireEvent.click(screen.getByRole('button'));
+
+    fireEvent.click(screen.getByRole('button', { name: /Tool Calls/ }));
+
+    const toolButton = screen.getByRole('button', { name: /web_search/ });
+    fireEvent.click(toolButton);
 
     const codeBlock = screen.getByTestId('code-block');
     expect(codeBlock).toBeInTheDocument();
-    expect(codeBlock).toHaveTextContent(/test_tool/);
-    expect(codeBlock).toHaveTextContent(/param/);
-    expect(codeBlock).toHaveTextContent(/value/);
+    expect(codeBlock).toHaveTextContent(/query/);
+    expect(codeBlock).toHaveTextContent(/test search/);
   });
 
   test('handles multiple tool calls correctly', () => {
@@ -68,19 +77,24 @@ describe('ToolCallBubble', () => {
         id: 'call_2',
         type: 'function' as ChatCompletionToolType.function,
         function: {
-          name: 'another_tool',
-          arguments: '{"another":"value"}',
+          name: 'fetch_page',
+          arguments: '{"url":"https://example.com"}',
         },
       },
     ];
 
     render(<ToolCallBubble toolCalls={multipleToolCalls} />);
-    const button = screen.getByRole('button');
-    expect(button).toHaveTextContent('Tool Calls (2)');
+    const mainButton = screen.getByRole('button', { name: /Tool Calls/ });
+    expect(mainButton).toHaveTextContent('Tool Calls (2)');
 
-    fireEvent.click(button);
-    const codeBlock = screen.getByTestId('code-block');
-    expect(codeBlock).toHaveTextContent(/test_tool/);
-    expect(codeBlock).toHaveTextContent(/another_tool/);
+    fireEvent.click(mainButton);
+
+    expect(screen.getByRole('button', { name: /web_search/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /fetch_page/ })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /web_search/ }));
+    const codeBlocks = screen.getAllByTestId('code-block');
+    expect(codeBlocks.length).toBe(1);
+    expect(codeBlocks[0]).toHaveTextContent(/query/);
   });
 });

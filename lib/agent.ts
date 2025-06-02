@@ -23,6 +23,7 @@ interface AgentRunnerOptions {
     completion_tokens: number;
     total_tokens: number;
   }) => void;
+  onMCPToolAction?: (toolCall: SchemaChatCompletionMessageToolCall) => Promise<void>;
 }
 
 export async function runAgentLoop({
@@ -32,6 +33,7 @@ export async function runAgentLoop({
   client,
   onUpdateMessages,
   onUpdateUsage,
+  onMCPToolAction,
 }: AgentRunnerOptions): Promise<void> {
   let currentAssistantContent = '';
   let currentReasoningContent = '';
@@ -86,8 +88,34 @@ export async function runAgentLoop({
             tools,
             currentMessages,
             onUpdateMessages,
-            onUpdateUsage
+            onUpdateUsage,
+            onMCPToolAction
           );
+        },
+        onMCPTool: async toolCall => {
+          logger.debug('MCP tool call detected', {
+            toolName: toolCall.function.name,
+            toolId: toolCall.id,
+          });
+
+          toolCalls.push(toolCall);
+          currentMessages = updateMessageToolCalls(currentMessages, assistantMessageId, toolCalls);
+          onUpdateMessages(currentMessages);
+
+          if (onMCPToolAction) {
+            await onMCPToolAction(toolCall);
+          }
+
+          const toolMessageId = generateUniqueId('tool-');
+          const toolMessage: Message = {
+            id: toolMessageId,
+            role: MessageRole.tool,
+            content: 'MCP tool action executed',
+            tool_call_id: toolCall.id,
+          };
+
+          currentMessages = [...currentMessages, toolMessage];
+          onUpdateMessages(currentMessages);
         },
         onUsageMetrics: usage => {
           if (usage) onUpdateUsage(usage);
@@ -149,7 +177,8 @@ async function executeToolAndResume(
     prompt_tokens: number;
     completion_tokens: number;
     total_tokens: number;
-  }) => void
+  }) => void,
+  onMCPToolAction?: (toolCall: SchemaChatCompletionMessageToolCall) => Promise<void>
 ) {
   const { function: funcCall } = toolCall;
   const handler = ToolHandlers[funcCall.name];
@@ -188,5 +217,6 @@ async function executeToolAndResume(
     client,
     onUpdateMessages,
     onUpdateUsage,
+    onMCPToolAction,
   });
 }

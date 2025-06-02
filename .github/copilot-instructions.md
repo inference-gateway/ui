@@ -1,11 +1,13 @@
 # GitHub Copilot Instructions for Inference Gateway UI
 
 - Always use context7 MCP server to find out about the latest documentation of a project before assessing a task.
-- Always Use early return when possible to reduce nesting and improve readability.
-- Always Use `async/await` for asynchronous code instead of `.then()` and `.catch()`.
-- Always Use `const` for variables that are not reassigned and `let` for those that are.
-- Always Use `===` and `!==` for equality checks instead of `==` and `!=`.
+- Always use early return when possible to reduce nesting and improve readability.
+- Always use `async/await` for asynchronous code instead of `.then()` and `.catch()`.
+- Always use `const` for variables that are not reassigned and `let` for those that are.
+- Always use `===` and `!==` for equality checks instead of `==` and `!=`.
 - Avoid using hooks when possible - prefer using standard state management patterns with less abstraction.
+- Always use the Official Inference Gateway TypeScript SDK for API interactions instead of manually constructing requests.
+- Always use `npm test` for testing instead of IDE built-in testing.
 
 ## Project Overview
 
@@ -20,6 +22,22 @@ This is a Next.js application serving as the UI for the Inference Gateway projec
   - [TypeScript SDK](https://github.com/inference-gateway/typescript-sdk)
   - [Python SDK](https://github.com/inference-gateway/python-sdk)
   - [Documentation](https://docs.inference-gateway.com)
+
+## Available Tools
+
+- context7 MCP server: Use this to access the latest documentation and project context.
+
+## Available Commands
+
+- `npm run dev`: Start the development server
+- `npm run build`: Build the application for production
+- `npm run start`: Start the production server
+- `npm run format`: Format code using Prettier
+- `npm run format:check`: Check code formatting without making changes
+- `npm run lint`: Run ESLint to check for code quality issues
+- `npm run lint:fix`: Automatically fix linting issues
+- `npm run typecheck`: Run TypeScript type checks
+- `npm run test`: Run tests using Jest and React Testing Library
 
 ## File Organization
 
