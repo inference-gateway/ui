@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.0](https://github.com/inference-gateway/ui/compare/v0.7.1...v0.8.0) (2025-06-02)
+
+### ✨ Features
+
+* MCP Tools Integration Complete Implementation with Examples and Documentation ([#42](https://github.com/inference-gateway/ui/issues/42)) ([a99725c](https://github.com/inference-gateway/ui/commit/a99725c9024f49bea055e63d4b49aefd80337972))
+
+### ♻️ Improvements
+
+* Update devcontainer and documentation for improved clarity and organization ([706fe09](https://github.com/inference-gateway/ui/commit/706fe099146d0c86c7b33efa9bfac9ee157d68ec))
+
+### 📚 Documentation
+
+* Update the examples and the README ([#40](https://github.com/inference-gateway/ui/issues/40)) ([af9fec3](https://github.com/inference-gateway/ui/commit/af9fec3132f5a539e65a7b3393bda123f6c67f29))
+
+### 🔧 Miscellaneous
+
+* Enable GitHub Copilot and configure authentication settings ([9d4af76](https://github.com/inference-gateway/ui/commit/9d4af761ee70a027f79e2397e96cabcf144a8bac))
+
 ## [0.7.1](https://github.com/inference-gateway/ui/compare/v0.7.0...v0.7.1) (2025-05-21)
 
 ### ♻️ Improvements
