@@ -22,7 +22,7 @@ export function A2AAgentsButton() {
         setIsLoading(true);
         setError(null);
         const response = await fetchA2AAgents();
-        setAgents(response.agents);
+        setAgents(response.data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load A2A agents');
       } finally {
@@ -72,7 +72,7 @@ export function A2AAgentsButton() {
               setIsLoading(true);
               setError(null);
               const response = await fetchA2AAgents();
-              setAgents(response.agents);
+              setAgents(response.data);
             } catch (err) {
               setError(err instanceof Error ? err.message : 'Failed to load A2A agents');
             } finally {

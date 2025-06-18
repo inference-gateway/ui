@@ -24,7 +24,7 @@ import {
   Info,
   Clock,
 } from 'lucide-react';
-import type { A2AAgent } from '@/types/a2a';
+import type { A2AAgent, A2ASkill } from '@/types/a2a';
 
 interface A2AAgentsDialogProps {
   open: boolean;
@@ -155,7 +155,7 @@ export function A2AAgentsDialog({
                     </CardHeader>
                     <CardContent className="pt-0">
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span>{agent.capabilities.length} capabilities</span>
+                        <span>{agent.capabilities?.skills?.length || 0} capabilities</span>
                         <span>v{agent.version}</span>
                         {agent.lastUpdated && (
                           <div className="flex items-center gap-1">
@@ -196,7 +196,7 @@ export function A2AAgentsDialog({
                     </CardHeader>
                     <CardContent className="pt-0">
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span>{agent.capabilities.length} capabilities</span>
+                        <span>{agent.capabilities?.skills?.length || 0} capabilities</span>
                         <span>v{agent.version}</span>
                       </div>
                     </CardContent>
@@ -261,50 +261,31 @@ export function A2AAgentsDialog({
                     <div>
                       <h4 className="font-medium mb-3 flex items-center gap-2">
                         <Info className="h-4 w-4" />
-                        Capabilities ({selectedAgent.capabilities.length})
+                        Capabilities ({selectedAgent.capabilities?.skills?.length || 0})
                       </h4>
                       <div className="space-y-3">
-                        {selectedAgent.capabilities.map((capability, index) => (
-                          <Card key={index}>
-                            <CardHeader className="pb-2">
-                              <CardTitle className="text-sm">{capability.name}</CardTitle>
-                              <CardDescription className="text-xs">
-                                {capability.description}
-                              </CardDescription>
-                            </CardHeader>
-                          </Card>
-                        ))}
+                        {(selectedAgent.capabilities?.skills || []).map(
+                          (skill: A2ASkill, index: number) => (
+                            <Card key={index}>
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-sm">{skill.name}</CardTitle>
+                                <CardDescription className="text-xs">
+                                  {skill.description}
+                                </CardDescription>
+                              </CardHeader>
+                            </Card>
+                          )
+                        )}
                       </div>
                     </div>
 
-                    {selectedAgent.endpoints.length > 0 && (
-                      <>
-                        <Separator />
-                        <div>
-                          <h4 className="font-medium mb-3">
-                            Endpoints ({selectedAgent.endpoints.length})
-                          </h4>
-                          <div className="space-y-2">
-                            {selectedAgent.endpoints.map((endpoint, index) => (
-                              <div
-                                key={index}
-                                className="flex items-center gap-2 text-sm bg-muted/50 p-2 rounded"
-                              >
-                                <Badge variant="outline" className="text-xs">
-                                  {endpoint.method}
-                                </Badge>
-                                <code className="text-xs">{endpoint.path}</code>
-                                {endpoint.description && (
-                                  <span className="text-muted-foreground">
-                                    - {endpoint.description}
-                                  </span>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </>
-                    )}
+                    <Separator />
+                    <div>
+                      <h4 className="font-medium mb-3">Agent URL</h4>
+                      <div className="bg-muted/50 p-2 rounded">
+                        <code className="text-xs">{selectedAgent.url}</code>
+                      </div>
+                    </div>
                   </div>
                 </ScrollArea>
               </div>

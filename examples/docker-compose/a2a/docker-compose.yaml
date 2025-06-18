@@ -30,6 +30,7 @@ services:
         condition: service_healthy
     networks:
       - frontend
+      - backend
 
   inference-gateway-hc:
     image: curlimages/curl:latest

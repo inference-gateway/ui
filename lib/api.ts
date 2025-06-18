@@ -1,7 +1,7 @@
 import logger from '@/lib/logger';
 import type { ListModelsResponse } from '@/types/model';
 import type { ListToolsResponse } from '@/types/mcp';
-import type { A2AAgentsResponse, A2AAgentDetails } from '@/types/a2a';
+import type { A2AAgentsResponse, A2AAgentDetails, A2AAgent } from '@/types/a2a';
 import { Session } from 'next-auth';
 
 export async function fetchModels(session?: Session): Promise<ListModelsResponse> {
@@ -55,7 +55,29 @@ export async function fetchA2AAgents(session?: Session): Promise<A2AAgentsRespon
     throw new Error(`Failed to fetch A2A agents: ${response.statusText}`);
   }
 
-  return response.json();
+  const data = await response.json();
+
+  // Transform the response to add status and compatibility fields
+  const transformedAgents = data.data.map((agent: A2AAgent) => ({
+    ...agent,
+    status: 'available' as const,
+    capabilities: {
+      skills: [], // TODO: I need to add it to the inference gateway - will send the AgentCard as is
+    },
+    endpoints: [
+      {
+        name: 'agent',
+        method: 'POST' as const,
+        path: '/api',
+        description: 'Main agent endpoint',
+      },
+    ],
+  }));
+
+  return {
+    data: transformedAgents,
+    object: data.object,
+  };
 }
 
 export async function fetchA2AAgentDetails(

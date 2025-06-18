@@ -1,20 +1,33 @@
 /**
  * A2A (Agent-to-Agent) types for the Inference Gateway UI
+ * Based on the actual Inference Gateway API response format
  */
 
 export interface A2AAgent {
   id: string;
   name: string;
   description: string;
-  version: string;
+  url: string;
+  status?: 'available' | 'unavailable' | 'error';
+  lastUpdated?: string;
+  capabilities?: A2ACapabilities;
+  endpoints?: A2AEndpoint[];
+  version?: string;
   author?: string;
   homepage?: string;
   license?: string;
-  capabilities: A2ACapability[];
-  endpoints: A2AEndpoint[];
-  metadata?: Record<string, unknown>;
-  status: 'available' | 'unavailable' | 'error';
-  lastUpdated?: string;
+}
+
+export interface A2ACapabilities {
+  skills: A2ASkill[];
+}
+
+export interface A2ASkill {
+  id: string;
+  name: string;
+  description: string;
+  input_schema?: Record<string, unknown>;
+  output_schema?: Record<string, unknown>;
 }
 
 export interface A2ACapability {
@@ -40,9 +53,8 @@ export interface A2AParameter {
 }
 
 export interface A2AAgentsResponse {
-  agents: A2AAgent[];
-  total_count: number;
-  available_count: number;
+  data: A2AAgent[];
+  object: string;
 }
 
 export interface A2AAgentDetails {
