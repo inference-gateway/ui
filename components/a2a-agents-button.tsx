@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Users, Loader2 } from 'lucide-react';
+import { Bot, Loader2 } from 'lucide-react';
 import { fetchA2AAgents } from '@/lib/api';
 import { A2AAgentsDialog } from './a2a-agents-dialog';
 import type { A2AAgent } from '@/types/a2a';
@@ -51,7 +51,7 @@ export function A2AAgentsButton() {
             : `${availableAgents.length} A2A agent${availableAgents.length === 1 ? '' : 's'} available`
         }
       >
-        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Users className="h-4 w-4" />}
+        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bot className="h-4 w-4" />}
         <span className="text-sm">A2A</span>
         {!isLoading && !error && (
           <Badge variant={availableAgents.length > 0 ? 'default' : 'secondary'} className="ml-1">

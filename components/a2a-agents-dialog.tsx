@@ -16,7 +16,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   RefreshCw,
-  Users,
+  Bot,
   CheckCircle,
   XCircle,
   AlertCircle,
@@ -80,7 +80,7 @@ export function A2AAgentsDialog({
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
+              <Bot className="h-5 w-5" />
               <DialogTitle>A2A Agents</DialogTitle>
             </div>
             <Button
@@ -117,7 +117,7 @@ export function A2AAgentsDialog({
 
               {agents.length === 0 && !isLoading && !error && (
                 <div className="text-center py-8 text-muted-foreground">
-                  <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <Bot className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>No A2A agents configured</p>
                   <p className="text-sm">Configure agents to enable Agent-to-Agent communication</p>
                 </div>
