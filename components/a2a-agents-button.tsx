@@ -62,11 +62,11 @@ export function A2AAgentsButton() {
 
       <A2AAgentsDialog
         open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        onOpenChangeAction={setDialogOpen}
         agents={agents}
         isLoading={isLoading}
         error={error}
-        onRefresh={() => {
+        onRefreshAction={() => {
           const loadAgents = async () => {
             try {
               setIsLoading(true);

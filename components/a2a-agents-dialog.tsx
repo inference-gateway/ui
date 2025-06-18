@@ -28,20 +28,20 @@ import type { A2AAgent, A2ASkill } from '@/types/a2a';
 
 interface A2AAgentsDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChangeAction: (open: boolean) => void;
   agents: A2AAgent[];
   isLoading: boolean;
   error: string | null;
-  onRefresh: () => void;
+  onRefreshAction: () => void;
 }
 
 export function A2AAgentsDialog({
   open,
-  onOpenChange,
+  onOpenChangeAction,
   agents,
   isLoading,
   error,
-  onRefresh,
+  onRefreshAction,
 }: A2AAgentsDialogProps) {
   const [selectedAgent, setSelectedAgent] = useState<A2AAgent | null>(null);
 
@@ -75,7 +75,7 @@ export function A2AAgentsDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChangeAction}>
       <DialogContent className="max-w-4xl max-h-[80vh]">
         <DialogHeader>
           <div className="flex items-center justify-between">
@@ -86,7 +86,7 @@ export function A2AAgentsDialog({
             <Button
               variant="outline"
               size="sm"
-              onClick={onRefresh}
+              onClick={onRefreshAction}
               disabled={isLoading}
               className="gap-2"
             >
