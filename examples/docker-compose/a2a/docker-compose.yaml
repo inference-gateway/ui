@@ -9,6 +9,8 @@ services:
       - ../../..:/app
     env_file:
       - .env.ui
+    ports:
+      - "3000:3000"
     deploy:
       resources:
         limits:
@@ -55,6 +57,8 @@ services:
       SERVER_READ_TIMEOUT: 130s
       SERVER_WRITE_TIMEOUT: 130s
       SERVER_IDLE_TIMEOUT: 120s
+    ports:
+      - "8080:8080"
     deploy:
       resources:
         limits:
