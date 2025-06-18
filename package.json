@@ -11,7 +11,7 @@
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "typecheck": "tsc --noEmit",
-    "oas-download": "curl -X GET \"https://raw.githubusercontent.com/inference-gateway/inference-gateway/main/openapi.yaml\" -o openapi.yaml",
+    "oas-download": "curl -X GET \"https://raw.githubusercontent.com/inference-gateway/schemas/main/openapi.yaml\" -o openapi.yaml",
     "test": "jest --detectOpenHandles",
     "test:watch": "jest --watch",
     "test:fast": "jest --runInBand --detectOpenHandles",

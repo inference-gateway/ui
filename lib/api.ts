@@ -1,6 +1,7 @@
 import logger from '@/lib/logger';
 import type { ListModelsResponse } from '@/types/model';
 import type { ListToolsResponse } from '@/types/mcp';
+import type { A2AAgentsResponse, A2AAgentDetails } from '@/types/a2a';
 import { Session } from 'next-auth';
 
 export async function fetchModels(session?: Session): Promise<ListModelsResponse> {
@@ -34,6 +35,45 @@ export async function fetchMCPTools(session?: Session): Promise<ListToolsRespons
 
   if (!response.ok) {
     throw new Error(`Failed to fetch MCP tools: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+export async function fetchA2AAgents(session?: Session): Promise<A2AAgentsResponse> {
+  const headers: Record<string, string> = {};
+
+  if (session?.accessToken) {
+    headers['Authorization'] = `Bearer ${session.accessToken}`;
+  }
+
+  const response = await fetch('/api/v1/a2a/agents', {
+    headers,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch A2A agents: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+export async function fetchA2AAgentDetails(
+  agentId: string,
+  session?: Session
+): Promise<A2AAgentDetails> {
+  const headers: Record<string, string> = {};
+
+  if (session?.accessToken) {
+    headers['Authorization'] = `Bearer ${session.accessToken}`;
+  }
+
+  const response = await fetch(`/api/v1/a2a/agents/${agentId}`, {
+    headers,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch A2A agent details: ${response.statusText}`);
   }
 
   return response.json();
