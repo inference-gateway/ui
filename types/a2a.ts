@@ -8,24 +8,41 @@ export interface A2AAgent {
   name: string;
   description: string;
   url: string;
+  version?: string;
+  capabilities?: A2ACapabilities;
+  skills?: A2ASkill[];
+  provider?: A2AProvider;
+  defaultInputModes?: string[];
+  defaultOutputModes?: string[];
   status?: 'available' | 'unavailable' | 'error';
   lastUpdated?: string;
-  capabilities?: A2ACapabilities;
   endpoints?: A2AEndpoint[];
-  version?: string;
   author?: string;
   homepage?: string;
   license?: string;
 }
 
+export interface A2AProvider {
+  organization: string;
+  url: string;
+}
+
 export interface A2ACapabilities {
-  skills: A2ASkill[];
+  skills?: A2ASkill[];
+  extensions?: string[];
+  pushNotifications?: boolean;
+  stateTransitionHistory?: boolean;
+  streaming?: boolean;
 }
 
 export interface A2ASkill {
   id: string;
   name: string;
   description: string;
+  examples?: string[];
+  inputModes?: string[];
+  outputModes?: string[];
+  tags?: string[];
   input_schema?: Record<string, unknown>;
   output_schema?: Record<string, unknown>;
 }

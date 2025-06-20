@@ -57,12 +57,16 @@ export async function fetchA2AAgents(session?: Session): Promise<A2AAgentsRespon
 
   const data = await response.json();
 
-  // Transform the response to add status and compatibility fields
   const transformedAgents = data.data.map((agent: A2AAgent) => ({
     ...agent,
     status: 'available' as const,
+
     capabilities: {
-      skills: [], // TODO: I need to add it to the inference gateway - will send the AgentCard as is
+      skills: agent.skills || agent.capabilities?.skills || [],
+      extensions: agent.capabilities?.extensions || [],
+      pushNotifications: agent.capabilities?.pushNotifications || false,
+      stateTransitionHistory: agent.capabilities?.stateTransitionHistory || false,
+      streaming: agent.capabilities?.streaming || false,
     },
     endpoints: [
       {

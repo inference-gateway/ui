@@ -23,6 +23,13 @@ import {
   ExternalLink,
   Info,
   Clock,
+  Zap,
+  Bell,
+  History,
+  Package,
+  ArrowRight,
+  ArrowLeft,
+  Sparkles,
 } from 'lucide-react';
 import type { A2AAgent, A2ASkill } from '@/types/a2a';
 
@@ -155,7 +162,7 @@ export function A2AAgentsDialog({
                     </CardHeader>
                     <CardContent className="pt-0">
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span>{agent.capabilities?.skills?.length || 0} capabilities</span>
+                        <span>{agent.skills?.length || 0} skills</span>
                         <span>v{agent.version}</span>
                         {agent.lastUpdated && (
                           <div className="flex items-center gap-1">
@@ -196,7 +203,7 @@ export function A2AAgentsDialog({
                     </CardHeader>
                     <CardContent className="pt-0">
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span>{agent.capabilities?.skills?.length || 0} capabilities</span>
+                        <span>{agent.skills?.length || 0} skills</span>
                         <span>v{agent.version}</span>
                       </div>
                     </CardContent>
@@ -223,7 +230,24 @@ export function A2AAgentsDialog({
                           </Badge>
                         </div>
                       </div>
-                      <p className="text-sm text-muted-foreground">{selectedAgent.description}</p>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {selectedAgent.description}
+                      </p>
+
+                      {selectedAgent.provider && (
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="text-xs font-medium">Provider:</span>
+                          <a
+                            href={selectedAgent.provider.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-primary hover:underline flex items-center gap-1"
+                          >
+                            {selectedAgent.provider.organization}
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        </div>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 text-sm">
@@ -258,23 +282,232 @@ export function A2AAgentsDialog({
 
                     <Separator />
 
+                    {selectedAgent.capabilities && (
+                      <>
+                        <div>
+                          <h4 className="font-medium mb-3 flex items-center gap-2">
+                            <Sparkles className="h-4 w-4" />
+                            Capabilities
+                          </h4>
+                          <div className="grid grid-cols-1 gap-3">
+                            <div className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center gap-2">
+                                <Zap className="h-4 w-4 text-blue-500" />
+                                <span className="text-sm font-medium">Streaming</span>
+                              </div>
+                              <Badge
+                                variant={
+                                  selectedAgent.capabilities.streaming ? 'default' : 'secondary'
+                                }
+                                className="text-xs"
+                              >
+                                {selectedAgent.capabilities.streaming ? 'Enabled' : 'Disabled'}
+                              </Badge>
+                            </div>
+
+                            <div className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center gap-2">
+                                <Bell className="h-4 w-4 text-green-500" />
+                                <span className="text-sm font-medium">Push Notifications</span>
+                              </div>
+                              <Badge
+                                variant={
+                                  selectedAgent.capabilities.pushNotifications
+                                    ? 'default'
+                                    : 'secondary'
+                                }
+                                className="text-xs"
+                              >
+                                {selectedAgent.capabilities.pushNotifications
+                                  ? 'Enabled'
+                                  : 'Disabled'}
+                              </Badge>
+                            </div>
+
+                            <div className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center gap-2">
+                                <History className="h-4 w-4 text-purple-500" />
+                                <span className="text-sm font-medium">
+                                  State Transition History
+                                </span>
+                              </div>
+                              <Badge
+                                variant={
+                                  selectedAgent.capabilities.stateTransitionHistory
+                                    ? 'default'
+                                    : 'secondary'
+                                }
+                                className="text-xs"
+                              >
+                                {selectedAgent.capabilities.stateTransitionHistory
+                                  ? 'Enabled'
+                                  : 'Disabled'}
+                              </Badge>
+                            </div>
+
+                            {selectedAgent.capabilities.extensions &&
+                              selectedAgent.capabilities.extensions.length > 0 && (
+                                <div className="flex items-center justify-between p-3 border rounded-lg">
+                                  <div className="flex items-center gap-2">
+                                    <Package className="h-4 w-4 text-orange-500" />
+                                    <span className="text-sm font-medium">Extensions</span>
+                                  </div>
+                                  <Badge variant="outline" className="text-xs">
+                                    {selectedAgent.capabilities.extensions.length} available
+                                  </Badge>
+                                </div>
+                              )}
+                          </div>
+
+                          {(selectedAgent.defaultInputModes &&
+                            selectedAgent.defaultInputModes.length > 0) ||
+                          (selectedAgent.defaultOutputModes &&
+                            selectedAgent.defaultOutputModes.length > 0) ? (
+                            <div className="mt-4 grid grid-cols-1 gap-3">
+                              {selectedAgent.defaultInputModes &&
+                                selectedAgent.defaultInputModes.length > 0 && (
+                                  <div className="p-3 border rounded-lg">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <ArrowRight className="h-4 w-4 text-blue-500" />
+                                      <span className="text-sm font-medium">
+                                        Default Input Modes
+                                      </span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1">
+                                      {selectedAgent.defaultInputModes.map((mode, index) => (
+                                        <Badge key={index} variant="outline" className="text-xs">
+                                          {mode}
+                                        </Badge>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              {selectedAgent.defaultOutputModes &&
+                                selectedAgent.defaultOutputModes.length > 0 && (
+                                  <div className="p-3 border rounded-lg">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <ArrowLeft className="h-4 w-4 text-green-500" />
+                                      <span className="text-sm font-medium">
+                                        Default Output Modes
+                                      </span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1">
+                                      {selectedAgent.defaultOutputModes.map((mode, index) => (
+                                        <Badge key={index} variant="outline" className="text-xs">
+                                          {mode}
+                                        </Badge>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                            </div>
+                          ) : null}
+                        </div>
+                        <Separator />
+                      </>
+                    )}
+
                     <div>
                       <h4 className="font-medium mb-3 flex items-center gap-2">
                         <Info className="h-4 w-4" />
-                        Capabilities ({selectedAgent.capabilities?.skills?.length || 0})
+                        Skills ({selectedAgent.skills?.length || 0})
                       </h4>
                       <div className="space-y-3">
-                        {(selectedAgent.capabilities?.skills || []).map(
-                          (skill: A2ASkill, index: number) => (
-                            <Card key={index}>
-                              <CardHeader className="pb-2">
-                                <CardTitle className="text-sm">{skill.name}</CardTitle>
-                                <CardDescription className="text-xs">
-                                  {skill.description}
-                                </CardDescription>
-                              </CardHeader>
-                            </Card>
-                          )
+                        {(selectedAgent.skills || []).map((skill: A2ASkill, index: number) => (
+                          <Card key={skill.id || index} className="border-l-4 border-l-primary/20">
+                            <CardHeader className="pb-3">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <CardTitle className="text-sm font-medium">
+                                    {skill.name}
+                                  </CardTitle>
+                                  <CardDescription className="text-xs mt-1">
+                                    {skill.description}
+                                  </CardDescription>
+                                </div>
+                                <Badge variant="outline" className="text-xs ml-2">
+                                  {skill.id}
+                                </Badge>
+                              </div>
+
+                              {skill.tags && skill.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-2">
+                                  {skill.tags.map((tag, tagIndex) => (
+                                    <Badge
+                                      key={tagIndex}
+                                      variant="secondary"
+                                      className="text-xs px-2 py-0"
+                                    >
+                                      {tag}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              )}
+
+                              {skill.examples && skill.examples.length > 0 && (
+                                <div className="mt-3">
+                                  <h5 className="text-xs font-medium mb-1">Examples:</h5>
+                                  <div className="space-y-1">
+                                    {skill.examples.slice(0, 3).map((example, exampleIndex) => (
+                                      <div
+                                        key={exampleIndex}
+                                        className="text-xs text-muted-foreground bg-muted/50 p-2 rounded italic"
+                                      >
+                                        &ldquo;{example}&rdquo;
+                                      </div>
+                                    ))}
+                                    {skill.examples.length > 3 && (
+                                      <div className="text-xs text-muted-foreground text-center py-1">
+                                        ... and {skill.examples.length - 3} more examples
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+
+                              <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
+                                {skill.inputModes && skill.inputModes.length > 0 && (
+                                  <div>
+                                    <span className="font-medium">Input:</span>
+                                    <div className="flex flex-wrap gap-1 mt-1">
+                                      {skill.inputModes.map((mode, modeIndex) => (
+                                        <Badge
+                                          key={modeIndex}
+                                          variant="outline"
+                                          className="text-xs"
+                                        >
+                                          {mode}
+                                        </Badge>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                                {skill.outputModes && skill.outputModes.length > 0 && (
+                                  <div>
+                                    <span className="font-medium">Output:</span>
+                                    <div className="flex flex-wrap gap-1 mt-1">
+                                      {skill.outputModes.map((mode, modeIndex) => (
+                                        <Badge
+                                          key={modeIndex}
+                                          variant="outline"
+                                          className="text-xs"
+                                        >
+                                          {mode}
+                                        </Badge>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </CardHeader>
+                          </Card>
+                        ))}
+
+                        {(!selectedAgent.skills || selectedAgent.skills.length === 0) && (
+                          <div className="text-center py-8 text-muted-foreground">
+                            <Info className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                            <p className="text-sm">No skills configured for this agent</p>
+                          </div>
                         )}
                       </div>
                     </div>
