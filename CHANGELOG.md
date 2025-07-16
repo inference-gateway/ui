@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.1-rc.1](https://github.com/inference-gateway/ui/compare/v0.8.0...v0.8.1-rc.1) (2025-07-16)
+
+### 🐛 Bug Fixes
+
+* Simplify Docker image build process ([9f07c19](https://github.com/inference-gateway/ui/commit/9f07c192f9523709d6ee0fefb6c2db529c7e2be7))
+
+### 👷 CI
+
+* Add Claude GitHub Actions workflows for automated code review and assistance ([#46](https://github.com/inference-gateway/ui/issues/46)) ([ce693d4](https://github.com/inference-gateway/ui/commit/ce693d44463207b073c45187652bb3004af92d9b))
+
+### 📚 Documentation
+
+* Add CLAUDE.md guidance file for Claude Code development ([#45](https://github.com/inference-gateway/ui/issues/45)) ([bf0e7c2](https://github.com/inference-gateway/ui/commit/bf0e7c2a59409be4875a5c9f9d2c4589e4086454))
+
 ## [0.8.0](https://github.com/inference-gateway/ui/compare/v0.7.1...v0.8.0) (2025-06-02)
 
 ### ✨ Features
