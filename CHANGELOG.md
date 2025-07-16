@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.1-rc.4](https://github.com/inference-gateway/ui/compare/v0.8.1-rc.3...v0.8.1-rc.4) (2025-07-16)
+
+### 🐛 Bug Fixes
+
+* Add some debugging messages ([88b932c](https://github.com/inference-gateway/ui/commit/88b932cc6f8027905e167fe4e78ba39617a17a95))
+
 ## [0.8.1-rc.3](https://github.com/inference-gateway/ui/compare/v0.8.1-rc.2...v0.8.1-rc.3) (2025-07-16)
 
 ### 🐛 Bug Fixes
