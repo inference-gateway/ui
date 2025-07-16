@@ -97,6 +97,8 @@ jobs:
             amd64_tag="$tag-amd64"
             arm64_tag="$tag-arm64"
             
+            docker manifest rm "$tag" 2>/dev/null || true
+            
             docker manifest create "$tag" "$amd64_tag" "$arm64_tag"
             docker manifest push "$tag"
             
