@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.1-rc.2](https://github.com/inference-gateway/ui/compare/v0.8.1-rc.1...v0.8.1-rc.2) (2025-07-16)
+
+### 🐛 Bug Fixes
+
+* Back to the original solution, avoid cross-compilation and emulators - use native github runners to build it natively for arm64 and amd64 ([eaf8bb1](https://github.com/inference-gateway/ui/commit/eaf8bb1c7fd0696ddf3b645eb4a584151015ce36))
+
 ## [0.8.1-rc.1](https://github.com/inference-gateway/ui/compare/v0.8.0...v0.8.1-rc.1) (2025-07-16)
 
 ### 🐛 Bug Fixes
