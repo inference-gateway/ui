@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.1-rc.5](https://github.com/inference-gateway/ui/compare/v0.8.1-rc.4...v0.8.1-rc.5) (2025-07-16)
+
+### 🐛 Bug Fixes
+
+* Improve Docker manifest creation process and error handling ([209afa6](https://github.com/inference-gateway/ui/commit/209afa6eb2b87848575fd6941c4cb7feec71ad6f))
+
 ## [0.8.1-rc.4](https://github.com/inference-gateway/ui/compare/v0.8.1-rc.3...v0.8.1-rc.4) (2025-07-16)
 
 ### 🐛 Bug Fixes
