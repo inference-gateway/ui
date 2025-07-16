@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.1-rc.6](https://github.com/inference-gateway/ui/compare/v0.8.1-rc.5...v0.8.1-rc.6) (2025-07-16)
+
+### 🐛 Bug Fixes
+
+* Remove existing Docker manifest before creating a new one ([c490df6](https://github.com/inference-gateway/ui/commit/c490df6dc7d47bb384a0252398dc70934152b915))
+
 ## [0.8.1-rc.5](https://github.com/inference-gateway/ui/compare/v0.8.1-rc.4...v0.8.1-rc.5) (2025-07-16)
 
 ### 🐛 Bug Fixes
