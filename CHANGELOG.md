@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.1-rc.3](https://github.com/inference-gateway/ui/compare/v0.8.1-rc.2...v0.8.1-rc.3) (2025-07-16)
+
+### 🐛 Bug Fixes
+
+* Correct runner name for ARM architecture in GitHub Actions workflow ([2afaf15](https://github.com/inference-gateway/ui/commit/2afaf15753b61b4a4ab1d61c625cc8896b4e7d6f))
+
 ## [0.8.1-rc.2](https://github.com/inference-gateway/ui/compare/v0.8.1-rc.1...v0.8.1-rc.2) (2025-07-16)
 
 ### 🐛 Bug Fixes
