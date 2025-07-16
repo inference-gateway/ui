@@ -70,7 +70,9 @@ export default function ToolCallBubble({ toolCalls }: ToolCallBubbleProps) {
                 className="bg-[hsl(var(--thinking-bubble-content-bg))] border border-[hsl(var(--thinking-bubble-content-border))] rounded-lg shadow-sm"
               >
                 <button
-                  onClick={() => toggleToolExpanded(toolCall.id || `${toolCall.function.name}-${index}`)}
+                  onClick={() =>
+                    toggleToolExpanded(toolCall.id || `${toolCall.function.name}-${index}`)
+                  }
                   className="w-full flex items-center justify-between p-3 hover:bg-[hsl(var(--thinking-bubble-hover-bg))] transition-colors duration-200"
                 >
                   <div className="flex items-center gap-2">
