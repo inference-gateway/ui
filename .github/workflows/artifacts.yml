@@ -14,14 +14,7 @@ permissions:
 jobs:
   containers:
     name: Build and Push Container Images
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-24.04
-            platform: linux/amd64
-          - os: ubuntu-24.04-arm
-            platform: linux/arm64
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
@@ -49,13 +42,13 @@ jobs:
             type=sha,format=long
             type=raw,value=latest,enable=${{ !contains(github.ref, '-rc') }}
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+      - name: Build and push multi-architecture Docker image
+        uses: docker/build-push-action@v6
         with:
           context: .
           target: prod
           push: true
-          platforms: ${{ matrix.platform }}
+          platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
