@@ -13,25 +13,19 @@ permissions:
 
 jobs:
   containers:
-    name: Build and Push Container Images
-    runs-on: ${{ matrix.runner }}
-    strategy:
-      matrix:
-        include:
-          - runner: ubuntu-24.04
-            platform: linux/amd64
-            arch: amd64
-          - runner: ubuntu-24.04-arm
-            platform: linux/arm64
-            arch: arm64
+    name: Build and Push Multi-Architecture Container Images
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
         with:
           persist-credentials: false
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3.6.0
+
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3.10.0
+        uses: docker/setup-buildx-action@v3.11.1
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3.4.0
@@ -46,69 +40,27 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=semver,pattern={{version}},suffix=-${{ matrix.arch }}
-            type=semver,pattern={{major}}.{{minor}},suffix=-${{ matrix.arch }}
-            type=sha,format=long,suffix=-${{ matrix.arch }}
-            type=raw,value=latest,suffix=-${{ matrix.arch }},enable=${{ !contains(github.ref, '-rc') }}
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: prod
-          push: true
-          platforms: ${{ matrix.platform }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  create_manifest:
-    name: Create Multi-Architecture Manifest
-    runs-on: ubuntu-24.04
-    needs: containers
-    steps:
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3.4.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata for manifest
-        id: meta
-        uses: docker/metadata-action@v5.7.0
-        with:
-          images: ghcr.io/${{ github.repository }}
-          tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=sha,format=long
             type=raw,value=latest,enable=${{ !contains(github.ref, '-rc') }}
 
-      - name: Create and push manifest
-        run: |
-          set -e
-          export DOCKER_CLI_EXPERIMENTAL=enabled
-          echo "Creating manifests for tags: ${{ steps.meta.outputs.tags }}"
-          for tag in $(echo "${{ steps.meta.outputs.tags }}" | tr '\n' ' '); do
-            echo "Creating manifest for: $tag"
-            
-            amd64_tag="$tag-amd64"
-            arm64_tag="$tag-arm64"
-            
-            docker manifest rm "$tag" 2>/dev/null || true
-            
-            docker manifest create "$tag" "$amd64_tag" "$arm64_tag"
-            docker manifest push "$tag"
-            
-            echo "Manifest pushed successfully"
-          done
+      - name: Build and push multi-arch Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: prod
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   sign_containers:
     name: Sign Container Images
     runs-on: ubuntu-24.04
-    needs: create_manifest
+    needs: containers
     steps:
       - name: Install cosign
         uses: sigstore/cosign-installer@v3.8.1
@@ -142,7 +94,7 @@ jobs:
   charts:
     name: Publish Helm Chart
     runs-on: ubuntu-24.04
-    needs: create_manifest
+    needs: containers
     env:
       TAG: ${{ github.event.release.tag_name }}
     steps:
