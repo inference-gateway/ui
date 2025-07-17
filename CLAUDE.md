@@ -4,6 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
+- `npm run prepare` - Always run this first to set up the project with pre-commit hooks
 - `npm run dev` - Start the development server (http://localhost:3000)
 - `npm run build` - Build the application for production
 - `npm run start` - Start the production server
