@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const inferenceGatewayUrl = process.env.INFERENCE_GATEWAY_URL || 'http://localhost:8080/v1';
-    const url = `${inferenceGatewayUrl}/a2a/agents`;
+    const inferenceGatewayUrl = process.env.INFERENCE_GATEWAY_URL || 'http://localhost:8080';
+    const url = `${inferenceGatewayUrl}/v1/a2a/agents`;
 
     const response = await fetch(url, {
       method: 'GET',

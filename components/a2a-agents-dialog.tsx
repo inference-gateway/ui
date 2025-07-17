@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -14,6 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Input } from '@/components/ui/input';
 import {
   RefreshCw,
   Bot,
@@ -30,6 +31,7 @@ import {
   ArrowRight,
   ArrowLeft,
   Sparkles,
+  Search,
 } from 'lucide-react';
 import type { A2AAgent, A2ASkill } from '@/types/a2a';
 
@@ -51,9 +53,24 @@ export function A2AAgentsDialog({
   onRefreshAction,
 }: A2AAgentsDialogProps) {
   const [selectedAgent, setSelectedAgent] = useState<A2AAgent | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const availableAgents = agents.filter(agent => agent.status === 'available');
-  const unavailableAgents = agents.filter(agent => agent.status !== 'available');
+  const filteredAgents = useMemo(() => {
+    if (!searchQuery.trim()) return agents;
+    
+    const query = searchQuery.toLowerCase();
+    return agents.filter(agent => 
+      agent.name.toLowerCase().includes(query) ||
+      agent.description.toLowerCase().includes(query) ||
+      agent.skills?.some(skill => 
+        skill.name.toLowerCase().includes(query) ||
+        skill.description.toLowerCase().includes(query)
+      )
+    );
+  }, [agents, searchQuery]);
+
+  const availableAgents = filteredAgents.filter(agent => agent.status === 'available');
+  const unavailableAgents = filteredAgents.filter(agent => agent.status !== 'available');
 
   const getStatusIcon = (status: A2AAgent['status']) => {
     switch (status) {
@@ -111,9 +128,21 @@ export function A2AAgentsDialog({
           </DialogDescription>
         </DialogHeader>
 
+        {/* Search Input */}
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search agents by name, description, or skills..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+            aria-label="Search A2A agents"
+          />
+        </div>
+
         <div className="flex gap-4 h-[60vh]">
           {/* Agent List */}
-          <div className="flex-1">
+          <div className="flex-1" role="listbox" aria-label="A2A agents list">
             <ScrollArea className="h-full">
               {error && (
                 <Alert className="mb-4">
@@ -141,10 +170,20 @@ export function A2AAgentsDialog({
                 {availableAgents.map(agent => (
                   <Card
                     key={agent.id}
-                    className={`cursor-pointer transition-colors hover:bg-muted/50 ${
+                    className={`cursor-pointer transition-colors hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-primary ${
                       selectedAgent?.id === agent.id ? 'ring-2 ring-primary' : ''
                     }`}
                     onClick={() => setSelectedAgent(agent)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setSelectedAgent(agent);
+                      }
+                    }}
+                    tabIndex={0}
+                    role="option"
+                    aria-selected={selectedAgent?.id === agent.id}
+                    aria-label={`Select ${agent.name} agent`}
                   >
                     <CardHeader className="pb-2">
                       <div className="flex items-center justify-between">
@@ -182,10 +221,20 @@ export function A2AAgentsDialog({
                 {unavailableAgents.map(agent => (
                   <Card
                     key={agent.id}
-                    className={`cursor-pointer transition-colors hover:bg-muted/50 opacity-60 ${
+                    className={`cursor-pointer transition-colors hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-primary opacity-60 ${
                       selectedAgent?.id === agent.id ? 'ring-2 ring-primary' : ''
                     }`}
                     onClick={() => setSelectedAgent(agent)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setSelectedAgent(agent);
+                      }
+                    }}
+                    tabIndex={0}
+                    role="option"
+                    aria-selected={selectedAgent?.id === agent.id}
+                    aria-label={`Select ${agent.name} agent (unavailable)`}
                   >
                     <CardHeader className="pb-2">
                       <div className="flex items-center justify-between">
@@ -242,9 +291,10 @@ export function A2AAgentsDialog({
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-xs text-primary hover:underline flex items-center gap-1"
+                            aria-label={`Visit ${selectedAgent.provider.organization} website (opens in new tab)`}
                           >
                             {selectedAgent.provider.organization}
-                            <ExternalLink className="h-3 w-3" />
+                            <ExternalLink className="h-3 w-3" aria-hidden="true" />
                           </a>
                         </div>
                       )}
@@ -272,8 +322,9 @@ export function A2AAgentsDialog({
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-primary hover:underline flex items-center gap-1"
+                            aria-label={`Visit ${selectedAgent.name} homepage (opens in new tab)`}
                           >
-                            <ExternalLink className="h-3 w-3" />
+                            <ExternalLink className="h-3 w-3" aria-hidden="true" />
                             Link
                           </a>
                         </div>

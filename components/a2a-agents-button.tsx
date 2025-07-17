@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Bot, Loader2 } from 'lucide-react';
 import { fetchA2AAgents } from '@/lib/api';
 import { A2AAgentsDialog } from './a2a-agents-dialog';
+import { A2AErrorBoundary } from './a2a-error-boundary';
 import type { A2AAgent } from '@/types/a2a';
 
 export function A2AAgentsButton() {
@@ -16,29 +17,29 @@ export function A2AAgentsButton() {
 
   const availableAgents = agents.filter(agent => agent.status === 'available');
 
-  useEffect(() => {
-    const loadAgents = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const response = await fetchA2AAgents();
-        setAgents(response.data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load A2A agents');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadAgents();
+  const loadAgents = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await fetchA2AAgents();
+      setAgents(response.data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load A2A agents');
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadAgents();
+  }, [loadAgents]);
 
   const handleClick = () => {
     setDialogOpen(true);
   };
 
   return (
-    <>
+    <A2AErrorBoundary>
       <Button
         variant="outline"
         size="sm"
@@ -66,22 +67,8 @@ export function A2AAgentsButton() {
         agents={agents}
         isLoading={isLoading}
         error={error}
-        onRefreshAction={() => {
-          const loadAgents = async () => {
-            try {
-              setIsLoading(true);
-              setError(null);
-              const response = await fetchA2AAgents();
-              setAgents(response.data);
-            } catch (err) {
-              setError(err instanceof Error ? err.message : 'Failed to load A2A agents');
-            } finally {
-              setIsLoading(false);
-            }
-          };
-          loadAgents();
-        }}
+        onRefreshAction={loadAgents}
       />
-    </>
+    </A2AErrorBoundary>
   );
 }

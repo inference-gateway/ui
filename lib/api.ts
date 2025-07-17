@@ -59,7 +59,7 @@ export async function fetchA2AAgents(session?: Session): Promise<A2AAgentsRespon
 
   const transformedAgents = data.data.map((agent: A2AAgent) => ({
     ...agent,
-    status: 'available' as const,
+    status: agent.status || 'available' as const,
 
     capabilities: {
       skills: agent.skills || agent.capabilities?.skills || [],
