@@ -58,7 +58,7 @@ export function A2AAgentsDialog({
   const filteredAgents = useMemo(() => {
     if (!searchQuery.trim()) return agents;
 
-    const query = searchQuery.toLowerCase().trim();
+    const query = searchQuery.toLowerCase();
     return agents.filter(
       agent =>
         agent.name.toLowerCase().includes(query) ||
@@ -71,15 +71,8 @@ export function A2AAgentsDialog({
     );
   }, [agents, searchQuery]);
 
-  const availableAgents = useMemo(() => 
-    filteredAgents.filter(agent => agent.status === 'available'),
-    [filteredAgents]
-  );
-  
-  const unavailableAgents = useMemo(() => 
-    filteredAgents.filter(agent => agent.status !== 'available'),
-    [filteredAgents]
-  );
+  const availableAgents = filteredAgents.filter(agent => agent.status === 'available');
+  const unavailableAgents = filteredAgents.filter(agent => agent.status !== 'available');
 
   const getStatusIcon = (status: A2AAgent['status']) => {
     switch (status) {
