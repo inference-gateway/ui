@@ -50,21 +50,14 @@ export class A2AErrorBoundary extends Component<Props, State> {
               </p>
               {this.state.error && (
                 <details className="mt-2 text-xs">
-                  <summary className="cursor-pointer hover:text-foreground">
-                    Error details
-                  </summary>
+                  <summary className="cursor-pointer hover:text-foreground">Error details</summary>
                   <pre className="mt-1 p-2 bg-muted rounded text-xs overflow-auto">
                     {this.state.error.message}
                   </pre>
                 </details>
               )}
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={this.handleRetry}
-              className="ml-4 gap-2"
-            >
+            <Button variant="outline" size="sm" onClick={this.handleRetry} className="ml-4 gap-2">
               <RefreshCw className="h-4 w-4" />
               Retry
             </Button>

@@ -57,15 +57,17 @@ export function A2AAgentsDialog({
 
   const filteredAgents = useMemo(() => {
     if (!searchQuery.trim()) return agents;
-    
+
     const query = searchQuery.toLowerCase();
-    return agents.filter(agent => 
-      agent.name.toLowerCase().includes(query) ||
-      agent.description.toLowerCase().includes(query) ||
-      agent.skills?.some(skill => 
-        skill.name.toLowerCase().includes(query) ||
-        skill.description.toLowerCase().includes(query)
-      )
+    return agents.filter(
+      agent =>
+        agent.name.toLowerCase().includes(query) ||
+        agent.description.toLowerCase().includes(query) ||
+        agent.skills?.some(
+          skill =>
+            skill.name.toLowerCase().includes(query) ||
+            skill.description.toLowerCase().includes(query)
+        )
     );
   }, [agents, searchQuery]);
 
@@ -134,7 +136,7 @@ export function A2AAgentsDialog({
           <Input
             placeholder="Search agents by name, description, or skills..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={e => setSearchQuery(e.target.value)}
             className="pl-10"
             aria-label="Search A2A agents"
           />
@@ -174,7 +176,7 @@ export function A2AAgentsDialog({
                       selectedAgent?.id === agent.id ? 'ring-2 ring-primary' : ''
                     }`}
                     onClick={() => setSelectedAgent(agent)}
-                    onKeyDown={(e) => {
+                    onKeyDown={e => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         setSelectedAgent(agent);
@@ -225,7 +227,7 @@ export function A2AAgentsDialog({
                       selectedAgent?.id === agent.id ? 'ring-2 ring-primary' : ''
                     }`}
                     onClick={() => setSelectedAgent(agent)}
-                    onKeyDown={(e) => {
+                    onKeyDown={e => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         setSelectedAgent(agent);
