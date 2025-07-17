@@ -17,26 +17,53 @@ export function A2AAgentsButton() {
 
   const availableAgents = agents.filter(agent => agent.status === 'available');
 
-  const loadAgents = useCallback(async () => {
+  const loadAgents = useCallback(async (signal?: AbortSignal) => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await fetchA2AAgents();
+      
+      // Pass AbortSignal to fetchA2AAgents
+      const response = await fetchA2AAgents(undefined, signal);
+      
+      // Check if request was aborted before updating state
+      if (signal?.aborted) {
+        return;
+      }
+      
       setAgents(response.data);
     } catch (err) {
+      // Don't set error if request was aborted
+      if (signal?.aborted) {
+        return;
+      }
       setError(err instanceof Error ? err.message : 'Failed to load A2A agents');
     } finally {
-      setIsLoading(false);
+      // Don't update loading state if request was aborted
+      if (!signal?.aborted) {
+        setIsLoading(false);
+      }
     }
   }, []);
 
   useEffect(() => {
-    loadAgents();
+    const abortController = new AbortController();
+    loadAgents(abortController.signal);
+    
+    // Cleanup function to cancel ongoing requests
+    return () => {
+      abortController.abort();
+    };
   }, [loadAgents]);
 
   const handleClick = () => {
     setDialogOpen(true);
   };
+
+  const handleRefresh = useCallback(() => {
+    // Create a new AbortController for manual refresh
+    const abortController = new AbortController();
+    loadAgents(abortController.signal);
+  }, [loadAgents]);
 
   return (
     <A2AErrorBoundary>
@@ -67,7 +94,7 @@ export function A2AAgentsButton() {
         agents={agents}
         isLoading={isLoading}
         error={error}
-        onRefreshAction={loadAgents}
+        onRefreshAction={handleRefresh}
       />
     </A2AErrorBoundary>
   );

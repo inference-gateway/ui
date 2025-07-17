@@ -40,7 +40,7 @@ export async function fetchMCPTools(session?: Session): Promise<ListToolsRespons
   return response.json();
 }
 
-export async function fetchA2AAgents(session?: Session): Promise<A2AAgentsResponse> {
+export async function fetchA2AAgents(session?: Session, signal?: AbortSignal): Promise<A2AAgentsResponse> {
   const headers: Record<string, string> = {};
 
   if (session?.accessToken) {
@@ -49,6 +49,7 @@ export async function fetchA2AAgents(session?: Session): Promise<A2AAgentsRespon
 
   const response = await fetch('/api/v1/a2a/agents', {
     headers,
+    signal,
   });
 
   if (!response.ok) {
@@ -59,7 +60,8 @@ export async function fetchA2AAgents(session?: Session): Promise<A2AAgentsRespon
 
   const transformedAgents = data.data.map((agent: A2AAgent) => ({
     ...agent,
-    status: agent.status || ('available' as const),
+    // Use actual status from API response, don't default to 'available'
+    status: agent.status,
 
     capabilities: {
       skills: agent.skills || agent.capabilities?.skills || [],
@@ -68,14 +70,8 @@ export async function fetchA2AAgents(session?: Session): Promise<A2AAgentsRespon
       stateTransitionHistory: agent.capabilities?.stateTransitionHistory || false,
       streaming: agent.capabilities?.streaming || false,
     },
-    endpoints: [
-      {
-        name: 'agent',
-        method: 'POST' as const,
-        path: '/api',
-        description: 'Main agent endpoint',
-      },
-    ],
+    // Use actual endpoints from API response if available, otherwise omit
+    ...(agent.endpoints && { endpoints: agent.endpoints }),
   }));
 
   return {

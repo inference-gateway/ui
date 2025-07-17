@@ -58,17 +58,24 @@ export function A2AAgentsDialog({
   const filteredAgents = useMemo(() => {
     if (!searchQuery.trim()) return agents;
 
-    const query = searchQuery.toLowerCase();
-    return agents.filter(
-      agent =>
-        agent.name.toLowerCase().includes(query) ||
-        agent.description.toLowerCase().includes(query) ||
-        agent.skills?.some(
-          skill =>
-            skill.name.toLowerCase().includes(query) ||
-            skill.description.toLowerCase().includes(query)
-        )
-    );
+    const query = searchQuery.toLowerCase().trim();
+    return agents.filter(agent => {
+      // Check agent name and description
+      if (agent.name.toLowerCase().includes(query) || 
+          agent.description.toLowerCase().includes(query)) {
+        return true;
+      }
+      
+      // Check skills if they exist
+      if (agent.skills && agent.skills.length > 0) {
+        return agent.skills.some(skill =>
+          skill.name.toLowerCase().includes(query) ||
+          skill.description.toLowerCase().includes(query)
+        );
+      }
+      
+      return false;
+    });
   }, [agents, searchQuery]);
 
   const availableAgents = filteredAgents.filter(agent => agent.status === 'available');
