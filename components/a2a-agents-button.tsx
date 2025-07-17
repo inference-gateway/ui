@@ -21,24 +21,20 @@ export function A2AAgentsButton() {
     try {
       setIsLoading(true);
       setError(null);
-      
-      // Pass AbortSignal to fetchA2AAgents
+
       const response = await fetchA2AAgents(undefined, signal);
-      
-      // Check if request was aborted before updating state
+
       if (signal?.aborted) {
         return;
       }
-      
+
       setAgents(response.data);
     } catch (err) {
-      // Don't set error if request was aborted
       if (signal?.aborted) {
         return;
       }
       setError(err instanceof Error ? err.message : 'Failed to load A2A agents');
     } finally {
-      // Don't update loading state if request was aborted
       if (!signal?.aborted) {
         setIsLoading(false);
       }
@@ -48,8 +44,7 @@ export function A2AAgentsButton() {
   useEffect(() => {
     const abortController = new AbortController();
     loadAgents(abortController.signal);
-    
-    // Cleanup function to cancel ongoing requests
+
     return () => {
       abortController.abort();
     };

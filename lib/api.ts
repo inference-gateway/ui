@@ -40,7 +40,10 @@ export async function fetchMCPTools(session?: Session): Promise<ListToolsRespons
   return response.json();
 }
 
-export async function fetchA2AAgents(session?: Session, signal?: AbortSignal): Promise<A2AAgentsResponse> {
+export async function fetchA2AAgents(
+  session?: Session,
+  signal?: AbortSignal
+): Promise<A2AAgentsResponse> {
   const headers: Record<string, string> = {};
 
   if (session?.accessToken) {
@@ -60,8 +63,7 @@ export async function fetchA2AAgents(session?: Session, signal?: AbortSignal): P
 
   const transformedAgents = data.data.map((agent: A2AAgent) => ({
     ...agent,
-    // Use actual status from API response, don't default to 'available'
-    status: agent.status,
+    status: agent.status || 'available', // TODO - get an actual status from the inference gateway, the inference gateway should continuously check the status of the agents
 
     capabilities: {
       extensions: agent.capabilities?.extensions || [],
@@ -69,7 +71,6 @@ export async function fetchA2AAgents(session?: Session, signal?: AbortSignal): P
       stateTransitionHistory: agent.capabilities?.stateTransitionHistory || false,
       streaming: agent.capabilities?.streaming || false,
     },
-    // Skills are separate from capabilities according to A2A spec
     skills: agent.skills || [],
   }));
 

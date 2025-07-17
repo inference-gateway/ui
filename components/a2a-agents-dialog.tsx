@@ -60,19 +60,21 @@ export function A2AAgentsDialog({
 
     const query = searchQuery.toLowerCase().trim();
     return agents.filter(agent => {
-      if (agent.name.toLowerCase().includes(query) || 
-          agent.description.toLowerCase().includes(query)) {
+      if (
+        agent.name.toLowerCase().includes(query) ||
+        agent.description.toLowerCase().includes(query)
+      ) {
         return true;
       }
-      
-      // Check skills if they exist
+
       if (agent.skills && agent.skills.length > 0) {
-        return agent.skills.some(skill =>
-          skill.name.toLowerCase().includes(query) ||
-          skill.description.toLowerCase().includes(query)
+        return agent.skills.some(
+          skill =>
+            skill.name.toLowerCase().includes(query) ||
+            skill.description.toLowerCase().includes(query)
         );
       }
-      
+
       return false;
     });
   }, [agents, searchQuery]);
