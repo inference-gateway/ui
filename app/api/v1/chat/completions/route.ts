@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Streaming is required' }, { status: 400 });
   }
 
-  const backendResponse = await fetch(gatewayUrl + '/chat/completions', {
+  const backendResponse = await fetch(gatewayUrl + '/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'text/event-stream',

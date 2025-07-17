@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, ArrowLeft, Wrench, CheckCircle, XCircle } from 'lucide-react';
+import { ChevronDown, ChevronUp, ArrowLeft, Wrench, CheckCircle, XCircle, Bot } from 'lucide-react';
 import { CodeBlock } from './code-block';
 import logger from '@/lib/logger';
-import { isMCPTool } from '@/lib/tools';
+import { isMCPTool, isA2ATool } from '@/lib/tools';
 
 interface ToolResponse {
   query: string;
@@ -37,12 +37,13 @@ export default function ToolResponseBubble({ response, toolName }: ToolResponseB
   }
 
   const isMCP = isMCPTool(toolName || '');
+  const isA2A = isA2ATool(toolName || '');
   let formattedResponse = null;
   let mcpResponse: MCPToolResponse | null = null;
   let isError = false;
 
   try {
-    if (isMCP) {
+    if (isMCP || isA2A) {
       try {
         mcpResponse = JSON.parse(response) as MCPToolResponse;
         isError = mcpResponse.isError || false;
@@ -87,6 +88,7 @@ export default function ToolResponseBubble({ response, toolName }: ToolResponseB
         >
           <div className="flex items-center gap-1">
             <ArrowLeft className="h-3 w-3" />
+            {isA2A && <Bot className="h-3 w-3 text-purple-500" />}
             {isMCP && <Wrench className="h-3 w-3 text-blue-500" />}
             {isError ? (
               <XCircle className="h-3 w-3 text-red-500" />
@@ -96,6 +98,11 @@ export default function ToolResponseBubble({ response, toolName }: ToolResponseB
           </div>
           <span>
             {toolName ? `${toolName} Response` : 'Tool Response'}
+            {isA2A && (
+              <span className="ml-1 text-xs px-1 py-0.5 bg-purple-100 text-purple-800 rounded">
+                A2A
+              </span>
+            )}
             {isMCP && (
               <span className="ml-1 text-xs px-1 py-0.5 bg-blue-100 text-blue-800 rounded">
                 MCP
@@ -120,6 +127,12 @@ export default function ToolResponseBubble({ response, toolName }: ToolResponseB
           }`}
         >
           <div className="space-y-2">
+            {isA2A && !isError && (
+              <div className="text-xs text-green-600 font-medium flex items-center gap-1">
+                <CheckCircle className="h-3 w-3" />
+                A2A Tool executed successfully
+              </div>
+            )}
             {isMCP && !isError && (
               <div className="text-xs text-green-600 font-medium flex items-center gap-1">
                 <CheckCircle className="h-3 w-3" />
@@ -128,7 +141,7 @@ export default function ToolResponseBubble({ response, toolName }: ToolResponseB
             )}
 
             <div className="overflow-x-auto">
-              {isMCP && formattedResponse && !formattedResponse.startsWith('{') ? (
+              {(isMCP || isA2A) && formattedResponse && !formattedResponse.startsWith('{') ? (
                 <div className="text-sm whitespace-pre-wrap font-mono bg-[hsl(var(--thinking-bubble-bg))] p-3 rounded border">
                   {formattedResponse}
                 </div>

@@ -4,6 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
+- `npm run prepare` - Always run this first to set up the project with pre-commit hooks
 - `npm run dev` - Start the development server (http://localhost:3000)
 - `npm run build` - Build the application for production
 - `npm run start` - Start the production server
@@ -89,7 +90,7 @@ Authentication is optional and controlled by `ENABLE_AUTH` environment variable.
 
 Key environment variables for development:
 
-- `INFERENCE_GATEWAY_URL` - Backend API URL (default: http://localhost:8080/v1)
+- `INFERENCE_GATEWAY_URL` - Backend API URL (default: http://localhost:8080)
 - `ENABLE_AUTH` - Enable authentication (default: false)
 - `NEXT_PUBLIC_LOG_LEVEL` - Client-side logging level
 - `LOG_LEVEL` - Server-side logging level

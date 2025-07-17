@@ -16,6 +16,16 @@ interface PageContent {
 }
 
 const BUILTIN_TOOLS = ['web_search', 'fetch_page'];
+const A2A_TOOLS = ['query_a2a_agent_card', 'submit_task_to_agent'];
+
+/**
+ * Centralized function to detect if a tool is an A2A (Agent-to-Agent) tool
+ * @param toolName - The name of the tool to check
+ * @returns true if the tool is an A2A tool, false otherwise
+ */
+export const isA2ATool = (toolName: string): boolean => {
+  return A2A_TOOLS.includes(toolName);
+};
 
 /**
  * Centralized function to detect if a tool is an MCP tool
@@ -28,7 +38,7 @@ export const isMCPTool = (toolName: string, tools?: SchemaChatCompletionTool[]):
     return !tools.some(tool => tool.function.name === toolName);
   }
 
-  return !BUILTIN_TOOLS.includes(toolName);
+  return !BUILTIN_TOOLS.includes(toolName) && !A2A_TOOLS.includes(toolName);
 };
 
 export const WebSearchTool: SchemaChatCompletionTool = {

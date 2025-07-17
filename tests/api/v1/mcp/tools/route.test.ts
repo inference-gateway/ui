@@ -232,7 +232,7 @@ describe('/api/v1/mcp/tools GET', () => {
       await GET();
 
       expect(mockInferenceGatewayClient).toHaveBeenCalledWith({
-        baseURL: 'http://localhost:8080',
+        baseURL: 'http://localhost:8080/v1',
         fetch: expect.any(Function),
       });
     });
