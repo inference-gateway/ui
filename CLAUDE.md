@@ -90,7 +90,7 @@ Authentication is optional and controlled by `ENABLE_AUTH` environment variable.
 
 Key environment variables for development:
 
-- `INFERENCE_GATEWAY_URL` - Backend API URL (default: http://localhost:8080/v1)
+- `INFERENCE_GATEWAY_URL` - Backend API URL (default: http://localhost:8080)
 - `ENABLE_AUTH` - Enable authentication (default: false)
 - `NEXT_PUBLIC_LOG_LEVEL` - Client-side logging level
 - `LOG_LEVEL` - Server-side logging level

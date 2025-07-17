@@ -53,8 +53,7 @@ services:
     env_file:
       - .env.gateway
     environment:
-      APP_ENVIRONMENT: production
-      LOG_LEVEL: warn
+      APP_ENVIRONMENT: development
       SERVER_READ_TIMEOUT: 130s
       SERVER_WRITE_TIMEOUT: 130s
       SERVER_IDLE_TIMEOUT: 120s
