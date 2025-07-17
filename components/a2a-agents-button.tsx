@@ -60,7 +60,6 @@ export function A2AAgentsButton() {
   };
 
   const handleRefresh = useCallback(() => {
-    // Create a new AbortController for manual refresh
     const abortController = new AbortController();
     loadAgents(abortController.signal);
   }, [loadAgents]);

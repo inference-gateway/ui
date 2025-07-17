@@ -28,7 +28,6 @@ export interface A2AProvider {
 }
 
 export interface A2ACapabilities {
-  skills?: A2ASkill[];
   extensions?: string[];
   pushNotifications?: boolean;
   stateTransitionHistory?: boolean;

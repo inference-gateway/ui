@@ -64,14 +64,13 @@ export async function fetchA2AAgents(session?: Session, signal?: AbortSignal): P
     status: agent.status,
 
     capabilities: {
-      skills: agent.skills || agent.capabilities?.skills || [],
       extensions: agent.capabilities?.extensions || [],
       pushNotifications: agent.capabilities?.pushNotifications || false,
       stateTransitionHistory: agent.capabilities?.stateTransitionHistory || false,
       streaming: agent.capabilities?.streaming || false,
     },
-    // Use actual endpoints from API response if available, otherwise omit
-    ...(agent.endpoints && { endpoints: agent.endpoints }),
+    // Skills are separate from capabilities according to A2A spec
+    skills: agent.skills || [],
   }));
 
   return {

@@ -60,7 +60,6 @@ export function A2AAgentsDialog({
 
     const query = searchQuery.toLowerCase().trim();
     return agents.filter(agent => {
-      // Check agent name and description
       if (agent.name.toLowerCase().includes(query) || 
           agent.description.toLowerCase().includes(query)) {
         return true;
