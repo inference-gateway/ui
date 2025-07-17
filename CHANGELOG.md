@@ -2,6 +2,70 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.1](https://github.com/inference-gateway/ui/compare/v0.8.0...v0.8.1) (2025-07-17)
+
+### 🐛 Bug Fixes
+
+* Simplify Docker image build process using QEMU for multi-arch ([#47](https://github.com/inference-gateway/ui/issues/47)) ([67a3cc2](https://github.com/inference-gateway/ui/commit/67a3cc24a59078335211c967876b6f2332e17368)), closes [#48](https://github.com/inference-gateway/ui/issues/48)
+
+### 👷 CI
+
+* Add Claude GitHub Actions workflows for automated code review and assistance ([#46](https://github.com/inference-gateway/ui/issues/46)) ([ce693d4](https://github.com/inference-gateway/ui/commit/ce693d44463207b073c45187652bb3004af92d9b))
+
+### 📚 Documentation
+
+* Add CLAUDE.md guidance file for Claude Code development ([#45](https://github.com/inference-gateway/ui/issues/45)) ([bf0e7c2](https://github.com/inference-gateway/ui/commit/bf0e7c2a59409be4875a5c9f9d2c4589e4086454))
+
+## [0.8.1-rc.7](https://github.com/inference-gateway/ui/compare/v0.8.1-rc.6...v0.8.1-rc.7) (2025-07-17)
+
+### 🐛 Bug Fixes
+
+* Refactor GitHub Actions workflow for multi-architecture container builds ([9b91eb6](https://github.com/inference-gateway/ui/commit/9b91eb66986497cf91a2bbead581870259db82df))
+
+## [0.8.1-rc.6](https://github.com/inference-gateway/ui/compare/v0.8.1-rc.5...v0.8.1-rc.6) (2025-07-16)
+
+### 🐛 Bug Fixes
+
+* Remove existing Docker manifest before creating a new one ([c490df6](https://github.com/inference-gateway/ui/commit/c490df6dc7d47bb384a0252398dc70934152b915))
+
+## [0.8.1-rc.5](https://github.com/inference-gateway/ui/compare/v0.8.1-rc.4...v0.8.1-rc.5) (2025-07-16)
+
+### 🐛 Bug Fixes
+
+* Improve Docker manifest creation process and error handling ([209afa6](https://github.com/inference-gateway/ui/commit/209afa6eb2b87848575fd6941c4cb7feec71ad6f))
+
+## [0.8.1-rc.4](https://github.com/inference-gateway/ui/compare/v0.8.1-rc.3...v0.8.1-rc.4) (2025-07-16)
+
+### 🐛 Bug Fixes
+
+* Add some debugging messages ([88b932c](https://github.com/inference-gateway/ui/commit/88b932cc6f8027905e167fe4e78ba39617a17a95))
+
+## [0.8.1-rc.3](https://github.com/inference-gateway/ui/compare/v0.8.1-rc.2...v0.8.1-rc.3) (2025-07-16)
+
+### 🐛 Bug Fixes
+
+* Correct runner name for ARM architecture in GitHub Actions workflow ([2afaf15](https://github.com/inference-gateway/ui/commit/2afaf15753b61b4a4ab1d61c625cc8896b4e7d6f))
+
+## [0.8.1-rc.2](https://github.com/inference-gateway/ui/compare/v0.8.1-rc.1...v0.8.1-rc.2) (2025-07-16)
+
+### 🐛 Bug Fixes
+
+* Back to the original solution, avoid cross-compilation and emulators - use native github runners to build it natively for arm64 and amd64 ([eaf8bb1](https://github.com/inference-gateway/ui/commit/eaf8bb1c7fd0696ddf3b645eb4a584151015ce36))
+
+## [0.8.1-rc.1](https://github.com/inference-gateway/ui/compare/v0.8.0...v0.8.1-rc.1) (2025-07-16)
+
+### 🐛 Bug Fixes
+
+* Simplify Docker image build process ([9f07c19](https://github.com/inference-gateway/ui/commit/9f07c192f9523709d6ee0fefb6c2db529c7e2be7))
+
+### 👷 CI
+
+* Add Claude GitHub Actions workflows for automated code review and assistance ([#46](https://github.com/inference-gateway/ui/issues/46)) ([ce693d4](https://github.com/inference-gateway/ui/commit/ce693d44463207b073c45187652bb3004af92d9b))
+
+### 📚 Documentation
+
+* Add CLAUDE.md guidance file for Claude Code development ([#45](https://github.com/inference-gateway/ui/issues/45)) ([bf0e7c2](https://github.com/inference-gateway/ui/commit/bf0e7c2a59409be4875a5c9f9d2c4589e4086454))
+
 ## [0.8.0](https://github.com/inference-gateway/ui/compare/v0.7.1...v0.8.0) (2025-06-02)
 
 ### ✨ Features
