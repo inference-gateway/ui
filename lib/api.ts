@@ -3,6 +3,7 @@ import type { ListModelsResponse } from '@/types/model';
 import type { ListToolsResponse } from '@/types/mcp';
 import type { A2AAgentsResponse, A2AAgentDetails, A2AAgent } from '@/types/a2a';
 import { Session } from 'next-auth';
+import { validateA2AAgent, validateA2AAgentDetails } from '@/lib/a2a-validation';
 
 export async function fetchModels(session?: Session): Promise<ListModelsResponse> {
   const headers: Record<string, string> = {};
@@ -57,30 +58,18 @@ export async function fetchA2AAgents(session?: Session): Promise<A2AAgentsRespon
 
   const data = await response.json();
 
-  const transformedAgents = data.data.map((agent: A2AAgent) => ({
-    ...agent,
-    status: agent.status || ('available' as const),
+  if (!data || !Array.isArray(data.data)) {
+    throw new Error('Invalid response format from A2A agents API');
+  }
 
-    capabilities: {
-      skills: agent.skills || agent.capabilities?.skills || [],
-      extensions: agent.capabilities?.extensions || [],
-      pushNotifications: agent.capabilities?.pushNotifications || false,
-      stateTransitionHistory: agent.capabilities?.stateTransitionHistory || false,
-      streaming: agent.capabilities?.streaming || false,
-    },
-    endpoints: [
-      {
-        name: 'agent',
-        method: 'POST' as const,
-        path: '/api',
-        description: 'Main agent endpoint',
-      },
-    ],
-  }));
+  // Validate and sanitize all agents
+  const validatedAgents = data.data
+    .map(agent => validateA2AAgent(agent))
+    .filter((agent): agent is A2AAgent => agent !== null);
 
   return {
-    data: transformedAgents,
-    object: data.object,
+    data: validatedAgents,
+    object: data.object || 'list',
   };
 }
 
@@ -102,7 +91,16 @@ export async function fetchA2AAgentDetails(
     throw new Error(`Failed to fetch A2A agent details: ${response.statusText}`);
   }
 
-  return response.json();
+  const data = await response.json();
+  
+  // Validate and sanitize the agent details
+  const validatedDetails = validateA2AAgentDetails(data);
+  
+  if (!validatedDetails) {
+    throw new Error('Invalid agent details format received from API');
+  }
+
+  return validatedDetails;
 }
 
 type ApiResponse = unknown;

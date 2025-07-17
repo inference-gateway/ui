@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Bot, Loader2 } from 'lucide-react';
@@ -14,24 +14,53 @@ export function A2AAgentsButton() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const availableAgents = agents.filter(agent => agent.status === 'available');
 
   const loadAgents = useCallback(async () => {
+    // Cancel any previous request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new abort controller
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
       setIsLoading(true);
       setError(null);
       const response = await fetchA2AAgents();
+      
+      // Check if request was cancelled
+      if (controller.signal.aborted) {
+        return;
+      }
+
       setAgents(response.data);
     } catch (err) {
+      // Don't show error if request was cancelled
+      if (controller.signal.aborted) {
+        return;
+      }
       setError(err instanceof Error ? err.message : 'Failed to load A2A agents');
     } finally {
-      setIsLoading(false);
+      if (!controller.signal.aborted) {
+        setIsLoading(false);
+      }
     }
   }, []);
 
   useEffect(() => {
     loadAgents();
+    
+    // Cleanup function to cancel ongoing request
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, [loadAgents]);
 
   const handleClick = () => {
@@ -52,7 +81,7 @@ export function A2AAgentsButton() {
             : `${availableAgents.length} A2A agent${availableAgents.length === 1 ? '' : 's'} available`
         }
       >
-        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bot className="h-4 w-4" />}
+        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" data-testid="loading-icon" /> : <Bot className="h-4 w-4" />}
         <span className="text-sm">A2A</span>
         {!isLoading && !error && (
           <Badge variant={availableAgents.length > 0 ? 'default' : 'secondary'} className="ml-1">
