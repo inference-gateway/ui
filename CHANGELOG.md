@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.1-rc.7](https://github.com/inference-gateway/ui/compare/v0.8.1-rc.6...v0.8.1-rc.7) (2025-07-17)
+
+### 🐛 Bug Fixes
+
+* Refactor GitHub Actions workflow for multi-architecture container builds ([9b91eb6](https://github.com/inference-gateway/ui/commit/9b91eb66986497cf91a2bbead581870259db82df))
+
 ## [0.8.1-rc.6](https://github.com/inference-gateway/ui/compare/v0.8.1-rc.5...v0.8.1-rc.6) (2025-07-16)
 
 ### 🐛 Bug Fixes
