@@ -34,4 +34,5 @@ jobs:
             - Test coverage
 
             Be constructive and helpful in your feedback.
-          allowed_tools: "Bash"
+          allowed_tools: |
+            Bash
