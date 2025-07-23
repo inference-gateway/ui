@@ -13,8 +13,9 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { ChatHeader } from '@/components/chat-header';
 import { ChevronLeft, Menu } from 'lucide-react';
 import { Session } from 'next-auth';
-import { Message, MessageRole, ChatSession, StorageType } from '@/types/chat';
+import { Message, MessageRole, ChatSession } from '@/types/chat';
 import { StorageServiceFactory } from '@/lib/storage';
+import { getStorageConfigWithUserId } from '@/lib/storage-config';
 import { WebSearchTool, FetchPageTool } from '@/lib/tools';
 import logger from '@/lib/logger';
 import {
@@ -58,11 +59,9 @@ export default function PageClient({ session }: PageClientProps) {
 
   // Storage service
   const storageService = useMemo(() => {
-    return StorageServiceFactory.createService({
-      storageType: StorageType.LOCAL,
-      userId: undefined,
-    });
-  }, []);
+    const userId = session?.user?.id || session?.user?.email || undefined;
+    return StorageServiceFactory.createService(getStorageConfigWithUserId(userId));
+  }, [session]);
 
   // Initialize API client
   useEffect(() => {

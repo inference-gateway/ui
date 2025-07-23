@@ -31,9 +31,14 @@ export interface StorageService {
 
 export enum StorageType {
   LOCAL = 'local',
+  SUPABASE = 'supabase',
 }
 
 export interface StorageOptions {
   storageType?: StorageType;
   userId?: string;
+  supabase?: {
+    url: string;
+    anonKey: string;
+  };
 }
