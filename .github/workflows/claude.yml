@@ -35,6 +35,12 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4.3.0
+        with:
+          node-version: "22"
+          cache: "npm"
+
       - name: Run Claude Code
         uses: anthropics/claude-code-action@beta
         with:
