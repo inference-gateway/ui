@@ -17,6 +17,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useRef, useState, useEffect, useMemo } from 'react';
 import { TokenUsage } from './token-usage';
 import { MCPToolsButton } from './mcp-tools-button';
+import { A2AAgentsButton } from './a2a-agents-button';
 
 interface CommandOption {
   name: string;
@@ -353,6 +354,7 @@ export function InputArea({
                   </button>
 
                   <MCPToolsButton isMobile={isMobile} />
+                  <A2AAgentsButton />
                 </>
               )}
             </div>

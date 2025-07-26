@@ -1,0 +1,144 @@
+---
+services:
+  inference-gateway-ui:
+    build:
+      context: ../../..
+      target: dev
+      dockerfile: Dockerfile
+    volumes:
+      - ../../..:/app
+    env_file:
+      - .env.ui
+    ports:
+      - "3000:3000"
+    deploy:
+      resources:
+        limits:
+          memory: 1512M
+          cpus: "1"
+        reservations:
+          memory: 256M
+          cpus: "0.15"
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    depends_on:
+      inference-gateway-hc:
+        condition: service_healthy
+      google-calendar-agent-hc:
+        condition: service_healthy
+    networks:
+      - frontend
+      - backend
+
+  inference-gateway-hc:
+    image: curlimages/curl:latest
+    command: ["sh", "-c", "sleep infinity"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://inference-gateway:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      inference-gateway:
+        condition: service_started
+    networks:
+      - backend
+
+  inference-gateway:
+    image: ghcr.io/inference-gateway/inference-gateway:latest
+    pull_policy: always
+    env_file:
+      - .env.gateway
+    environment:
+      APP_ENVIRONMENT: development
+      SERVER_READ_TIMEOUT: 130s
+      SERVER_WRITE_TIMEOUT: 130s
+      SERVER_IDLE_TIMEOUT: 120s
+    ports:
+      - "8080:8080"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "0.5"
+        reservations:
+          memory: 512M
+          cpus: "0.25"
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    depends_on:
+      google-calendar-agent-hc:
+        condition: service_healthy
+    networks:
+      - backend
+
+  google-calendar-agent-hc:
+    image: curlimages/curl:latest
+    command: ["sh", "-c", "sleep infinity"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://google-calendar-agent:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      google-calendar-agent:
+        condition: service_started
+    networks:
+      - backend
+
+  google-calendar-agent:
+    image: ghcr.io/inference-gateway/google-calendar-agent:latest
+    pull_policy: always
+    env_file:
+      - .env.agent
+    environment:
+      APP_ENVIRONMENT: production
+      APP_DEMO_MODE: true
+      LOG_LEVEL: warn
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.3"
+        reservations:
+          memory: 256M
+          cpus: "0.15"
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    networks:
+      - backend
+
+  a2a-debugger:
+    image: ghcr.io/inference-gateway/a2a-debugger:latest
+    pull_policy: always
+    environment:
+      LOG_LEVEL: debug
+    entrypoint:
+      - /a2a
+      - --config
+      - /config/.a2a.yaml
+    command:
+      - config
+      - set
+      - server-url
+      - http://google-calendar-agent:8080
+    volumes:
+      - ./a2a-debugger:/config
+    depends_on:
+      - google-calendar-agent
+    networks:
+      - backend
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge

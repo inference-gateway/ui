@@ -110,7 +110,7 @@ export async function runAgentLoop({
           const toolMessage: Message = {
             id: toolMessageId,
             role: MessageRole.tool,
-            content: 'MCP tool action executed',
+            content: 'Tool action executed on the backend', // TODO - properly send the response from the backend to the client so it could be displayed nicely
             tool_call_id: toolCall.id,
           };
 
