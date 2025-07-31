@@ -25,7 +25,7 @@ describe('/api/v1/storage/config', () => {
   describe('GET', () => {
     it('should return local storage config by default', async () => {
       delete process.env.STORAGE_TYPE;
-      delete process.env.STORAGE_CONNECTION_URL;
+      delete process.env.DB_CONNECTION_URL;
 
       await GET();
 
@@ -36,7 +36,7 @@ describe('/api/v1/storage/config', () => {
 
     it('should return postgres storage config with connection URL', async () => {
       process.env.STORAGE_TYPE = 'postgres';
-      process.env.STORAGE_CONNECTION_URL = 'postgresql://user:pass@localhost:5432/db';
+      process.env.DB_CONNECTION_URL = 'postgresql://user:pass@localhost:5432/db';
 
       await GET();
 
@@ -48,7 +48,7 @@ describe('/api/v1/storage/config', () => {
 
     it('should return postgres storage config without connection URL if not set', async () => {
       process.env.STORAGE_TYPE = 'postgres';
-      delete process.env.STORAGE_CONNECTION_URL;
+      delete process.env.DB_CONNECTION_URL;
 
       await GET();
 
@@ -59,7 +59,7 @@ describe('/api/v1/storage/config', () => {
 
     it('should handle custom storage type', async () => {
       process.env.STORAGE_TYPE = 'custom-storage';
-      process.env.STORAGE_CONNECTION_URL = 'custom://connection-string';
+      process.env.DB_CONNECTION_URL = 'custom://connection-string';
 
       await GET();
 
@@ -71,7 +71,7 @@ describe('/api/v1/storage/config', () => {
 
     it('should return local storage config when STORAGE_TYPE is empty string', async () => {
       process.env.STORAGE_TYPE = '';
-      process.env.STORAGE_CONNECTION_URL = 'postgresql://user:pass@localhost:5432/db';
+      process.env.DB_CONNECTION_URL = 'postgresql://user:pass@localhost:5432/db';
 
       await GET();
 

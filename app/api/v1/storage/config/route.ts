@@ -5,7 +5,7 @@ import type { StorageConfig } from '@/types/chat';
 export async function GET() {
   try {
     const storageType = process.env.STORAGE_TYPE || 'local';
-    const connectionUrl = process.env.STORAGE_CONNECTION_URL;
+    const connectionUrl = process.env.DB_CONNECTION_URL;
 
     logger.debug('Storage config requested', {
       storageType,

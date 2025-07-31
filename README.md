@@ -119,10 +119,10 @@ When rate limits are exceeded, clients receive a `429 Too Many Requests` respons
 
 ### Storage Settings
 
-| Environment Variable   | Default Value | Description                                        |
-| ---------------------- | ------------- | -------------------------------------------------- |
-| STORAGE_TYPE           | `local`       | Storage type for chat history                      |
-| STORAGE_CONNECTION_URL | -             | Connection URL for storage (required for postgres) |
+| Environment Variable | Default Value | Description                                             |
+| -------------------- | ------------- | ------------------------------------------------------- |
+| STORAGE_TYPE         | `local`       | Storage type for chat history                           |
+| DB_CONNECTION_URL    | -             | Connection URL for the database (required for postgres) |
 
 Examples:
 
