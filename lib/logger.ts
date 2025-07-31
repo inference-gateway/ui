@@ -12,11 +12,7 @@ interface Logger {
 const getLogLevel = (): LogLevel => {
   const env = process.env.NODE_ENV || 'production';
 
-  // Unified LOG_LEVEL for both client and server
-  const logLevel =
-    process.env.LOG_LEVEL ||
-    process.env.NEXT_PUBLIC_LOG_LEVEL || // Backwards compatibility
-    (env === 'production' ? 'info' : 'debug');
+  const logLevel = process.env.LOG_LEVEL || (env === 'production' ? 'info' : 'debug');
 
   return logLevel.toLowerCase() as LogLevel;
 };
