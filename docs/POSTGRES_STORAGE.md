@@ -111,8 +111,15 @@ GRANT ALL PRIVILEGES ON DATABASE inference_gateway_ui TO inference_user;
 Execute the migration script to create the required tables:
 
 ```bash
-psql -h localhost -U inference_user -d inference_gateway_ui -f migrations/001_create_chat_tables.sql
+psql -h localhost -U inference_user -d inference_gateway_ui -f examples/docker-compose/postgres/migrations/001_create_chat_tables.sql
 ```
+
+### 4. Quick Start with Docker Compose
+
+For a complete setup with Docker Compose, see the [PostgreSQL example](../examples/docker-compose/postgres/README.md) which includes:
+- Automatic database initialization
+- Pre-configured environment variables
+- Full Docker Compose setup with UI, backend, and database
 
 ## Features
 
