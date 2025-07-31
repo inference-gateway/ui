@@ -1,0 +1,65 @@
+---
+services:
+  ui:
+    image: ghcr.io/inference-gateway/ui:latest
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.frontend
+    depends_on:
+      - inference-gateway
+      - supabase
+    deploy:
+      resources:
+        limits:
+          cpus: "2.5"
+          memory: 1512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    pull_policy: always
+    restart: unless-stopped
+
+  inference-gateway:
+    image: ghcr.io/inference-gateway/inference-gateway:latest
+    env_file:
+      - .env.backend
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 100M
+    pull_policy: always
+    restart: unless-stopped
+
+  supabase:
+    image: supabase/postgres:15.8.1.125
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-inference_gateway}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-your_super_secret_and_long_postgres_password}
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-token-with-at-least-32-characters-long}
+      JWT_EXP: ${JWT_EXPIRY:-3600}
+      POSTGRES_INITDB_ARGS: "--auth-local=trust --auth-host=md5"
+    volumes:
+      - supabase_db_data:/var/lib/postgresql/data
+      - ./init/00-init.sh:/docker-entrypoint-initdb.d/00-init.sh:ro
+      - ./init/migrations:/docker-entrypoint-initdb.d/migrations:ro
+      - ./init/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./init/seeds:/docker-entrypoint-initdb.d/seeds:ro
+    restart: unless-stopped
+    healthcheck:
+      test: pg_isready -U ${POSTGRES_USER:-postgres} -h localhost -d ${POSTGRES_DB:-inference_gateway}
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  supabase_db_data:
+    driver: local

@@ -88,9 +88,19 @@ The UI can be configured using the following environment variables:
 
 ### Storage Settings
 
-| Environment Variable                          | Default Value | Description                   |
-| --------------------------------------------- | ------------- | ----------------------------- |
-| NEXT_PUBLIC_INFERENCE_GATEWAY_UI_STORAGE_TYPE | `local`       | Storage type for chat history |
+| Environment Variable                          | Default Value | Description                                        |
+| --------------------------------------------- | ------------- | -------------------------------------------------- |
+| NEXT_PUBLIC_INFERENCE_GATEWAY_UI_STORAGE_TYPE | `local`       | Storage type for chat history                      |
+| NEXT_PUBLIC_SUPABASE_URL                      | -             | Supabase project URL (when using Supabase storage) |
+| NEXT_PUBLIC_SUPABASE_ANON_KEY                 | -             | Supabase anon key (when using Supabase storage)    |
+
+**Storage Types:**
+
+- `local`: Store chat history in browser localStorage (default)
+- `supabase`: Store chat history in Supabase database
+
+**Supabase Setup:**
+If using Supabase storage, run the database schema from `examples/docker-compose/database/schema.sql` in your Supabase SQL editor.
 
 ### Authentication Settings
 
