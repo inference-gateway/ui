@@ -14,11 +14,12 @@ describe('Logger Configuration', () => {
   // Create helper function to test log level logic
   const getLogLevelLogic = () => {
     const env = process.env.NODE_ENV || 'production';
-    
-    const logLevel = process.env.LOG_LEVEL || 
-                     process.env.NEXT_PUBLIC_LOG_LEVEL || 
-                     (env === 'production' ? 'info' : 'debug');
-    
+
+    const logLevel =
+      process.env.LOG_LEVEL ||
+      process.env.NEXT_PUBLIC_LOG_LEVEL ||
+      (env === 'production' ? 'info' : 'debug');
+
     return logLevel.toLowerCase();
   };
 
@@ -43,37 +44,37 @@ describe('Logger Configuration', () => {
     it('should use LOG_LEVEL when provided explicitly', () => {
       (process.env as any).LOG_LEVEL = 'warn';
       (process.env as any).NODE_ENV = 'production';
-      
+
       expect(getLogLevelLogic()).toBe('warn');
     });
 
     it('should default to debug when NODE_ENV is development', () => {
       (process.env as any).NODE_ENV = 'development';
-      
+
       expect(getLogLevelLogic()).toBe('debug');
     });
 
     it('should default to info when NODE_ENV is production', () => {
       (process.env as any).NODE_ENV = 'production';
-      
+
       expect(getLogLevelLogic()).toBe('info');
     });
 
     it('should default to debug when NODE_ENV is not production', () => {
       (process.env as any).NODE_ENV = 'test';
-      
+
       expect(getLogLevelLogic()).toBe('debug');
     });
 
     it('should handle case-insensitive LOG_LEVEL values', () => {
       (process.env as any).LOG_LEVEL = 'DEBUG';
-      
+
       expect(getLogLevelLogic()).toBe('debug');
     });
 
     it('should work the same on both client and server side', () => {
       (process.env as any).LOG_LEVEL = 'error';
-      
+
       expect(getLogLevelLogic()).toBe('error');
     });
   });
@@ -82,13 +83,13 @@ describe('Logger Configuration', () => {
     it('should still work if NEXT_PUBLIC_LOG_LEVEL is set (but prefer LOG_LEVEL)', () => {
       (process.env as any).LOG_LEVEL = 'error';
       (process.env as any).NEXT_PUBLIC_LOG_LEVEL = 'debug'; // This should be ignored when LOG_LEVEL is set
-      
+
       expect(getLogLevelLogic()).toBe('error');
     });
 
     it('should fallback to NEXT_PUBLIC_LOG_LEVEL if LOG_LEVEL is not set (backwards compatibility)', () => {
       (process.env as any).NEXT_PUBLIC_LOG_LEVEL = 'warn';
-      
+
       expect(getLogLevelLogic()).toBe('warn');
     });
   });
@@ -102,10 +103,10 @@ describe('Logger Configuration', () => {
         info: 2,
         debug: 3,
       };
-      
+
       const warnLevel = 1;
       expect(levels.error <= warnLevel).toBe(true); // should log
-      expect(levels.warn <= warnLevel).toBe(true);  // should log
+      expect(levels.warn <= warnLevel).toBe(true); // should log
       expect(levels.info <= warnLevel).toBe(false); // should not log
       expect(levels.debug <= warnLevel).toBe(false); // should not log
     });
