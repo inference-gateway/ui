@@ -61,7 +61,3 @@ const createLogger = (logLevel: LogLevel): Logger => {
 const logger = createLogger(getLogLevel());
 
 export default logger;
-
-// Export functions for testing
-export const getLogLevelForTesting = getLogLevel;
-export const createLoggerForTesting = createLogger;
