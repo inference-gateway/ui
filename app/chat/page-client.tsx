@@ -69,7 +69,7 @@ export default function PageClient({ session }: PageClientProps) {
         userId: session?.user?.id,
       });
     }
-    
+
     return StorageServiceFactory.createService({
       storageType: storageConfig.type,
       userId: session?.user?.id,
