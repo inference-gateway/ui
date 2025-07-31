@@ -36,7 +36,7 @@ export async function GET() {
     };
 
     const client = new InferenceGatewayClient({
-      baseURL: gatewayUrl,
+      baseURL: `${gatewayUrl}/v1`,
       fetch: fetchWithAuth,
     });
 

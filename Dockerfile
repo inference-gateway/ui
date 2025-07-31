@@ -6,7 +6,7 @@ ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     PORT=3000 \
     HOSTNAME="0.0.0.0" \
-    INFERENCE_GATEWAY_URL="http://localhost:8080/v1"
+    INFERENCE_GATEWAY_URL="http://localhost:8080"
 EXPOSE 3000
 USER nextjs:nodejs
 WORKDIR /app

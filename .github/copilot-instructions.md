@@ -22,6 +22,10 @@ This is a Next.js application serving as the UI for the Inference Gateway projec
   - [TypeScript SDK](https://github.com/inference-gateway/typescript-sdk)
   - [Python SDK](https://github.com/inference-gateway/python-sdk)
   - [Documentation](https://docs.inference-gateway.com)
+  - [A2A ADK](https://github.com/inference-gateway/adk)
+  - [A2A Agents](https://github.com/inference-gateway/awesome-a2a)
+  - [A2A Debugger](https://github.com/inference-gateway/a2a-debugger)
+  - [A2A Google Calendar Agent](https://github.com/inference-gateway/google-calendar-agent)
 
 ## Available Tools
 
