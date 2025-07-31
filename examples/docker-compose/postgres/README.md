@@ -10,6 +10,7 @@ This example demonstrates how to set up and use the Inference Gateway UI with Po
 ## Overview
 
 This setup includes:
+
 - Inference Gateway UI with PostgreSQL storage enabled
 - Inference Gateway backend
 - PostgreSQL database with automatic schema initialization
@@ -66,7 +67,7 @@ Configure your `.env.backend` file as needed for the Inference Gateway backend.
 The PostgreSQL schema includes:
 
 - `chat_sessions` - Stores chat sessions with metadata and token usage
-- `messages` - Stores individual messages within chat sessions  
+- `messages` - Stores individual messages within chat sessions
 - `user_preferences` - Stores user preferences including active chat and selected model
 
 The schema is automatically created when the database starts using the migration files in the `migrations/` directory.

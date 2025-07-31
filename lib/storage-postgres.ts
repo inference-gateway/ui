@@ -13,7 +13,7 @@ export class PostgresStorageService implements StorageService {
 
   constructor(options?: StorageOptions) {
     this.userId = options?.userId;
-    
+
     if (!options?.connectionUrl) {
       throw new Error('PostgreSQL connection URL is required');
     }
@@ -62,22 +62,27 @@ export class PostgresStorageService implements StorageService {
         GROUP BY cs.id, cs.title, cs.created_at, cs.prompt_tokens, cs.completion_tokens, cs.total_tokens
         ORDER BY cs.created_at DESC
       `;
-      
+
       const result = await client.query(query, [this.userId || null]);
-      
+
       const sessions: ChatSession[] = result.rows.map((row: DatabaseRow) => ({
         id: row.id as string,
         title: row.title as string,
-        messages: Array.isArray(row.messages) ? row.messages.map((msg: Record<string, unknown>): Message => ({
-          id: msg.id as string,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          role: msg.role as any,
-          content: msg.content as string,
-          model: msg.model as string | undefined,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          tool_calls: msg.tool_calls as any,
-          tool_call_id: msg.tool_call_id as string | undefined,
-        })) : [],
+        messages: Array.isArray(row.messages)
+          ? row.messages.map(
+              (msg: Record<string, unknown>): Message => ({
+                id: msg.id as string,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                role: msg.role as any,
+                content: msg.content as string,
+                model: msg.model === null ? undefined : (msg.model as string | undefined),
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                tool_calls: msg.tool_calls === null ? undefined : (msg.tool_calls as any),
+                tool_call_id:
+                  msg.tool_call_id === null ? undefined : (msg.tool_call_id as string | undefined),
+              })
+            )
+          : [],
         createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : undefined,
         tokenUsage: {
           prompt_tokens: (row.prompt_tokens as number) || 0,
@@ -105,7 +110,7 @@ export class PostgresStorageService implements StorageService {
 
   async saveChatSessions(sessions: ChatSession[]): Promise<void> {
     const client = await this.pool.connect();
-    
+
     try {
       await client.query('BEGIN');
 
@@ -123,7 +128,7 @@ export class PostgresStorageService implements StorageService {
           INSERT INTO chat_sessions (id, user_id, title, created_at, prompt_tokens, completion_tokens, total_tokens)
           VALUES ($1, $2, $3, $4, $5, $6, $7)
         `;
-        
+
         await client.query(sessionQuery, [
           session.id,
           this.userId || null,
@@ -140,7 +145,7 @@ export class PostgresStorageService implements StorageService {
             INSERT INTO messages (id, session_id, role, content, model, tool_calls, tool_call_id, name)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
           `;
-          
+
           await client.query(messageQuery, [
             message.id,
             session.id,
@@ -181,9 +186,9 @@ export class PostgresStorageService implements StorageService {
         FROM user_preferences 
         WHERE user_id = $1
       `;
-      
+
       const result = await client.query(query, [this.userId || '']);
-      
+
       if (result.rows.length > 0 && result.rows[0].active_chat_id) {
         const activeChatId = result.rows[0].active_chat_id;
         logger.debug('Found active chat ID in PostgreSQL', {
@@ -229,7 +234,7 @@ export class PostgresStorageService implements StorageService {
         ON CONFLICT (user_id) 
         DO UPDATE SET active_chat_id = $2, updated_at = CURRENT_TIMESTAMP
       `;
-      
+
       await client.query(query, [this.userId || '', id]);
 
       logger.debug('Saved active chat ID to PostgreSQL', {
@@ -256,9 +261,9 @@ export class PostgresStorageService implements StorageService {
         FROM user_preferences 
         WHERE user_id = $1
       `;
-      
+
       const result = await client.query(query, [this.userId || '']);
-      
+
       if (result.rows.length > 0 && result.rows[0].selected_model) {
         const selectedModel = result.rows[0].selected_model;
         logger.debug('Found selected model in PostgreSQL', {
@@ -292,7 +297,7 @@ export class PostgresStorageService implements StorageService {
         ON CONFLICT (user_id) 
         DO UPDATE SET selected_model = $2, updated_at = CURRENT_TIMESTAMP
       `;
-      
+
       await client.query(query, [this.userId || '', model]);
 
       logger.debug('Saved selected model to PostgreSQL', {
@@ -322,7 +327,7 @@ export class PostgresStorageService implements StorageService {
         await client.query('DELETE FROM user_preferences WHERE user_id = $1', [this.userId]);
       } else {
         await client.query('DELETE FROM chat_sessions WHERE user_id IS NULL');
-        await client.query('DELETE FROM user_preferences WHERE user_id = \'\'');
+        await client.query("DELETE FROM user_preferences WHERE user_id = ''");
       }
 
       await client.query('COMMIT');

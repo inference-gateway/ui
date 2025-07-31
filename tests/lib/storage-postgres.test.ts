@@ -1,20 +1,26 @@
-import { ChatSession, Message, MessageRole } from '@/types/chat';
+import { ChatSession, MessageRole } from '@/types/chat';
 
-// Mock pg module completely to avoid TextEncoder issues
+const mockPool = {
+  connect: jest.fn(),
+  end: jest.fn(),
+  query: jest.fn(),
+};
+
 jest.mock('pg', () => ({
-  Pool: jest.fn(),
+  Pool: jest.fn().mockImplementation(() => mockPool),
 }));
 
-// Import after mocking
 import { PostgresStorageService } from '@/lib/storage-postgres';
 import { Pool } from 'pg';
 
-const MockPool = Pool as jest.MockedClass<typeof Pool>;
+const MockedPool = Pool as jest.MockedClass<typeof Pool>;
 
 describe('PostgresStorageService', () => {
-  let mockPool: jest.Mocked<Pool>;
-  let mockClient: any;
-  
+  let mockClient: {
+    query: jest.Mock;
+    release: jest.Mock;
+  };
+
   const testSession: ChatSession = {
     id: 'test-session-id',
     title: 'Test Session',
@@ -23,17 +29,17 @@ describe('PostgresStorageService', () => {
         id: 'msg-1',
         role: MessageRole.user,
         content: 'Hello',
-        model: null,
-        tool_calls: null,
-        tool_call_id: null,
+        model: undefined,
+        tool_calls: undefined,
+        tool_call_id: undefined,
       },
       {
         id: 'msg-2',
         role: MessageRole.assistant,
         content: 'Hi there!',
         model: 'gpt-4',
-        tool_calls: null,
-        tool_call_id: null,
+        tool_calls: undefined,
+        tool_call_id: undefined,
       },
     ],
     createdAt: '2023-01-01T00:00:00.000Z',
@@ -46,18 +52,15 @@ describe('PostgresStorageService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     mockClient = {
       query: jest.fn(),
       release: jest.fn(),
     };
-    
-    mockPool = {
-      connect: jest.fn().mockResolvedValue(mockClient),
-      end: jest.fn(),
-    } as any;
-    
-    MockPool.mockImplementation(() => mockPool);
+
+    mockPool.connect.mockResolvedValue(mockClient);
+    mockPool.end.mockResolvedValue(undefined);
+    mockPool.query.mockResolvedValue({ rows: [] });
   });
 
   describe('constructor', () => {
@@ -71,7 +74,8 @@ describe('PostgresStorageService', () => {
         userId: 'user-123',
       });
 
-      expect(MockPool).toHaveBeenCalledWith({
+      expect(service).toBeDefined();
+      expect(MockedPool).toHaveBeenCalledWith({
         connectionString: 'postgresql://user:pass@localhost:5432/db',
         max: 10,
         idleTimeoutMillis: 30000,
@@ -123,10 +127,9 @@ describe('PostgresStorageService', () => {
       const sessions = await service.getChatSessions();
 
       expect(mockPool.connect).toHaveBeenCalled();
-      expect(mockClient.query).toHaveBeenCalledWith(
-        expect.stringContaining('SELECT'),
-        ['user-123']
-      );
+      expect(mockClient.query).toHaveBeenCalledWith(expect.stringContaining('SELECT'), [
+        'user-123',
+      ]);
       expect(mockClient.release).toHaveBeenCalled();
 
       expect(sessions).toHaveLength(1);
@@ -190,7 +193,16 @@ describe('PostgresStorageService', () => {
       );
       expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO messages'),
-        expect.arrayContaining(['msg-1', 'test-session-id', 'user', 'Hello', null, null, null, null])
+        expect.arrayContaining([
+          'msg-1',
+          'test-session-id',
+          'user',
+          'Hello',
+          null,
+          null,
+          null,
+          null,
+        ])
       );
       expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
       expect(mockClient.release).toHaveBeenCalled();
@@ -203,7 +215,8 @@ describe('PostgresStorageService', () => {
       });
 
       const error = new Error('Insert failed');
-      mockClient.query.mockResolvedValueOnce({ rows: [] }) // BEGIN
+      mockClient.query
+        .mockResolvedValueOnce({ rows: [] }) // BEGIN
         .mockResolvedValueOnce({ rows: [] }) // DELETE
         .mockRejectedValue(error); // INSERT (fails)
 
@@ -240,9 +253,7 @@ describe('PostgresStorageService', () => {
         userId: 'user-123',
       });
 
-      // Mock for active chat query (empty result)
       mockClient.query.mockResolvedValueOnce({ rows: [] });
-      // Mock for getChatSessions call (empty result)
       mockClient.query.mockResolvedValueOnce({ rows: [] });
 
       const activeChatId = await service.getActiveChatId();
@@ -256,9 +267,7 @@ describe('PostgresStorageService', () => {
         userId: 'user-123',
       });
 
-      // Mock for active chat query (empty result)
       mockClient.query.mockResolvedValueOnce({ rows: [] });
-      // Mock for getChatSessions call (has sessions)
       mockClient.query.mockResolvedValueOnce({
         rows: [
           {
@@ -272,7 +281,6 @@ describe('PostgresStorageService', () => {
           },
         ],
       });
-      // Mock for saveActiveChatId
       mockClient.query.mockResolvedValueOnce({ rows: [] });
 
       const activeChatId = await service.getActiveChatId();
@@ -387,7 +395,7 @@ describe('PostgresStorageService', () => {
         'DELETE FROM chat_sessions WHERE user_id IS NULL'
       );
       expect(mockClient.query).toHaveBeenCalledWith(
-        'DELETE FROM user_preferences WHERE user_id = \'\''
+        "DELETE FROM user_preferences WHERE user_id = ''"
       );
     });
   });

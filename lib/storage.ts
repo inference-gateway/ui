@@ -1,16 +1,19 @@
 import logger from '@/lib/logger';
 import { type StorageOptions, type StorageService, StorageType } from '@/types/chat';
 import { LocalStorageService } from './storage-local';
-import { PostgresStorageService } from './storage-postgres';
+import { ApiStorageService } from './storage-api';
 
+/**
+ * Client-side storage factory that supports both local storage and API-based storage.
+ * For PostgreSQL storage, it uses API routes to communicate with the server.
+ */
 export class StorageServiceFactory {
   static createService(options?: StorageOptions): StorageService {
     const storageType = options?.storageType || StorageType.LOCAL;
 
-    logger.debug('Creating storage service', {
+    logger.debug('Creating client storage service', {
       storageType,
       userId: options?.userId,
-      hasConnectionUrl: !!options?.connectionUrl,
     });
 
     switch (storageType) {
@@ -19,24 +22,8 @@ export class StorageServiceFactory {
         return new LocalStorageService(options);
       case StorageType.POSTGRES:
       case 'postgres':
-        if (!options?.connectionUrl) {
-          logger.error('PostgreSQL storage requires connectionUrl, falling back to local storage', {
-            storageType,
-            hasConnectionUrl: !!options?.connectionUrl,
-          });
-          return new LocalStorageService(options);
-        }
-        
-        try {
-          return new PostgresStorageService(options);
-        } catch (error) {
-          logger.error('Failed to create PostgreSQL storage service, falling back to local storage', {
-            storageType,
-            hasConnectionUrl: !!options?.connectionUrl,
-            error: error instanceof Error ? error.message : error,
-          });
-          return new LocalStorageService(options);
-        }
+        logger.debug('Using API-based storage for PostgreSQL backend');
+        return new ApiStorageService(options);
       default:
         logger.warn('Unknown storage type, falling back to local storage', {
           storageType,
