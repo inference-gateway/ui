@@ -53,6 +53,11 @@ STORAGE_TYPE=postgres
 # Database connection
 DATABASE_URL=postgresql://postgres:password@postgres:5432/inference_gateway
 
+# Database connection pool configuration (optional)
+DB_POOL_SIZE=10
+DB_IDLE_TIMEOUT=30000
+DB_CONNECTION_TIMEOUT=2000
+
 # Other UI configuration
 INFERENCE_GATEWAY_URL=http://inference-gateway:8080
 ENABLE_AUTH=false
@@ -93,6 +98,52 @@ If you need to reset the database schema:
 1. Stop the containers: `docker-compose down`
 2. Remove the database volume: `docker volume rm postgres_postgres_data`
 3. Restart: `docker-compose up`
+
+## Security Considerations
+
+### Production Deployment
+
+For production deployments, consider the following security enhancements:
+
+#### SSL/TLS Configuration
+
+Enable SSL connections by updating your `DATABASE_URL`:
+
+```env
+# Enable SSL connection (production)
+DATABASE_URL=postgresql://postgres:password@postgres:5432/inference_gateway?sslmode=require
+
+# For self-signed certificates (development only)
+DATABASE_URL=postgresql://postgres:password@postgres:5432/inference_gateway?sslmode=require&sslcert=client-cert.pem&sslkey=client-key.pem&sslrootcert=ca-cert.pem
+```
+
+#### Database Authentication
+
+- Use strong passwords for database users
+- Create dedicated database users with minimal required permissions
+- Consider using certificate-based authentication for production
+
+#### Connection Pool Security
+
+- Set appropriate `DB_POOL_SIZE` limits to prevent resource exhaustion
+- Configure timeouts to prevent connection hanging
+- Monitor connection pool metrics in production
+
+#### Input Validation
+
+The PostgreSQL storage service includes built-in input validation:
+
+- UUID validation for session and message IDs
+- String length limits and SQL injection prevention
+- Safe string validation for user inputs
+
+### Environment Variables Reference
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DB_POOL_SIZE` | `10` | Maximum number of database connections |
+| `DB_IDLE_TIMEOUT` | `30000` | Idle connection timeout (ms) |
+| `DB_CONNECTION_TIMEOUT` | `2000` | Connection establishment timeout (ms) |
 
 ## Manual Database Access
 

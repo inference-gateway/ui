@@ -22,11 +22,11 @@ describe('PostgresStorageService', () => {
   };
 
   const testSession: ChatSession = {
-    id: 'test-session-id',
+    id: '550e8400-e29b-41d4-a716-446655440000',
     title: 'Test Session',
     messages: [
       {
-        id: 'msg-1',
+        id: '550e8400-e29b-41d4-a716-446655440001',
         role: MessageRole.user,
         content: 'Hello',
         model: undefined,
@@ -34,7 +34,7 @@ describe('PostgresStorageService', () => {
         tool_call_id: undefined,
       },
       {
-        id: 'msg-2',
+        id: '550e8400-e29b-41d4-a716-446655440002',
         role: MessageRole.assistant,
         content: 'Hi there!',
         model: 'gpt-4',
@@ -93,7 +93,7 @@ describe('PostgresStorageService', () => {
 
       const mockRows = [
         {
-          id: 'test-session-id',
+          id: '550e8400-e29b-41d4-a716-446655440000',
           title: 'Test Session',
           created_at: new Date('2023-01-01T00:00:00.000Z'),
           prompt_tokens: 100,
@@ -101,7 +101,7 @@ describe('PostgresStorageService', () => {
           total_tokens: 250,
           messages: [
             {
-              id: 'msg-1',
+              id: '550e8400-e29b-41d4-a716-446655440001',
               role: 'user',
               content: 'Hello',
               model: null,
@@ -110,7 +110,7 @@ describe('PostgresStorageService', () => {
               name: null,
             },
             {
-              id: 'msg-2',
+              id: '550e8400-e29b-41d4-a716-446655440002',
               role: 'assistant',
               content: 'Hi there!',
               model: 'gpt-4',
@@ -182,7 +182,7 @@ describe('PostgresStorageService', () => {
       expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO chat_sessions'),
         expect.arrayContaining([
-          'test-session-id',
+          '550e8400-e29b-41d4-a716-446655440000',
           'user-123',
           'Test Session',
           expect.any(Date),
@@ -194,8 +194,8 @@ describe('PostgresStorageService', () => {
       expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO messages'),
         expect.arrayContaining([
-          'msg-1',
-          'test-session-id',
+          '550e8400-e29b-41d4-a716-446655440001',
+          '550e8400-e29b-41d4-a716-446655440000',
           'user',
           'Hello',
           null,
@@ -271,7 +271,7 @@ describe('PostgresStorageService', () => {
       mockClient.query.mockResolvedValueOnce({
         rows: [
           {
-            id: 'first-session',
+            id: '550e8400-e29b-41d4-a716-446655440003',
             title: 'First Session',
             created_at: new Date(),
             prompt_tokens: 0,
@@ -284,15 +284,15 @@ describe('PostgresStorageService', () => {
 
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // BEGIN
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // upsert
-      mockClient.query.mockResolvedValueOnce({ rows: [{ id: 'first-session' }] });
+      mockClient.query.mockResolvedValueOnce({ rows: [{ id: '550e8400-e29b-41d4-a716-446655440003' }] });
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // COMMIT
 
       const activeChatId = await service.getActiveChatId();
 
-      expect(activeChatId).toBe('first-session');
+      expect(activeChatId).toBe('550e8400-e29b-41d4-a716-446655440003');
       expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO user_preferences'),
-        ['user-123', 'first-session']
+        ['user-123', '550e8400-e29b-41d4-a716-446655440003']
       );
     });
   });
@@ -307,15 +307,15 @@ describe('PostgresStorageService', () => {
       // Mock the saveActiveChatId calls (BEGIN, upsert, check, COMMIT)
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // BEGIN
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // upsert
-      mockClient.query.mockResolvedValueOnce({ rows: [{ id: 'new-active-id' }] }); // check
+      mockClient.query.mockResolvedValueOnce({ rows: [{ id: '550e8400-e29b-41d4-a716-446655440004' }] }); // check
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // COMMIT
 
-      await service.saveActiveChatId('new-active-id');
+      await service.saveActiveChatId('550e8400-e29b-41d4-a716-446655440004');
 
       expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
       expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO user_preferences'),
-        ['user-123', 'new-active-id']
+        ['user-123', '550e8400-e29b-41d4-a716-446655440004']
       );
       expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
     });
@@ -333,7 +333,7 @@ describe('PostgresStorageService', () => {
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // COMMIT
 
       // Should not throw error, just log warning
-      await expect(service.saveActiveChatId('non-existent-id')).resolves.not.toThrow();
+      await expect(service.saveActiveChatId('550e8400-e29b-41d4-a716-446655440005')).resolves.not.toThrow();
 
       expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
       expect(mockClient.query).toHaveBeenCalledWith('COMMIT');

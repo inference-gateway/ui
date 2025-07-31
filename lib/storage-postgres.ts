@@ -1,5 +1,6 @@
 import { Pool } from 'pg';
 import logger from '@/lib/logger';
+import { isValidUUID, isSafeString } from '@/lib/utils';
 import type { StorageOptions, StorageService, Message } from '@/types/chat';
 import { ChatSession } from '@/types/chat';
 
@@ -14,25 +15,57 @@ export class PostgresStorageService implements StorageService {
   constructor(options?: StorageOptions) {
     this.userId = options?.userId;
 
+    // Validate user ID if provided
+    if (this.userId && !isValidUUID(this.userId) && !isSafeString(this.userId, 255)) {
+      throw new Error('Invalid user ID format - must be a valid UUID or safe string');
+    }
+
     if (!options?.connectionUrl) {
       throw new Error('PostgreSQL connection URL is required');
     }
 
+    // Get configuration from environment variables with fallbacks
+    const maxConnections = parseInt(process.env.DB_POOL_SIZE || '10', 10);
+    const idleTimeout = parseInt(process.env.DB_IDLE_TIMEOUT || '30000', 10);
+    const connectionTimeout = parseInt(process.env.DB_CONNECTION_TIMEOUT || '2000', 10);
+
     this.pool = new Pool({
       connectionString: options.connectionUrl,
-      max: 10,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
+      max: maxConnections,
+      idleTimeoutMillis: idleTimeout,
+      connectionTimeoutMillis: connectionTimeout,
     });
 
     logger.debug('PostgreSQL storage service initialized', {
       userId: this.userId,
       hasConnectionUrl: !!options.connectionUrl,
+      maxConnections,
+      idleTimeout,
+      connectionTimeout,
     });
   }
 
+  private async getConnection() {
+    try {
+      return await this.pool.connect();
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('pool exhausted')) {
+        logger.error('Database connection pool exhausted', {
+          userId: this.userId,
+          poolInfo: {
+            totalCount: this.pool.totalCount,
+            idleCount: this.pool.idleCount,
+            waitingCount: this.pool.waitingCount,
+          },
+        });
+        throw new Error('Database connection pool exhausted, please try again later');
+      }
+      throw error;
+    }
+  }
+
   async getChatSessions(): Promise<ChatSession[]> {
-    const client = await this.pool.connect();
+    const client = await this.getConnection();
     try {
       const query = `
         SELECT 
@@ -109,7 +142,30 @@ export class PostgresStorageService implements StorageService {
   }
 
   async saveChatSessions(sessions: ChatSession[]): Promise<void> {
-    const client = await this.pool.connect();
+    // Validate input sessions
+    for (const session of sessions) {
+      if (!isValidUUID(session.id)) {
+        throw new Error(`Invalid session ID format: ${session.id}`);
+      }
+      if (!isSafeString(session.title, 500)) {
+        throw new Error(`Invalid session title: ${session.title}`);
+      }
+      
+      // Validate messages
+      for (const message of session.messages) {
+        if (!isValidUUID(message.id)) {
+          throw new Error(`Invalid message ID format: ${message.id}`);
+        }
+        if (message.content && !isSafeString(message.content, 50000)) {
+          throw new Error(`Invalid message content for message ${message.id}`);
+        }
+        if (message.model && !isSafeString(message.model, 100)) {
+          throw new Error(`Invalid model name: ${message.model}`);
+        }
+      }
+    }
+
+    const client = await this.getConnection();
 
     try {
       await client.query('BEGIN');
@@ -203,7 +259,7 @@ export class PostgresStorageService implements StorageService {
   }
 
   async getActiveChatId(): Promise<string> {
-    const client = await this.pool.connect();
+    const client = await this.getConnection();
     try {
       const query = `
         SELECT active_chat_id 
@@ -249,7 +305,12 @@ export class PostgresStorageService implements StorageService {
   }
 
   async saveActiveChatId(id: string): Promise<void> {
-    const client = await this.pool.connect();
+    // Validate input
+    if (!isValidUUID(id)) {
+      throw new Error(`Invalid chat ID format: ${id}`);
+    }
+
+    const client = await this.getConnection();
     try {
       await client.query('BEGIN');
 
@@ -301,7 +362,7 @@ export class PostgresStorageService implements StorageService {
    * This prevents foreign key constraint violations and race conditions
    */
   async getSelectedModel(): Promise<string> {
-    const client = await this.pool.connect();
+    const client = await this.getConnection();
     try {
       const query = `
         SELECT selected_model 
@@ -336,7 +397,12 @@ export class PostgresStorageService implements StorageService {
   }
 
   async saveSelectedModel(model: string): Promise<void> {
-    const client = await this.pool.connect();
+    // Validate input
+    if (!isSafeString(model, 100)) {
+      throw new Error(`Invalid model name: ${model}`);
+    }
+
+    const client = await this.getConnection();
     try {
       const query = `
         INSERT INTO user_preferences (user_id, selected_model)
@@ -364,7 +430,7 @@ export class PostgresStorageService implements StorageService {
   }
 
   async clear(): Promise<void> {
-    const client = await this.pool.connect();
+    const client = await this.getConnection();
     try {
       await client.query('BEGIN');
 
