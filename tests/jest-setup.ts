@@ -2,6 +2,11 @@ import { jest } from '@jest/globals';
 import '@testing-library/jest-dom';
 import React from 'react';
 
+// Add TextEncoder/TextDecoder polyfills for Node.js environment
+const { TextEncoder, TextDecoder } = require('util');
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+
 jest.useFakeTimers();
 
 const mockFn = () => jest.fn();
