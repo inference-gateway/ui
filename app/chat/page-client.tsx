@@ -63,7 +63,6 @@ export default function PageClient({ session }: PageClientProps) {
   // Storage service
   const storageService = useMemo(() => {
     if (!storageConfig) {
-      // Return a default service while config is loading
       return StorageServiceFactory.createService({
         storageType: StorageType.LOCAL,
         userId: session?.user?.id,
@@ -73,6 +72,7 @@ export default function PageClient({ session }: PageClientProps) {
     return StorageServiceFactory.createService({
       storageType: storageConfig.type,
       userId: session?.user?.id,
+      connectionUrl: storageConfig.connectionUrl,
     });
   }, [storageConfig, session?.user?.id]);
 

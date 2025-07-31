@@ -1,21 +1,20 @@
 import { NextResponse } from 'next/server';
 import logger from '@/lib/logger';
-
-export interface StorageConfig {
-  type: string;
-  // Future storage configurations can be added here
-  // database?: DatabaseConfig;
-  // redis?: RedisConfig;
-}
+import type { StorageConfig } from '@/types/chat';
 
 export async function GET() {
   try {
     const storageType = process.env.STORAGE_TYPE || 'local';
+    const connectionUrl = process.env.STORAGE_CONNECTION_URL;
 
-    logger.debug('Storage config requested', { storageType });
+    logger.debug('Storage config requested', {
+      storageType,
+      hasConnectionUrl: !!connectionUrl,
+    });
 
     const config: StorageConfig = {
       type: storageType,
+      ...(connectionUrl && { connectionUrl }),
     };
 
     return NextResponse.json(config);
