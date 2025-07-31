@@ -15,6 +15,7 @@ import { ChevronLeft, Menu } from 'lucide-react';
 import { Session } from 'next-auth';
 import { Message, MessageRole, ChatSession, StorageType } from '@/types/chat';
 import { StorageServiceFactory } from '@/lib/storage';
+import { useStorageConfig } from '@/hooks/use-storage-config';
 import { WebSearchTool, FetchPageTool } from '@/lib/tools';
 import logger from '@/lib/logger';
 import {
@@ -56,13 +57,24 @@ export default function PageClient({ session }: PageClientProps) {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const clientInstance = useRef<InferenceGatewayClient | null>(null);
 
+  // Storage configuration
+  const { config: storageConfig } = useStorageConfig();
+
   // Storage service
   const storageService = useMemo(() => {
+    if (!storageConfig) {
+      return StorageServiceFactory.createService({
+        storageType: StorageType.LOCAL,
+        userId: session?.user?.id,
+      });
+    }
+
     return StorageServiceFactory.createService({
-      storageType: StorageType.LOCAL,
-      userId: undefined,
+      storageType: storageConfig.type,
+      userId: session?.user?.id,
+      connectionUrl: storageConfig.connectionUrl,
     });
-  }, []);
+  }, [storageConfig, session?.user?.id]);
 
   // Initialize API client
   useEffect(() => {

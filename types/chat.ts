@@ -31,9 +31,16 @@ export interface StorageService {
 
 export enum StorageType {
   LOCAL = 'local',
+  POSTGRES = 'postgres',
+}
+
+export interface StorageConfig {
+  type: string;
+  connectionUrl?: string;
 }
 
 export interface StorageOptions {
-  storageType?: StorageType;
+  storageType?: StorageType | string;
   userId?: string;
+  connectionUrl?: string;
 }
