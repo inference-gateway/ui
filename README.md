@@ -88,10 +88,10 @@ The UI can be configured using the following environment variables:
 
 ### Storage Settings
 
-| Environment Variable   | Default Value | Description                                        |
-| ---------------------- | ------------- | -------------------------------------------------- |
-| STORAGE_TYPE           | `local`       | Storage type for chat history                      |
-| STORAGE_CONNECTION_URL | -             | Connection URL for storage (required for postgres) |
+| Environment Variable | Default Value | Description                                             |
+| -------------------- | ------------- | ------------------------------------------------------- |
+| STORAGE_TYPE         | `local`       | Storage type for chat history                           |
+| DB_CONNECTION_URL    | -             | Connection URL for the database (required for postgres) |
 
 Examples:
 
