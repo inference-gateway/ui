@@ -9,11 +9,11 @@ assignees: ''
 
 ## Summary
 
-<!-- Provide a brief description of the feature you want to request. -->
+<!-- Provide a brief description of the refactor you want to request. -->
 
 ### Acceptance Criteria
 
-<!-- List the criteria that must be met for this feature to be considered complete. -->
+<!-- List the criteria that must be met for this refactor to be considered complete. -->
 
 - [ ] Criterion 1
 - [ ] Criterion 2
