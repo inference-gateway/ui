@@ -25,6 +25,8 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | d
 # Install specific npm version
 RUN npm install -g npm@11.2.0
 
+RUN npm install -g @anthropic-ai/claude-code
+
 # Install global npm packages
 RUN su node -c "npm install -g next typescript"
 

@@ -16,8 +16,7 @@
         "ms-vscode.vscode-typescript-next",
         "dsznajder.es7-react-js-snippets",
         "github.vscode-github-actions",
-        "github.vscode-pull-request-github",
-        "orta.vscode-jest"
+        "github.vscode-pull-request-github"
       ],
       "settings": {
         "editor.formatOnSave": true,
@@ -41,14 +40,6 @@
           "authProvider": "github"
         },
         "github.copilot.chat.codeGeneration.useInstructionFiles": true,
-        "github.copilot.chat.codeGeneration.instructions": [
-          {
-            "file": ".github/copilot-instructions.md"
-          },
-          {
-            "file": "../README.md"
-          }
-        ],
         "github.copilot.chat.commitMessageGeneration.instructions": [
           {
             "text": "Always use conventional commit message format."
