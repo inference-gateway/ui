@@ -31,9 +31,23 @@ export interface StorageService {
 
 export enum StorageType {
   LOCAL = 'local',
+  // Future storage types can be added here:
+  // DATABASE = 'database',
+  // REDIS = 'redis',
+  // SUPABASE = 'supabase',
+}
+
+export interface StorageConfig {
+  type: string;
+  // Future storage configurations can be added here
+  // database?: DatabaseConfig;
+  // redis?: RedisConfig;
 }
 
 export interface StorageOptions {
-  storageType?: StorageType;
+  storageType?: StorageType | string;
   userId?: string;
+  // Future options can be added here
+  // connectionString?: string;
+  // apiKey?: string;
 }

@@ -88,9 +88,9 @@ The UI can be configured using the following environment variables:
 
 ### Storage Settings
 
-| Environment Variable                          | Default Value | Description                   |
-| --------------------------------------------- | ------------- | ----------------------------- |
-| NEXT_PUBLIC_INFERENCE_GATEWAY_UI_STORAGE_TYPE | `local`       | Storage type for chat history |
+| Environment Variable | Default Value | Description                   |
+| -------------------- | ------------- | ----------------------------- |
+| STORAGE_TYPE         | `local`       | Storage type for chat history |
 
 ### Authentication Settings
 

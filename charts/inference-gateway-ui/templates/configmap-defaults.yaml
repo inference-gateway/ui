@@ -13,7 +13,7 @@ data:
   LOG_LEVEL: {{ .Values.config.LOG_LEVEL | quote }}
   NEXT_PUBLIC_LOG_LEVEL: {{ .Values.config.NEXT_PUBLIC_LOG_LEVEL | quote }}
   # Storage
-  NEXT_PUBLIC_INFERENCE_GATEWAY_UI_STORAGE_TYPE: {{ .Values.config.NEXT_PUBLIC_INFERENCE_GATEWAY_UI_STORAGE_TYPE | quote }}
+  STORAGE_TYPE: {{ .Values.config.STORAGE_TYPE | quote }}
   # Authentication General Settings
   ENABLE_AUTH: {{ .Values.config.ENABLE_AUTH | quote }}
   SECURE_COOKIES: {{ .Values.config.SECURE_COOKIES | quote }}
