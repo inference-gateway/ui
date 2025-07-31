@@ -52,6 +52,7 @@ The Inference Gateway UI is a Next.js application that provides a user-friendly 
 - 🧰 **Tool Support**: Enables AI models to use tools, including web search capability
 - 🔍 **Web Search**: Integrated web search functionality for models to retrieve current information
 - 🔒 **Authentication**: Optional authentication using NextAuth.js
+- 🛡️ **Rate Limiting**: Configurable rate limiting for public deployments and abuse prevention
 - 📱 **Responsive Design**: Works on desktop and mobile devices
 - 🐳 **Docker Support**: Easy containerization and deployment
 - ☸️ **Kubernetes Ready**: Includes configurations for Kubernetes deployment
@@ -84,6 +85,36 @@ The UI can be configured using the following environment variables:
 | INFERENCE_GATEWAY_URL | `http://localhost:8080/v1` | URL of the Inference Gateway API |
 | LOG_LEVEL             | `debug`                    | Server-side logging level        |
 | NEXT_PUBLIC_LOG_LEVEL | `debug`                    | Client-side logging level        |
+
+### Rate Limiting Settings
+
+| Environment Variable    | Default Value | Description                                               |
+| ----------------------- | ------------- | --------------------------------------------------------- |
+| ENABLE_RATE_LIMITING    | `false`       | Enable rate limiting for all API endpoints                |
+| RATE_LIMIT_WINDOW_MS    | `60000`       | Time window in milliseconds (default: 1 minute)           |
+| RATE_LIMIT_MAX_REQUESTS | `60`          | Maximum requests per window (default: 60 requests/minute) |
+
+**Rate Limiting Configuration:**
+
+Rate limiting can be enabled for public deployments to prevent abuse. When enabled, it applies to all API endpoints and tracks requests by client IP address (using `x-forwarded-for` or `x-real-ip` headers when available).
+
+Example configurations:
+
+- **Development**: Rate limiting disabled (default)
+- **Public playground**: 30 requests per minute
+  ```
+  ENABLE_RATE_LIMITING=true
+  RATE_LIMIT_WINDOW_MS=60000
+  RATE_LIMIT_MAX_REQUESTS=30
+  ```
+- **Production**: 100 requests per minute
+  ```
+  ENABLE_RATE_LIMITING=true
+  RATE_LIMIT_WINDOW_MS=60000
+  RATE_LIMIT_MAX_REQUESTS=100
+  ```
+
+When rate limits are exceeded, clients receive a `429 Too Many Requests` response with appropriate headers indicating when they can retry.
 
 ### Storage Settings
 
