@@ -1,11 +1,7 @@
 'use client';
 
-function generateUniqueId(prefix = ''): string {
-  return `${prefix}${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
-}
-
 import { useIsMobile } from '@/hooks/use-mobile';
-import { cn } from '@/lib/utils';
+import { cn, generateUUID } from '@/lib/utils';
 import { ChatHistory } from '@/components/chat-history';
 import { ChatArea } from '@/components/chat-area';
 import { InputArea } from '@/components/input-area';
@@ -13,9 +9,8 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { ChatHeader } from '@/components/chat-header';
 import { ChevronLeft, Menu } from 'lucide-react';
 import { Session } from 'next-auth';
-import { Message, MessageRole, ChatSession, StorageType } from '@/types/chat';
+import { Message, MessageRole, ChatSession, StorageConfig } from '@/types/chat';
 import { StorageServiceFactory } from '@/lib/storage';
-import { useStorageConfig } from '@/hooks/use-storage-config';
 import { WebSearchTool, FetchPageTool } from '@/lib/tools';
 import logger from '@/lib/logger';
 import {
@@ -29,9 +24,10 @@ export const dynamic = 'force-dynamic';
 
 export interface PageClientProps {
   session?: Session | null;
+  storageConfig: StorageConfig;
 }
 
-export default function PageClient({ session }: PageClientProps) {
+export default function PageClient({ session, storageConfig }: PageClientProps) {
   // State variables
   const isMobile = useIsMobile();
   const isDarkMode = true;
@@ -57,18 +53,8 @@ export default function PageClient({ session }: PageClientProps) {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const clientInstance = useRef<InferenceGatewayClient | null>(null);
 
-  // Storage configuration
-  const { config: storageConfig } = useStorageConfig();
-
   // Storage service
   const storageService = useMemo(() => {
-    if (!storageConfig) {
-      return StorageServiceFactory.createService({
-        storageType: StorageType.LOCAL,
-        userId: session?.user?.id,
-      });
-    }
-
     return StorageServiceFactory.createService({
       storageType: storageConfig.type,
       userId: session?.user?.id,
@@ -145,7 +131,7 @@ export default function PageClient({ session }: PageClientProps) {
         }
 
         if (sessions.length === 0) {
-          const newChatId = Date.now().toString();
+          const newChatId = generateUUID();
           const newChat: ChatSession = {
             id: newChatId,
             title: 'New Chat',
@@ -158,6 +144,7 @@ export default function PageClient({ session }: PageClientProps) {
             },
           };
           sessions = [newChat];
+
           await storageService.saveChatSessions(sessions);
           await storageService.saveActiveChatId(newChatId);
         }
@@ -197,31 +184,67 @@ export default function PageClient({ session }: PageClientProps) {
     loadChatData();
   }, [storageService]);
 
-  // Save chat data when it changes
-  useEffect(() => {
-    const saveChatData = async () => {
-      try {
-        const updatedSessions = chatSessions.map(chat => {
-          if (chat.id === activeChatId) {
-            return { ...chat, messages, tokenUsage };
-          }
-          return chat;
-        });
+  // Debounced save to prevent excessive API calls
+  const debouncedSaveRef = useRef<NodeJS.Timeout | null>(null);
 
-        await storageService.saveChatSessions(updatedSessions);
-        await storageService.saveActiveChatId(activeChatId);
-      } catch (error) {
-        logger.error('Failed to save chat data', {
-          error: error instanceof Error ? error.message : error,
-          stack: error instanceof Error ? error.stack : undefined,
-        });
+  const saveChatData = useCallback(
+    async (immediate = false) => {
+      if (debouncedSaveRef.current) {
+        clearTimeout(debouncedSaveRef.current);
+        debouncedSaveRef.current = null;
+      }
+
+      const performSave = async () => {
+        try {
+          if (!activeChatId || chatSessions.length === 0) {
+            return;
+          }
+
+          const updatedSessions = chatSessions.map(chat => {
+            if (chat.id === activeChatId) {
+              return { ...chat, messages, tokenUsage };
+            }
+            return chat;
+          });
+
+          if (storageService.saveChatData) {
+            await storageService.saveChatData(updatedSessions, activeChatId);
+          } else {
+            await storageService.saveChatSessions(updatedSessions);
+            if (activeChatId) {
+              await storageService.saveActiveChatId(activeChatId);
+            }
+          }
+        } catch (error) {
+          logger.error('Failed to save chat data', {
+            error: error instanceof Error ? error.message : error,
+            stack: error instanceof Error ? error.stack : undefined,
+          });
+        }
+      };
+
+      if (immediate) {
+        await performSave();
+      } else {
+        debouncedSaveRef.current = setTimeout(performSave, 1000);
+      }
+    },
+    [activeChatId, chatSessions, messages, tokenUsage, storageService]
+  );
+
+  useEffect(() => {
+    if (activeChatId && chatSessions.length > 0) {
+      saveChatData(false);
+    }
+  }, [messages, chatSessions, activeChatId, tokenUsage, saveChatData]);
+
+  useEffect(() => {
+    return () => {
+      if (debouncedSaveRef.current) {
+        clearTimeout(debouncedSaveRef.current);
       }
     };
-
-    if (activeChatId && chatSessions.length > 0) {
-      saveChatData();
-    }
-  }, [messages, chatSessions, activeChatId, tokenUsage, storageService]);
+  }, []);
 
   useEffect(() => {
     const saveSelectedModel = async () => {
@@ -235,7 +258,7 @@ export default function PageClient({ session }: PageClientProps) {
 
   const handleNewChat = useCallback(async () => {
     try {
-      const newChatId = Date.now().toString();
+      const newChatId = generateUUID();
       const newChat: ChatSession = {
         id: newChatId,
         title: 'New Chat',
@@ -257,8 +280,7 @@ export default function PageClient({ session }: PageClientProps) {
         total_tokens: 0,
       });
 
-      await storageService.saveChatSessions([newChat, ...chatSessions]);
-      await storageService.saveActiveChatId(newChatId);
+      await saveChatData(true);
     } catch (error) {
       logger.error('Failed to create new chat', {
         error: error instanceof Error ? error.message : error,
@@ -266,7 +288,7 @@ export default function PageClient({ session }: PageClientProps) {
       });
       setError('Failed to create new chat');
     }
-  }, [chatSessions, storageService]);
+  }, [saveChatData]);
 
   const handleSelectChat = useCallback(
     (chatId: string) => {
@@ -305,7 +327,7 @@ export default function PageClient({ session }: PageClientProps) {
           );
         }
 
-        await storageService.saveChatSessions(updatedSessions);
+        await saveChatData(true);
       } catch (error) {
         logger.error('Failed to delete chat', {
           error: error instanceof Error ? error.message : error,
@@ -314,7 +336,7 @@ export default function PageClient({ session }: PageClientProps) {
         setError('Failed to delete chat');
       }
     },
-    [chatSessions, activeChatId, storageService]
+    [chatSessions, activeChatId, saveChatData]
   );
 
   const handleClearChat = useCallback(async () => {
@@ -343,7 +365,7 @@ export default function PageClient({ session }: PageClientProps) {
         total_tokens: 0,
       });
 
-      await storageService.saveChatSessions(updatedSessions);
+      await saveChatData(true);
     } catch (error) {
       logger.error('Failed to clear chat', {
         error: error instanceof Error ? error.message : error,
@@ -351,7 +373,7 @@ export default function PageClient({ session }: PageClientProps) {
       });
       setError('Failed to clear chat');
     }
-  }, [activeChatId, chatSessions, storageService]);
+  }, [activeChatId, chatSessions, saveChatData]);
 
   const toggleWebSearch = useCallback(() => {
     setIsWebSearchEnabled(prev => !prev);
@@ -382,7 +404,7 @@ export default function PageClient({ session }: PageClientProps) {
       setError(null);
 
       try {
-        const userMessageId = generateUniqueId('user-');
+        const userMessageId = generateUUID();
         const userMessage: Message = {
           id: userMessageId,
           role: MessageRole.user,
@@ -464,7 +486,7 @@ export default function PageClient({ session }: PageClientProps) {
         );
 
         setChatSessions(finalUpdatedSessions);
-        await storageService.saveChatSessions(finalUpdatedSessions);
+        await saveChatData(true);
       } catch (error) {
         logger.error('Failed to send message', {
           error: error instanceof Error ? error.message : error,
@@ -485,7 +507,7 @@ export default function PageClient({ session }: PageClientProps) {
       selectedModel,
       isWebSearchEnabled,
       tokenUsage,
-      storageService,
+      saveChatData,
     ]
   );
 

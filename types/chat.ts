@@ -27,6 +27,7 @@ export interface StorageService {
   getSelectedModel(): Promise<string>;
   saveSelectedModel(model: string): Promise<void>;
   clear(): Promise<void>;
+  saveChatData?(sessions: ChatSession[], activeChatId?: string): Promise<void>;
 }
 
 export enum StorageType {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import Chat from '@/app/chat/page-client';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -68,8 +68,9 @@ jest.mock('next-auth/react', () => ({
 }));
 
 describe('Home Component', () => {
-  const mockHandleSendMessage = jest.fn();
-  const mockSetSelectedModel = jest.fn();
+  const mockStorageConfig = {
+    type: 'local',
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -82,7 +83,7 @@ describe('Home Component', () => {
 
   test('renders the main components', async () => {
     await act(async () => {
-      render(<Chat />);
+      render(<Chat storageConfig={mockStorageConfig} />);
     });
 
     expect(screen.getByTestId('mock-model-selector')).toBeInTheDocument();
