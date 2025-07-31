@@ -83,15 +83,14 @@ The UI can be configured using the following environment variables:
 | PORT                  | `3000`                  | Port to run the application on   |
 | HOSTNAME              | `0.0.0.0`               | Hostname to bind to              |
 | INFERENCE_GATEWAY_URL | `http://localhost:8080` | URL of the Inference Gateway API |
-| LOG_LEVEL             | `debug`                 | Server-side logging level        |
-| NEXT_PUBLIC_LOG_LEVEL | `debug`                 | Client-side logging level        |
+| LOG_LEVEL             | `debug`                 | Logging level for both client and server-side code (defaults to 'debug' in development, 'info' in production) |
 
 ### Storage Settings
 
-| Environment Variable | Default Value | Description                                             |
-| -------------------- | ------------- | ------------------------------------------------------- |
-| STORAGE_TYPE         | `local`       | Storage type for chat history                           |
-| DB_CONNECTION_URL    | -             | Connection URL for the database (required for postgres) |
+| Environment Variable   | Default Value | Description                                        |
+| ---------------------- | ------------- | -------------------------------------------------- |
+| STORAGE_TYPE           | `local`       | Storage type for chat history                      |
+| STORAGE_CONNECTION_URL | -             | Connection URL for storage (required for postgres) |
 
 Examples:
 

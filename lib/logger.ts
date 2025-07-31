@@ -10,18 +10,14 @@ interface Logger {
 }
 
 const getLogLevel = (): LogLevel => {
-  if (typeof window === 'undefined') {
-    // Server-side - use environment variables if available
-    const env = process.env.NODE_ENV || 'production';
-    return (
-      process.env.LOG_LEVEL ||
-      process.env.NEXT_PUBLIC_LOG_LEVEL ||
-      (env === 'production' ? 'info' : 'debug')
-    ).toLowerCase() as LogLevel;
-  } else {
-    // Client-side - use NEXT_PUBLIC_LOG_LEVEL or default
-    return (process.env.NEXT_PUBLIC_LOG_LEVEL || 'info').toLowerCase() as LogLevel;
-  }
+  const env = process.env.NODE_ENV || 'production';
+  
+  // Unified LOG_LEVEL for both client and server
+  const logLevel = process.env.LOG_LEVEL || 
+                   process.env.NEXT_PUBLIC_LOG_LEVEL || // Backwards compatibility
+                   (env === 'production' ? 'info' : 'debug');
+  
+  return logLevel.toLowerCase() as LogLevel;
 };
 
 const createLogger = (logLevel: LogLevel): Logger => {
@@ -64,3 +60,7 @@ const createLogger = (logLevel: LogLevel): Logger => {
 const logger = createLogger(getLogLevel());
 
 export default logger;
+
+// Export functions for testing
+export const getLogLevelForTesting = getLogLevel;
+export const createLoggerForTesting = createLogger;
