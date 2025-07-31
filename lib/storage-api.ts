@@ -136,6 +136,28 @@ export class ApiStorageService implements StorageService {
     }
   }
 
+  /**
+   * Batched save operation to reduce API calls
+   * Saves chat sessions and active chat ID in sequence to maintain data consistency
+   */
+  async saveChatData(chatSessions: ChatSession[], activeChatId?: string): Promise<void> {
+    try {
+      await this.saveChatSessions(chatSessions);
+
+      if (activeChatId) {
+        await this.saveActiveChatId(activeChatId);
+      }
+    } catch (error) {
+      logger.error('Failed to save chat data via API', {
+        error: error instanceof Error ? error.message : error,
+        userId: this.userId,
+        sessionCount: chatSessions.length,
+        activeChatId,
+      });
+      throw error;
+    }
+  }
+
   async clear(): Promise<void> {
     try {
       await Promise.all([
