@@ -22,6 +22,7 @@ The Inference Gateway UI is a Next.js application that provides a user-friendly 
 
 ## Table of Contents
 
+- [Table of Contents](#table-of-contents)
 - [Key Features](#key-features)
 - [Development](#development)
 - [Configuration](#configuration)
@@ -76,14 +77,14 @@ The UI can be configured using the following environment variables:
 
 ### General Settings
 
-| Environment Variable  | Default Value              | Description                      |
-| --------------------- | -------------------------- | -------------------------------- |
-| NODE_ENV              | `development`              | Node environment                 |
-| PORT                  | `3000`                     | Port to run the application on   |
-| HOSTNAME              | `0.0.0.0`                  | Hostname to bind to              |
-| INFERENCE_GATEWAY_URL | `http://localhost:8080/v1` | URL of the Inference Gateway API |
-| LOG_LEVEL             | `debug`                    | Server-side logging level        |
-| NEXT_PUBLIC_LOG_LEVEL | `debug`                    | Client-side logging level        |
+| Environment Variable  | Default Value           | Description                      |
+| --------------------- | ----------------------- | -------------------------------- |
+| NODE_ENV              | `development`           | Node environment                 |
+| PORT                  | `3000`                  | Port to run the application on   |
+| HOSTNAME              | `0.0.0.0`               | Hostname to bind to              |
+| INFERENCE_GATEWAY_URL | `http://localhost:8080` | URL of the Inference Gateway API |
+| LOG_LEVEL             | `debug`                 | Server-side logging level        |
+| NEXT_PUBLIC_LOG_LEVEL | `debug`                 | Client-side logging level        |
 
 ### Storage Settings
 
@@ -120,7 +121,7 @@ docker pull ghcr.io/inference-gateway/ui:latest
 
 # Run the container with the pre-built image
 docker run -p 3000:3000 \
-  -e INFERENCE_GATEWAY_URL=http://localhost:8080/v1 \
+  -e INFERENCE_GATEWAY_URL=http://localhost:8080 \
   ghcr.io/inference-gateway/ui:latest
 ```
 
@@ -133,7 +134,7 @@ docker build -t inference-gateway-ui --target dev .
 # Run the container with the locally built image
 docker run -p 3000:3000 \
   -v $(pwd):/app \
-  -e INFERENCE_GATEWAY_URL=http://localhost:8080/v1 \
+  -e INFERENCE_GATEWAY_URL=http://localhost:8080 \
   inference-gateway-ui
 ```
 
@@ -181,7 +182,7 @@ helm upgrade --install inference-gateway-ui \
   --namespace inference-gateway \
   --set gateway.enabled=false \
   --set-string "env[0].name=INFERENCE_GATEWAY_URL" \
-  --set-string "env[0].value=http://your-gateway-service:8080/v1"
+  --set-string "env[0].value=http://your-gateway-service:8080"
 ```
 
 #### 3. Deployment with Ingress for External Access
