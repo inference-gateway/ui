@@ -98,8 +98,6 @@ Examples:
 - **Local storage** (default): No connection URL needed
 - **PostgreSQL**: `postgresql://username:password@host:port/database`
 
-> **📚 For detailed PostgreSQL setup instructions, schema information, and configuration options, see [PostgreSQL Storage Documentation](docs/POSTGRES_STORAGE.md)**
-
 ### Authentication Settings
 
 | Environment Variable           | Default Value           | Description                                |
