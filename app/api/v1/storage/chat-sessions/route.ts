@@ -14,7 +14,7 @@ export async function GET() {
     }
 
     const storageType = (process.env.STORAGE_TYPE as StorageType) || StorageType.LOCAL;
-    const connectionUrl = process.env.DATABASE_URL;
+    const connectionUrl = process.env.DB_CONNECTION_URL;
 
     const userId = session?.user?.id || (enableAuth ? undefined : 'default-user');
 
@@ -47,9 +47,8 @@ export async function POST(request: NextRequest) {
     const { chatSessions } = await request.json();
 
     const storageType = (process.env.STORAGE_TYPE as StorageType) || StorageType.LOCAL;
-    const connectionUrl = process.env.DATABASE_URL;
+    const connectionUrl = process.env.DB_CONNECTION_URL;
 
-    // Use a default user ID when authentication is disabled to ensure data isolation still works
     const userId = session?.user?.id || (enableAuth ? undefined : 'default-user');
 
     const storageService = ServerStorageServiceFactory.createService({

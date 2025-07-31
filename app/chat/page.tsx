@@ -22,7 +22,7 @@ export default async function Page() {
 
   const storageConfig: StorageConfig = {
     type: process.env.STORAGE_TYPE || 'local',
-    ...(process.env.DATABASE_URL && { connectionUrl: process.env.DATABASE_URL }),
+    ...(process.env.DB_CONNECTION_URL && { connectionUrl: process.env.DB_CONNECTION_URL }),
   };
 
   logger.debug('Server-side storage configuration', {

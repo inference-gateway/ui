@@ -18,7 +18,6 @@ export class PostgresStorageService implements StorageService {
       throw new Error('PostgreSQL connection URL is required');
     }
 
-    // Get configuration from environment variables with fallbacks
     const maxConnections = parseInt(process.env.DB_POOL_SIZE || '10', 10);
     const idleTimeout = parseInt(process.env.DB_IDLE_TIMEOUT || '30000', 10);
     const connectionTimeout = parseInt(process.env.DB_CONNECTION_TIMEOUT || '2000', 10);
@@ -136,7 +135,6 @@ export class PostgresStorageService implements StorageService {
   }
 
   async saveChatSessions(sessions: ChatSession[]): Promise<void> {
-
     const client = await this.getConnection();
 
     try {
@@ -277,7 +275,6 @@ export class PostgresStorageService implements StorageService {
   }
 
   async saveActiveChatId(id: string): Promise<void> {
-
     const client = await this.getConnection();
     try {
       await client.query('BEGIN');
@@ -365,7 +362,6 @@ export class PostgresStorageService implements StorageService {
   }
 
   async saveSelectedModel(model: string): Promise<void> {
-
     const client = await this.getConnection();
     try {
       const query = `

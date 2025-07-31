@@ -51,7 +51,7 @@ The `.env.frontend` file should include:
 STORAGE_TYPE=postgres
 
 # Database connection
-DATABASE_URL=postgresql://postgres:password@postgres:5432/inference_gateway
+DB_CONNECTION_URL=postgresql://postgres:password@postgres:5432/inference_gateway
 
 # Database connection pool configuration (optional)
 DB_POOL_SIZE=10
@@ -89,7 +89,7 @@ If you encounter database connection errors:
 
 1. Ensure the PostgreSQL container is healthy: `docker-compose ps`
 2. Check the database logs: `docker-compose logs postgres`
-3. Verify the `DATABASE_URL` in your `.env.frontend` file matches the database configuration
+3. Verify the `DB_CONNECTION_URL` in your `.env.frontend` file matches the database configuration
 
 ### Schema Issues
 
@@ -107,14 +107,14 @@ For production deployments, consider the following security enhancements:
 
 #### SSL/TLS Configuration
 
-Enable SSL connections by updating your `DATABASE_URL`:
+Enable SSL connections by updating your `DB_CONNECTION_URL`:
 
 ```env
 # Enable SSL connection (production)
-DATABASE_URL=postgresql://postgres:password@postgres:5432/inference_gateway?sslmode=require
+DB_CONNECTION_URL=postgresql://postgres:password@postgres:5432/inference_gateway?sslmode=require
 
 # For self-signed certificates (development only)
-DATABASE_URL=postgresql://postgres:password@postgres:5432/inference_gateway?sslmode=require&sslcert=client-cert.pem&sslkey=client-key.pem&sslrootcert=ca-cert.pem
+DB_CONNECTION_URL=postgresql://postgres:password@postgres:5432/inference_gateway?sslmode=require&sslcert=client-cert.pem&sslkey=client-key.pem&sslrootcert=ca-cert.pem
 ```
 
 #### Database Authentication
@@ -139,11 +139,11 @@ The PostgreSQL storage service uses prepared statements for all database operati
 
 ### Environment Variables Reference
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `DB_POOL_SIZE` | `10` | Maximum number of database connections |
-| `DB_IDLE_TIMEOUT` | `30000` | Idle connection timeout (ms) |
-| `DB_CONNECTION_TIMEOUT` | `2000` | Connection establishment timeout (ms) |
+| Variable                | Default | Description                            |
+| ----------------------- | ------- | -------------------------------------- |
+| `DB_POOL_SIZE`          | `10`    | Maximum number of database connections |
+| `DB_IDLE_TIMEOUT`       | `30000` | Idle connection timeout (ms)           |
+| `DB_CONNECTION_TIMEOUT` | `2000`  | Connection establishment timeout (ms)  |
 
 ## Manual Database Access
 

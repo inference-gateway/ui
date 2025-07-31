@@ -284,7 +284,9 @@ describe('PostgresStorageService', () => {
 
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // BEGIN
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // upsert
-      mockClient.query.mockResolvedValueOnce({ rows: [{ id: '550e8400-e29b-41d4-a716-446655440003' }] });
+      mockClient.query.mockResolvedValueOnce({
+        rows: [{ id: '550e8400-e29b-41d4-a716-446655440003' }],
+      });
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // COMMIT
 
       const activeChatId = await service.getActiveChatId();
@@ -307,7 +309,9 @@ describe('PostgresStorageService', () => {
       // Mock the saveActiveChatId calls (BEGIN, upsert, check, COMMIT)
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // BEGIN
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // upsert
-      mockClient.query.mockResolvedValueOnce({ rows: [{ id: '550e8400-e29b-41d4-a716-446655440004' }] }); // check
+      mockClient.query.mockResolvedValueOnce({
+        rows: [{ id: '550e8400-e29b-41d4-a716-446655440004' }],
+      }); // check
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // COMMIT
 
       await service.saveActiveChatId('550e8400-e29b-41d4-a716-446655440004');
@@ -326,14 +330,14 @@ describe('PostgresStorageService', () => {
         userId: 'user-123',
       });
 
-      // Mock the saveActiveChatId calls where session doesn't exist yet
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // BEGIN
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // upsert
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // check (no session found)
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // COMMIT
 
-      // Should not throw error, just log warning
-      await expect(service.saveActiveChatId('550e8400-e29b-41d4-a716-446655440005')).resolves.not.toThrow();
+      await expect(
+        service.saveActiveChatId('550e8400-e29b-41d4-a716-446655440005')
+      ).resolves.not.toThrow();
 
       expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
       expect(mockClient.query).toHaveBeenCalledWith('COMMIT');

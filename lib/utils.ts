@@ -17,4 +17,3 @@ export function isServer(): boolean {
 export function generateUUID(): string {
   return uuidv4();
 }
-
