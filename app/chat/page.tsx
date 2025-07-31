@@ -2,6 +2,7 @@ import PageClient from './page-client';
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import logger from '@/lib/logger';
+import type { StorageConfig } from '@/types/chat';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,5 +20,16 @@ export default async function Page() {
     redirect('/auth/signin?error=Session expired, please sign in again');
   }
 
-  return <PageClient session={session} />;
+  const storageConfig: StorageConfig = {
+    type: process.env.STORAGE_TYPE || 'local',
+    ...(process.env.DATABASE_URL && { connectionUrl: process.env.DATABASE_URL }),
+  };
+
+  logger.debug('Server-side storage configuration', {
+    storageType: storageConfig.type,
+    hasConnectionUrl: !!storageConfig.connectionUrl,
+    userId: session?.user?.id,
+  });
+
+  return <PageClient session={session} storageConfig={storageConfig} />;
 }

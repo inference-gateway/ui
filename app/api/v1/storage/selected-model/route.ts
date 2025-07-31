@@ -16,9 +16,11 @@ export async function GET() {
     const storageType = (process.env.STORAGE_TYPE as StorageType) || StorageType.LOCAL;
     const connectionUrl = process.env.DATABASE_URL;
 
+    const userId = session?.user?.id || (enableAuth ? undefined : 'default-user');
+
     const storageService = ServerStorageServiceFactory.createService({
       storageType,
-      userId: session?.user?.id,
+      userId,
       connectionUrl,
     });
 
@@ -47,9 +49,12 @@ export async function POST(request: NextRequest) {
     const storageType = (process.env.STORAGE_TYPE as StorageType) || StorageType.LOCAL;
     const connectionUrl = process.env.DATABASE_URL;
 
+    // Use a default user ID when authentication is disabled to ensure data isolation still works
+    const userId = session?.user?.id || (enableAuth ? undefined : 'default-user');
+
     const storageService = ServerStorageServiceFactory.createService({
       storageType,
-      userId: session?.user?.id,
+      userId,
       connectionUrl,
     });
 

@@ -1,11 +1,7 @@
 'use client';
 
-function generateUniqueId(prefix = ''): string {
-  return `${prefix}${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
-}
-
 import { useIsMobile } from '@/hooks/use-mobile';
-import { cn } from '@/lib/utils';
+import { cn, generateUUID } from '@/lib/utils';
 import { ChatHistory } from '@/components/chat-history';
 import { ChatArea } from '@/components/chat-area';
 import { InputArea } from '@/components/input-area';
@@ -13,9 +9,8 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { ChatHeader } from '@/components/chat-header';
 import { ChevronLeft, Menu } from 'lucide-react';
 import { Session } from 'next-auth';
-import { Message, MessageRole, ChatSession, StorageType } from '@/types/chat';
+import { Message, MessageRole, ChatSession, StorageConfig } from '@/types/chat';
 import { StorageServiceFactory } from '@/lib/storage';
-import { useStorageConfig } from '@/hooks/use-storage-config';
 import { WebSearchTool, FetchPageTool } from '@/lib/tools';
 import logger from '@/lib/logger';
 import {
@@ -29,9 +24,10 @@ export const dynamic = 'force-dynamic';
 
 export interface PageClientProps {
   session?: Session | null;
+  storageConfig: StorageConfig;
 }
 
-export default function PageClient({ session }: PageClientProps) {
+export default function PageClient({ session, storageConfig }: PageClientProps) {
   // State variables
   const isMobile = useIsMobile();
   const isDarkMode = true;
@@ -57,18 +53,8 @@ export default function PageClient({ session }: PageClientProps) {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const clientInstance = useRef<InferenceGatewayClient | null>(null);
 
-  // Storage configuration
-  const { config: storageConfig } = useStorageConfig();
-
   // Storage service
   const storageService = useMemo(() => {
-    if (!storageConfig) {
-      return StorageServiceFactory.createService({
-        storageType: StorageType.LOCAL,
-        userId: session?.user?.id,
-      });
-    }
-
     return StorageServiceFactory.createService({
       storageType: storageConfig.type,
       userId: session?.user?.id,
@@ -145,7 +131,7 @@ export default function PageClient({ session }: PageClientProps) {
         }
 
         if (sessions.length === 0) {
-          const newChatId = Date.now().toString();
+          const newChatId = generateUUID();
           const newChat: ChatSession = {
             id: newChatId,
             title: 'New Chat',
@@ -158,6 +144,7 @@ export default function PageClient({ session }: PageClientProps) {
             },
           };
           sessions = [newChat];
+
           await storageService.saveChatSessions(sessions);
           await storageService.saveActiveChatId(newChatId);
         }
@@ -208,8 +195,13 @@ export default function PageClient({ session }: PageClientProps) {
           return chat;
         });
 
+        // Save sessions first to ensure the chat session exists in the database
         await storageService.saveChatSessions(updatedSessions);
-        await storageService.saveActiveChatId(activeChatId);
+
+        // Only save active chat ID if it's valid (not empty)
+        if (activeChatId) {
+          await storageService.saveActiveChatId(activeChatId);
+        }
       } catch (error) {
         logger.error('Failed to save chat data', {
           error: error instanceof Error ? error.message : error,
@@ -235,7 +227,7 @@ export default function PageClient({ session }: PageClientProps) {
 
   const handleNewChat = useCallback(async () => {
     try {
-      const newChatId = Date.now().toString();
+      const newChatId = generateUUID();
       const newChat: ChatSession = {
         id: newChatId,
         title: 'New Chat',
@@ -257,6 +249,7 @@ export default function PageClient({ session }: PageClientProps) {
         total_tokens: 0,
       });
 
+      // Save sessions first, then set the active chat ID
       await storageService.saveChatSessions([newChat, ...chatSessions]);
       await storageService.saveActiveChatId(newChatId);
     } catch (error) {
@@ -382,7 +375,7 @@ export default function PageClient({ session }: PageClientProps) {
       setError(null);
 
       try {
-        const userMessageId = generateUniqueId('user-');
+        const userMessageId = generateUUID();
         const userMessage: Message = {
           id: userMessageId,
           role: MessageRole.user,

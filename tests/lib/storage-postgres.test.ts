@@ -176,7 +176,7 @@ describe('PostgresStorageService', () => {
 
       expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
       expect(mockClient.query).toHaveBeenCalledWith(
-        'DELETE FROM chat_sessions WHERE user_id = $1',
+        'SELECT id FROM chat_sessions WHERE user_id = $1',
         ['user-123']
       );
       expect(mockClient.query).toHaveBeenCalledWith(
@@ -281,7 +281,11 @@ describe('PostgresStorageService', () => {
           },
         ],
       });
-      mockClient.query.mockResolvedValueOnce({ rows: [] });
+
+      mockClient.query.mockResolvedValueOnce({ rows: [] }); // BEGIN
+      mockClient.query.mockResolvedValueOnce({ rows: [] }); // upsert
+      mockClient.query.mockResolvedValueOnce({ rows: [{ id: 'first-session' }] });
+      mockClient.query.mockResolvedValueOnce({ rows: [] }); // COMMIT
 
       const activeChatId = await service.getActiveChatId();
 
@@ -300,14 +304,39 @@ describe('PostgresStorageService', () => {
         userId: 'user-123',
       });
 
-      mockClient.query.mockResolvedValue({ rows: [] });
+      // Mock the saveActiveChatId calls (BEGIN, upsert, check, COMMIT)
+      mockClient.query.mockResolvedValueOnce({ rows: [] }); // BEGIN
+      mockClient.query.mockResolvedValueOnce({ rows: [] }); // upsert
+      mockClient.query.mockResolvedValueOnce({ rows: [{ id: 'new-active-id' }] }); // check
+      mockClient.query.mockResolvedValueOnce({ rows: [] }); // COMMIT
 
       await service.saveActiveChatId('new-active-id');
 
+      expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
       expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO user_preferences'),
         ['user-123', 'new-active-id']
       );
+      expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
+    });
+
+    it('should handle race condition when session does not exist yet', async () => {
+      const service = new PostgresStorageService({
+        connectionUrl: 'postgresql://test',
+        userId: 'user-123',
+      });
+
+      // Mock the saveActiveChatId calls where session doesn't exist yet
+      mockClient.query.mockResolvedValueOnce({ rows: [] }); // BEGIN
+      mockClient.query.mockResolvedValueOnce({ rows: [] }); // upsert
+      mockClient.query.mockResolvedValueOnce({ rows: [] }); // check (no session found)
+      mockClient.query.mockResolvedValueOnce({ rows: [] }); // COMMIT
+
+      // Should not throw error, just log warning
+      await expect(service.saveActiveChatId('non-existent-id')).resolves.not.toThrow();
+
+      expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
+      expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
     });
   });
 

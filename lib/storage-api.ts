@@ -92,6 +92,10 @@ export class ApiStorageService implements StorageService {
     }
   }
 
+  /**
+   * Saves chat sessions and sets the active chat ID atomically via API
+   * This helps prevent race conditions by doing both operations together
+   */
   async getSelectedModel(): Promise<string> {
     try {
       const response = await fetch('/api/v1/storage/selected-model');

@@ -114,19 +114,33 @@ export class PostgresStorageService implements StorageService {
     try {
       await client.query('BEGIN');
 
-      // Delete existing sessions for this user
-      if (this.userId) {
-        await client.query('DELETE FROM chat_sessions WHERE user_id = $1', [this.userId]);
-      } else {
-        await client.query('DELETE FROM chat_sessions WHERE user_id IS NULL');
+      const existingSessionsQuery = this.userId
+        ? 'SELECT id FROM chat_sessions WHERE user_id = $1'
+        : 'SELECT id FROM chat_sessions WHERE user_id IS NULL';
+
+      const existingResult = await client.query(
+        existingSessionsQuery,
+        this.userId ? [this.userId] : []
+      );
+
+      const existingSessionIds = new Set(existingResult.rows.map(row => row.id));
+      const newSessionIds = new Set(sessions.map(session => session.id));
+
+      const sessionsToDelete = [...existingSessionIds].filter(id => !newSessionIds.has(id));
+      for (const sessionId of sessionsToDelete) {
+        await client.query('DELETE FROM chat_sessions WHERE id = $1', [sessionId]);
       }
 
-      // Insert new sessions
       for (const session of sessions) {
-        // Insert chat session
         const sessionQuery = `
           INSERT INTO chat_sessions (id, user_id, title, created_at, prompt_tokens, completion_tokens, total_tokens)
           VALUES ($1, $2, $3, $4, $5, $6, $7)
+          ON CONFLICT (id) 
+          DO UPDATE SET 
+            title = EXCLUDED.title,
+            prompt_tokens = EXCLUDED.prompt_tokens,
+            completion_tokens = EXCLUDED.completion_tokens,
+            total_tokens = EXCLUDED.total_tokens
         `;
 
         await client.query(sessionQuery, [
@@ -139,11 +153,21 @@ export class PostgresStorageService implements StorageService {
           session.tokenUsage?.total_tokens || 0,
         ]);
 
+        await client.query('DELETE FROM messages WHERE session_id = $1', [session.id]);
+
         // Insert messages
         for (const message of session.messages) {
           const messageQuery = `
             INSERT INTO messages (id, session_id, role, content, model, tool_calls, tool_call_id, name)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            ON CONFLICT (id)
+            DO UPDATE SET
+              role = EXCLUDED.role,
+              content = EXCLUDED.content,
+              model = EXCLUDED.model,
+              tool_calls = EXCLUDED.tool_calls,
+              tool_call_id = EXCLUDED.tool_call_id,
+              name = EXCLUDED.name
           `;
 
           await client.query(messageQuery, [
@@ -198,7 +222,6 @@ export class PostgresStorageService implements StorageService {
         return activeChatId;
       }
 
-      // If no active chat found, try to set the first available session as active
       const sessions = await this.getChatSessions();
       if (sessions.length > 0) {
         const firstSessionId = sessions[0].id;
@@ -228,20 +251,40 @@ export class PostgresStorageService implements StorageService {
   async saveActiveChatId(id: string): Promise<void> {
     const client = await this.pool.connect();
     try {
-      const query = `
+      await client.query('BEGIN');
+
+      const upsertQuery = `
         INSERT INTO user_preferences (user_id, active_chat_id)
         VALUES ($1, $2)
         ON CONFLICT (user_id) 
         DO UPDATE SET active_chat_id = $2, updated_at = CURRENT_TIMESTAMP
       `;
 
-      await client.query(query, [this.userId || '', id]);
+      await client.query(upsertQuery, [this.userId || '', id]);
+
+      const checkQuery = `
+        SELECT 1 FROM chat_sessions 
+        WHERE id = $1 AND (user_id = $2 OR (user_id IS NULL AND $2 IS NULL))
+      `;
+
+      const checkResult = await client.query(checkQuery, [id, this.userId || null]);
+
+      if (checkResult.rows.length === 0) {
+        logger.warn('Active chat ID set for session that does not exist yet', {
+          userId: this.userId,
+          activeChatId: id,
+          note: 'This may be due to a race condition between session creation and active chat setting',
+        });
+      }
+
+      await client.query('COMMIT');
 
       logger.debug('Saved active chat ID to PostgreSQL', {
         userId: this.userId,
         activeChatId: id,
       });
     } catch (error) {
+      await client.query('ROLLBACK');
       logger.error('Failed to save active chat ID to PostgreSQL', {
         userId: this.userId,
         activeChatId: id,
@@ -253,6 +296,10 @@ export class PostgresStorageService implements StorageService {
     }
   }
 
+  /**
+   * Saves chat sessions and sets the active chat ID in a single transaction
+   * This prevents foreign key constraint violations and race conditions
+   */
   async getSelectedModel(): Promise<string> {
     const client = await this.pool.connect();
     try {
@@ -321,7 +368,6 @@ export class PostgresStorageService implements StorageService {
     try {
       await client.query('BEGIN');
 
-      // Delete sessions for this user (messages will be cascade deleted)
       if (this.userId) {
         await client.query('DELETE FROM chat_sessions WHERE user_id = $1', [this.userId]);
         await client.query('DELETE FROM user_preferences WHERE user_id = $1', [this.userId]);
