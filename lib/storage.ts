@@ -8,7 +8,7 @@ export class StorageServiceFactory {
     logger.debug('Creating storage service', {
       storageType: options?.storageType || 'default (local)',
     });
-    
+
     switch (options?.storageType) {
       case StorageType.SUPABASE:
         return new SupabaseStorageService(options);

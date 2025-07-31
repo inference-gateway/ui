@@ -94,9 +94,7 @@ export class SupabaseStorageService implements StorageService {
         },
       }));
 
-      const { error } = await this.supabase
-        .from('chat_sessions')
-        .upsert(supabaseSessions);
+      const { error } = await this.supabase.from('chat_sessions').upsert(supabaseSessions);
 
       if (error) {
         logger.error('Failed to save chat sessions to Supabase', { error, userId: this.userId });
@@ -121,7 +119,8 @@ export class SupabaseStorageService implements StorageService {
         .eq('user_id', this.userId)
         .single();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+      if (error && error.code !== 'PGRST116') {
+        // PGRST116 is "not found"
         logger.error('Failed to get active chat ID from Supabase', { error, userId: this.userId });
         return '';
       }
@@ -137,12 +136,10 @@ export class SupabaseStorageService implements StorageService {
 
   async saveActiveChatId(id: string): Promise<void> {
     try {
-      const { error } = await this.supabase
-        .from('user_preferences')
-        .upsert({
-          user_id: this.userId,
-          active_chat_id: id,
-        });
+      const { error } = await this.supabase.from('user_preferences').upsert({
+        user_id: this.userId,
+        active_chat_id: id,
+      });
 
       if (error) {
         logger.error('Failed to save active chat ID to Supabase', { error, userId: this.userId });
@@ -164,7 +161,8 @@ export class SupabaseStorageService implements StorageService {
         .eq('user_id', this.userId)
         .single();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+      if (error && error.code !== 'PGRST116') {
+        // PGRST116 is "not found"
         logger.error('Failed to get selected model from Supabase', { error, userId: this.userId });
         return '';
       }
@@ -180,12 +178,10 @@ export class SupabaseStorageService implements StorageService {
 
   async saveSelectedModel(model: string): Promise<void> {
     try {
-      const { error } = await this.supabase
-        .from('user_preferences')
-        .upsert({
-          user_id: this.userId,
-          selected_model: model,
-        });
+      const { error } = await this.supabase.from('user_preferences').upsert({
+        user_id: this.userId,
+        selected_model: model,
+      });
 
       if (error) {
         logger.error('Failed to save selected model to Supabase', { error, userId: this.userId });
@@ -208,9 +204,9 @@ export class SupabaseStorageService implements StorageService {
         .eq('user_id', this.userId);
 
       if (sessionsError) {
-        logger.error('Failed to clear chat sessions from Supabase', { 
-          error: sessionsError, 
-          userId: this.userId 
+        logger.error('Failed to clear chat sessions from Supabase', {
+          error: sessionsError,
+          userId: this.userId,
         });
       }
 
@@ -221,9 +217,9 @@ export class SupabaseStorageService implements StorageService {
         .eq('user_id', this.userId);
 
       if (preferencesError) {
-        logger.error('Failed to clear user preferences from Supabase', { 
-          error: preferencesError, 
-          userId: this.userId 
+        logger.error('Failed to clear user preferences from Supabase', {
+          error: preferencesError,
+          userId: this.userId,
         });
       }
 
