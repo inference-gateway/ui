@@ -148,7 +148,7 @@ config:
   NODE_ENV: "production"
   PORT: "3000"
   HOSTNAME: "0.0.0.0"
-  INFERENCE_GATEWAY_URL: "http://inference-gateway:8080/v1"
+  INFERENCE_GATEWAY_URL: "http://inference-gateway:8080"
   LOG_LEVEL: "info"
   NEXT_PUBLIC_LOG_LEVEL: "info"
   # Authentication General Settings
@@ -158,7 +158,7 @@ config:
   NEXTAUTH_TRUST_HOST: "true"
   NEXTAUTH_REFRESH_TOKEN_ENABLED: "true"
   # Storage
-  NEXT_PUBLIC_INFERENCE_GATEWAY_UI_STORAGE_TYPE: "local"
+  STORAGE_TYPE: "local"
 
 # Controls whether to deploy the inference-gateway backend along with the UI
 gateway:

@@ -6,11 +6,8 @@ import {
 import { Message, MessageRole } from '@/types/chat';
 import { SYSTEM_PROMPT } from '@/lib/constants';
 import { ToolHandlers } from '@/lib/tools';
+import { generateUUID } from '@/lib/utils';
 import logger from '@/lib/logger';
-
-function generateUniqueId(prefix = ''): string {
-  return `${prefix}${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
-}
 
 interface AgentRunnerOptions {
   model: string;
@@ -40,7 +37,7 @@ export async function runAgentLoop({
   const toolCalls: SchemaChatCompletionMessageToolCall[] = [];
   let currentMessages = [...messages];
 
-  const assistantMessageId = generateUniqueId('assistant-');
+  const assistantMessageId = generateUUID();
   const assistantMessage: Message = {
     id: assistantMessageId,
     role: MessageRole.assistant,
@@ -106,11 +103,11 @@ export async function runAgentLoop({
             await onMCPToolAction(toolCall);
           }
 
-          const toolMessageId = generateUniqueId('tool-');
+          const toolMessageId = generateUUID();
           const toolMessage: Message = {
             id: toolMessageId,
             role: MessageRole.tool,
-            content: 'MCP tool action executed',
+            content: 'Tool action executed on the backend', // TODO - properly send the response from the backend to the client so it could be displayed nicely
             tool_call_id: toolCall.id,
           };
 
@@ -199,7 +196,7 @@ async function executeToolAndResume(
 
   const toolResult = await handler.call(args);
 
-  const toolMessageId = generateUniqueId('tool-');
+  const toolMessageId = generateUUID();
   const toolMessage: Message = {
     id: toolMessageId,
     role: MessageRole.tool,

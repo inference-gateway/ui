@@ -1,6 +1,73 @@
 import { jest } from '@jest/globals';
 import '@testing-library/jest-dom';
 import React from 'react';
+import { TextEncoder, TextDecoder } from 'util';
+
+global.TextEncoder = TextEncoder as unknown as typeof global.TextEncoder;
+global.TextDecoder = TextDecoder as unknown as typeof global.TextDecoder;
+
+global.Request = class MockRequest {
+  url: string;
+  method: string;
+  headers: Map<string, string>;
+
+  constructor(input: string | URL, init: RequestInit = {}) {
+    this.url = typeof input === 'string' ? input : input.toString();
+    this.method = init.method || 'GET';
+    this.headers = new Map(Object.entries((init.headers as Record<string, string>) || {}));
+  }
+} as unknown as typeof Request;
+
+global.Response = class MockResponse {
+  body: BodyInit | null;
+  status: number;
+  headers: Map<string, string>;
+  ok: boolean;
+
+  constructor(body: BodyInit | null, init: ResponseInit = {}) {
+    this.body = body;
+    this.status = init.status || 200;
+    this.headers = new Map(Object.entries((init.headers as Record<string, string>) || {}));
+    this.ok = this.status >= 200 && this.status < 300;
+  }
+
+  async json() {
+    if (typeof this.body === 'string') {
+      return JSON.parse(this.body);
+    }
+    return this.body;
+  }
+
+  async text() {
+    return typeof this.body === 'string' ? this.body : JSON.stringify(this.body);
+  }
+
+  static json(data: unknown, init: ResponseInit = {}) {
+    return new MockResponse(JSON.stringify(data), {
+      ...init,
+      headers: {
+        'content-type': 'application/json',
+        ...((init.headers as Record<string, string>) || {}),
+      },
+    });
+  }
+} as unknown as typeof Response;
+
+(global as Record<string, unknown>).NextResponse = {
+  json: (data: unknown, init: ResponseInit = {}) => {
+    const MockResponseClass = global.Response as unknown as new (
+      body: string,
+      init: ResponseInit
+    ) => Response;
+    return new MockResponseClass(JSON.stringify(data), {
+      ...init,
+      headers: {
+        'content-type': 'application/json',
+        ...((init.headers as Record<string, string>) || {}),
+      },
+    });
+  },
+};
 
 jest.useFakeTimers();
 

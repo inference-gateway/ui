@@ -27,13 +27,21 @@ export interface StorageService {
   getSelectedModel(): Promise<string>;
   saveSelectedModel(model: string): Promise<void>;
   clear(): Promise<void>;
+  saveChatData?(sessions: ChatSession[], activeChatId?: string): Promise<void>;
 }
 
 export enum StorageType {
   LOCAL = 'local',
+  POSTGRES = 'postgres',
+}
+
+export interface StorageConfig {
+  type: string;
+  connectionUrl?: string;
 }
 
 export interface StorageOptions {
-  storageType?: StorageType;
+  storageType?: StorageType | string;
   userId?: string;
+  connectionUrl?: string;
 }

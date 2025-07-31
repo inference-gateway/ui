@@ -22,6 +22,7 @@ The Inference Gateway UI is a Next.js application that provides a user-friendly 
 
 ## Table of Contents
 
+- [Table of Contents](#table-of-contents)
 - [Key Features](#key-features)
 - [Development](#development)
 - [Configuration](#configuration)
@@ -77,14 +78,14 @@ The UI can be configured using the following environment variables:
 
 ### General Settings
 
-| Environment Variable  | Default Value              | Description                      |
-| --------------------- | -------------------------- | -------------------------------- |
-| NODE_ENV              | `development`              | Node environment                 |
-| PORT                  | `3000`                     | Port to run the application on   |
-| HOSTNAME              | `0.0.0.0`                  | Hostname to bind to              |
-| INFERENCE_GATEWAY_URL | `http://localhost:8080/v1` | URL of the Inference Gateway API |
-| LOG_LEVEL             | `debug`                    | Server-side logging level        |
-| NEXT_PUBLIC_LOG_LEVEL | `debug`                    | Client-side logging level        |
+| Environment Variable  | Default Value           | Description                      |
+| --------------------- | ----------------------- | -------------------------------- |
+| NODE_ENV              | `development`           | Node environment                 |
+| PORT                  | `3000`                  | Port to run the application on   |
+| HOSTNAME              | `0.0.0.0`               | Hostname to bind to              |
+| INFERENCE_GATEWAY_URL | `http://localhost:8080` | URL of the Inference Gateway API |
+| LOG_LEVEL             | `debug`                 | Server-side logging level        |
+| NEXT_PUBLIC_LOG_LEVEL | `debug`                 | Client-side logging level        |
 
 ### Rate Limiting Settings
 
@@ -118,9 +119,15 @@ When rate limits are exceeded, clients receive a `429 Too Many Requests` respons
 
 ### Storage Settings
 
-| Environment Variable                          | Default Value | Description                   |
-| --------------------------------------------- | ------------- | ----------------------------- |
-| NEXT_PUBLIC_INFERENCE_GATEWAY_UI_STORAGE_TYPE | `local`       | Storage type for chat history |
+| Environment Variable   | Default Value | Description                                        |
+| ---------------------- | ------------- | -------------------------------------------------- |
+| STORAGE_TYPE           | `local`       | Storage type for chat history                      |
+| STORAGE_CONNECTION_URL | -             | Connection URL for storage (required for postgres) |
+
+Examples:
+
+- **Local storage** (default): No connection URL needed
+- **PostgreSQL**: `postgresql://username:password@host:port/database`
 
 ### Authentication Settings
 
@@ -151,7 +158,7 @@ docker pull ghcr.io/inference-gateway/ui:latest
 
 # Run the container with the pre-built image
 docker run -p 3000:3000 \
-  -e INFERENCE_GATEWAY_URL=http://localhost:8080/v1 \
+  -e INFERENCE_GATEWAY_URL=http://localhost:8080 \
   ghcr.io/inference-gateway/ui:latest
 ```
 
@@ -164,7 +171,7 @@ docker build -t inference-gateway-ui --target dev .
 # Run the container with the locally built image
 docker run -p 3000:3000 \
   -v $(pwd):/app \
-  -e INFERENCE_GATEWAY_URL=http://localhost:8080/v1 \
+  -e INFERENCE_GATEWAY_URL=http://localhost:8080 \
   inference-gateway-ui
 ```
 
@@ -212,7 +219,7 @@ helm upgrade --install inference-gateway-ui \
   --namespace inference-gateway \
   --set gateway.enabled=false \
   --set-string "env[0].name=INFERENCE_GATEWAY_URL" \
-  --set-string "env[0].value=http://your-gateway-service:8080/v1"
+  --set-string "env[0].value=http://your-gateway-service:8080"
 ```
 
 #### 3. Deployment with Ingress for External Access

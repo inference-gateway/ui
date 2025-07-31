@@ -1,0 +1,105 @@
+version: "3"
+
+vars:
+  NODE_ENV: '{{.NODE_ENV | default "development"}}'
+
+tasks:
+  dev:
+    desc: Start the Next.js development server
+    cmd: npm run dev
+
+  build:
+    desc: Build the application for production
+    cmd: npm run build
+
+  start:
+    desc: Start the production server
+    cmd: npm run start
+
+  format:
+    desc: Format code using Prettier
+    cmd: npm run format
+
+  format:check:
+    desc: Check code formatting without making changes
+    cmd: npm run format:check
+
+  lint:
+    desc: Run ESLint to check for code quality issues
+    cmd: npm run lint
+
+  lint:fix:
+    desc: Automatically fix linting issues
+    cmd: npm run lint:fix
+
+  typecheck:
+    desc: Run TypeScript type checks
+    cmd: npm run typecheck
+
+  test:
+    desc: Run tests using Jest
+    cmd: npm run test
+
+  test:watch:
+    desc: Run tests in watch mode
+    cmd: npm run test:watch
+
+  test:fast:
+    desc: Run tests in series (faster for CI)
+    cmd: npm run test:fast
+
+  test:ci:
+    desc: Run tests for continuous integration
+    cmd: npm run test:ci
+
+  test:coverage:
+    desc: Run tests with coverage report
+    cmd: npm run test:coverage
+
+  test:clear-cache:
+    desc: Clear Jest cache
+    cmd: npm run test:clear-cache
+
+  oas-download:
+    desc: Download the latest OpenAPI specification
+    cmd: npm run oas-download
+
+  prepare:
+    desc: Prepare project (install Git hooks)
+    cmd: npm run prepare
+
+  ci:
+    desc: Run all CI checks (lint, typecheck, test)
+    deps:
+      - lint
+      - typecheck
+      - test:ci
+
+  quality:
+    desc: Run all code quality checks
+    deps:
+      - format:check
+      - lint
+      - typecheck
+
+  install:
+    desc: Install dependencies
+    cmd: npm install
+
+  clean:
+    desc: Clean build artifacts and node_modules
+    cmds:
+      - rm -rf .next
+      - rm -rf node_modules
+      - rm -rf coverage
+
+  setup:
+    desc: Setup the project for development
+    cmds:
+      - task: install
+      - task: prepare
+
+  tidy:
+    desc: Run go mod tidy on all examples
+    cmds:
+      - find . -name 'go.mod' -execdir go mod tidy \;
