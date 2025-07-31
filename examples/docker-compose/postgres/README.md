@@ -129,13 +129,13 @@ DATABASE_URL=postgresql://postgres:password@postgres:5432/inference_gateway?sslm
 - Configure timeouts to prevent connection hanging
 - Monitor connection pool metrics in production
 
-#### Input Validation
+#### SQL Injection Protection
 
-The PostgreSQL storage service includes built-in input validation:
+The PostgreSQL storage service uses prepared statements for all database operations:
 
-- UUID validation for session and message IDs
-- String length limits and SQL injection prevention
-- Safe string validation for user inputs
+- All queries use parameterized statements via the `pg` driver
+- Automatic SQL injection prevention through proper parameter binding
+- No need for manual input validation as the database handles type safety
 
 ### Environment Variables Reference
 

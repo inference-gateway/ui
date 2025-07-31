@@ -1,6 +1,5 @@
 import { Pool } from 'pg';
 import logger from '@/lib/logger';
-import { isValidUUID, isSafeString } from '@/lib/utils';
 import type { StorageOptions, StorageService, Message } from '@/types/chat';
 import { ChatSession } from '@/types/chat';
 
@@ -14,11 +13,6 @@ export class PostgresStorageService implements StorageService {
 
   constructor(options?: StorageOptions) {
     this.userId = options?.userId;
-
-    // Validate user ID if provided
-    if (this.userId && !isValidUUID(this.userId) && !isSafeString(this.userId, 255)) {
-      throw new Error('Invalid user ID format - must be a valid UUID or safe string');
-    }
 
     if (!options?.connectionUrl) {
       throw new Error('PostgreSQL connection URL is required');
@@ -142,28 +136,6 @@ export class PostgresStorageService implements StorageService {
   }
 
   async saveChatSessions(sessions: ChatSession[]): Promise<void> {
-    // Validate input sessions
-    for (const session of sessions) {
-      if (!isValidUUID(session.id)) {
-        throw new Error(`Invalid session ID format: ${session.id}`);
-      }
-      if (!isSafeString(session.title, 500)) {
-        throw new Error(`Invalid session title: ${session.title}`);
-      }
-      
-      // Validate messages
-      for (const message of session.messages) {
-        if (!isValidUUID(message.id)) {
-          throw new Error(`Invalid message ID format: ${message.id}`);
-        }
-        if (message.content && !isSafeString(message.content, 50000)) {
-          throw new Error(`Invalid message content for message ${message.id}`);
-        }
-        if (message.model && !isSafeString(message.model, 100)) {
-          throw new Error(`Invalid model name: ${message.model}`);
-        }
-      }
-    }
 
     const client = await this.getConnection();
 
@@ -305,10 +277,6 @@ export class PostgresStorageService implements StorageService {
   }
 
   async saveActiveChatId(id: string): Promise<void> {
-    // Validate input
-    if (!isValidUUID(id)) {
-      throw new Error(`Invalid chat ID format: ${id}`);
-    }
 
     const client = await this.getConnection();
     try {
@@ -397,10 +365,6 @@ export class PostgresStorageService implements StorageService {
   }
 
   async saveSelectedModel(model: string): Promise<void> {
-    // Validate input
-    if (!isSafeString(model, 100)) {
-      throw new Error(`Invalid model name: ${model}`);
-    }
 
     const client = await this.getConnection();
     try {
