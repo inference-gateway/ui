@@ -15,12 +15,12 @@ CREATE TABLE IF NOT EXISTS chat_sessions (
     -- Token usage tracking
     prompt_tokens INTEGER DEFAULT 0,
     completion_tokens INTEGER DEFAULT 0,
-    total_tokens INTEGER DEFAULT 0,
-    
-    -- Index for faster queries
-    INDEX idx_chat_sessions_user_id (user_id),
-    INDEX idx_chat_sessions_created_at (created_at)
+    total_tokens INTEGER DEFAULT 0
 );
+
+-- Indexes for chat_sessions table
+CREATE INDEX IF NOT EXISTS idx_chat_sessions_user_id ON chat_sessions (user_id);
+CREATE INDEX IF NOT EXISTS idx_chat_sessions_created_at ON chat_sessions (created_at);
 
 -- Messages table
 CREATE TABLE IF NOT EXISTS messages (
@@ -34,12 +34,12 @@ CREATE TABLE IF NOT EXISTS messages (
     -- Additional message fields from inference gateway SDK
     tool_calls JSONB,
     tool_call_id VARCHAR(255),
-    name VARCHAR(255),
-    
-    -- Index for faster queries
-    INDEX idx_messages_session_id (session_id),
-    INDEX idx_messages_created_at (created_at)
+    name VARCHAR(255)
 );
+
+-- Indexes for messages table
+CREATE INDEX IF NOT EXISTS idx_messages_session_id ON messages (session_id);
+CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages (created_at);
 
 -- User preferences table
 CREATE TABLE IF NOT EXISTS user_preferences (
@@ -47,11 +47,11 @@ CREATE TABLE IF NOT EXISTS user_preferences (
     active_chat_id UUID REFERENCES chat_sessions(id) ON DELETE SET NULL,
     selected_model VARCHAR(255),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    
-    -- Index for faster queries
-    INDEX idx_user_preferences_active_chat_id (active_chat_id)
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Indexes for user_preferences table
+CREATE INDEX IF NOT EXISTS idx_user_preferences_active_chat_id ON user_preferences (active_chat_id);
 
 -- Trigger to update updated_at columns
 CREATE OR REPLACE FUNCTION update_updated_at_column()
