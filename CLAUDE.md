@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+IMPORTANT: Before starting any feature or task implementations, you have to run `npm run prepare` to install the git pre-commit hook.
+
 ## Development Commands
 
 - `npm run prepare` - Always run this first to set up the project with pre-commit hooks
