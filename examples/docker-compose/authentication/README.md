@@ -4,8 +4,8 @@ This example demonstrates how to set up and use the Inference Gateway UI with Au
 
 ## Prerequisites
 
-- Docker Engine 24.0+
-- Docker Compose 2.20+
+- Docker Engine 28.3.3-1+
+- Docker Compose 2.39.1+
 - Valid OAuth credentials from your provider(s)
 
 ## Setup Steps
@@ -17,37 +17,44 @@ cp .env.backend.example .env.backend
 cp .env.frontend.example .env.frontend
 ```
 
-2. Configure backend environment (.env.backend):
+2. Configure backend environment (.env.backend) set the providers and storage type.
+
+3. Configure frontend environment (.env.frontend):
 
 ```ini
 AUTH_ENABLE=true
-SECURE_COOKIES=false # Set to true if you are using HTTPS for production
+AUTH_SECURE_COOKIES=false # Set to true if you are using HTTPS for production
 NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=your-secure-random-salt
 NEXTAUTH_TRUST_HOST=true
 NEXTAUTH_REFRESH_TOKEN_ENABLED=true # Wether you want to use refresh tokens once the access token expires
 
 # OIDC Configuration
-AUTH_OIDC_CLIENT_ID=app-client
-AUTH_OIDC_CLIENT_SECRET=very-secret
-AUTH_OIDC_ISSUER=http://localhost:8080/realms/app-realm
-```
-
-3. Configure frontend environment (.env.frontend):
-
-```ini
-AUTH_ENABLE="true"
+AUTH_OIDC_KEYCLOAK_CLIENT_ID=app-client
+AUTH_OIDC_KEYCLOAK_CLIENT_SECRET=very-secret
+AUTH_OIDC_KEYCLOAK_ISSUER=http://localhost:8080/realms/app-realm
 ```
 
 4. Start the services:
 
 ```bash
-docker compose -f examples/docker-compose/authentication/docker-compose.yaml up -d
+docker compose up -d
 ```
 
 ## Accessing the Application
 
-- UI: http://localhost:3000
+- UI: `http://localhost:3000`
+
+You will be redirected to the signin page for login. After successful login, you will be redirected back to the application.
+
+In this example keycloak is used as an Identity Provider (IdP) that supports OIDC.
+
+username: `user`
+password: `password`
+
+** Check the keycloak/imprort/realm-config.json file for more details on how to import the realm configuration into keycloak. **
+** If you wish to add more identity providers, you can check the main README.md for the envrionment variables. **
+** Currently Keycloak, Google, and GitHub are supported. **
 
 ## Configuration Notes
 
@@ -63,5 +70,5 @@ docker compose -f examples/docker-compose/authentication/docker-compose.yaml up 
 View container logs:
 
 ```bash
-docker compose -f examples/docker-compose/authentication/docker-compose.yaml logs -f
+docker compose logs -f
 ```

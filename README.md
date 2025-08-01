@@ -102,7 +102,7 @@ Examples:
 | Environment Variable           | Default Value           | Description                                |
 | ------------------------------ | ----------------------- | ------------------------------------------ |
 | AUTH_ENABLE                    | `false`                 | Enable authentication                      |
-| SECURE_COOKIES                 | `false`                 | Use secure cookies (set to true for HTTPS) |
+| AUTH_SECURE_COOKIES            | `false`                 | Use secure cookies (set to true for HTTPS) |
 | NEXTAUTH_URL                   | `http://localhost:3000` | URL of this application (for NextAuth)     |
 | NEXTAUTH_SECRET                | -                       | Secret used to encrypt session cookies     |
 | NEXTAUTH_TRUST_HOST            | `true`                  | Trust the host header from the proxy       |
@@ -110,11 +110,30 @@ Examples:
 
 ### Keycloak Auth Provider
 
-| Environment Variable    | Default Value                            | Description        |
-| ----------------------- | ---------------------------------------- | ------------------ |
-| AUTH_OIDC_CLIENT_ID     | `app-client`                             | OIDC client ID     |
-| AUTH_OIDC_CLIENT_SECRET | -                                        | OIDC client secret |
-| AUTH_OIDC_ISSUER        | `http://localhost:8080/realms/app-realm` | OIDC issuer URL    |
+| Environment Variable             | Default Value                            | Description        |
+| -------------------------------- | ---------------------------------------- | ------------------ |
+| AUTH_OIDC_KEYCLOAK_CLIENT_ID     | `app-client`                             | OIDC client ID     |
+| AUTH_OIDC_KEYCLOAK_CLIENT_SECRET | -                                        | OIDC client secret |
+| AUTH_OIDC_KEYCLOAK_ISSUER        | `http://localhost:8080/realms/app-realm` | OIDC issuer URL    |
+| AUTH_OIDC_KEYCLOAK_SCOPES        | `openid profile email`                   | OIDC scopes        |
+
+### Github Auth Provider
+
+| Environment Variable           | Default Value                            | Description        |
+| ------------------------------ | ---------------------------------------- | ------------------ |
+| AUTH_OIDC_GITHUB_CLIENT_ID     | `app-client`                             | OIDC client ID     |
+| AUTH_OIDC_GITHUB_CLIENT_SECRET | -                                        | OIDC client secret |
+| AUTH_OIDC_GITHUB_ISSUER        | `http://localhost:8080/realms/app-realm` | OIDC issuer URL    |
+| AUTH_OIDC_GITHUB_SCOPES        | `read:user user:email`                   | OIDC scopes        |
+
+### Google Auth Provider
+
+| Environment Variable           | Default Value                                                                                     | Description        |
+| ------------------------------ | ------------------------------------------------------------------------------------------------- | ------------------ |
+| AUTH_OIDC_GOOGLE_CLIENT_ID     | `app-client`                                                                                      | OIDC client ID     |
+| AUTH_OIDC_GOOGLE_CLIENT_SECRET | -                                                                                                 | OIDC client secret |
+| AUTH_OIDC_GOOGLE_ISSUER        | `http://localhost:8080/realms/app-realm`                                                          | OIDC issuer URL    |
+| AUTH_OIDC_GOOGLE_SCOPES        | `https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile` | OIDC scopes        |
 
 ## Docker
 

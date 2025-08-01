@@ -374,9 +374,9 @@ tasks:
         type: Opaque
         stringData:
           NEXTAUTH_SECRET: dummy-secret
-          AUTH_OIDC_CLIENT_ID: inference-gateway-client
-          AUTH_OIDC_CLIENT_SECRET: very-secret
-          AUTH_OIDC_ISSUER: https://keycloak.inference-gateway.local/realms/inference-gateway-realm
+          AUTH_OIDC_KEYCLOAK_CLIENT_ID: inference-gateway-client
+          AUTH_OIDC_KEYCLOAK_CLIENT_SECRET: very-secret
+          AUTH_OIDC_KEYCLOAK_ISSUER: https://keycloak.inference-gateway.local/realms/inference-gateway-realm
         EOF
       - echo "Deploying UI with authentication..."
       - |
