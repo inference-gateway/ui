@@ -353,7 +353,9 @@ export function getEnabledProviders(): ProviderConfig[] {
       id: 'keycloak',
       name: 'Keycloak',
       enabled: Boolean(
-        process.env.AUTH_OIDC_CLIENT_ID && process.env.AUTH_OIDC_CLIENT_SECRET && process.env.AUTH_OIDC_ISSUER
+        process.env.AUTH_OIDC_CLIENT_ID &&
+          process.env.AUTH_OIDC_CLIENT_SECRET &&
+          process.env.AUTH_OIDC_ISSUER
       ),
       signinUrl: `/api/auth/signin/keycloak`,
       callbackUrl: `/api/auth/callback/keycloak`,

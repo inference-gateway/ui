@@ -110,11 +110,11 @@ Examples:
 
 ### Keycloak Auth Provider
 
-| Environment Variable | Default Value                            | Description            |
-| -------------------- | ---------------------------------------- | ---------------------- |
-| AUTH_OIDC_CLIENT_ID          | `app-client`                             | OIDC client ID     |
-| AUTH_OIDC_CLIENT_SECRET      | -                                        | OIDC client secret |
-| AUTH_OIDC_ISSUER      | `http://localhost:8080/realms/app-realm` | OIDC issuer URL    |
+| Environment Variable    | Default Value                            | Description        |
+| ----------------------- | ---------------------------------------- | ------------------ |
+| AUTH_OIDC_CLIENT_ID     | `app-client`                             | OIDC client ID     |
+| AUTH_OIDC_CLIENT_SECRET | -                                        | OIDC client secret |
+| AUTH_OIDC_ISSUER        | `http://localhost:8080/realms/app-realm` | OIDC issuer URL    |
 
 ## Docker
 
