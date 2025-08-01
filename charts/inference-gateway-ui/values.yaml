@@ -151,8 +151,8 @@ config:
   INFERENCE_GATEWAY_URL: "http://inference-gateway:8080"
   LOG_LEVEL: "info"
   # Authentication General Settings
-  ENABLE_AUTH: "true"
-  SECURE_COOKIES: "true"
+  AUTH_ENABLE: "false"
+  AUTH_SECURE_COOKIES: "true"
   NEXTAUTH_URL: "http://localhost:3000"
   NEXTAUTH_TRUST_HOST: "true"
   NEXTAUTH_REFRESH_TOKEN_ENABLED: "true"

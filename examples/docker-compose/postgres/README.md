@@ -60,7 +60,7 @@ DB_CONNECTION_TIMEOUT=2000
 
 # Other UI configuration
 INFERENCE_GATEWAY_URL=http://inference-gateway:8080
-ENABLE_AUTH=false
+AUTH_ENABLE=false
 ```
 
 ### Backend Environment Variables

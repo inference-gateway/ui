@@ -8,7 +8,7 @@ export async function GET() {
   try {
     const session = await auth();
 
-    const enableAuth = process.env.ENABLE_AUTH === 'true';
+    const enableAuth = process.env.AUTH_ENABLE === 'true';
     if (enableAuth && !session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await auth();
 
-    const enableAuth = process.env.ENABLE_AUTH === 'true';
+    const enableAuth = process.env.AUTH_ENABLE === 'true';
     if (enableAuth && !session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

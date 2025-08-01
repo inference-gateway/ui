@@ -3,7 +3,7 @@ import logger from '@/lib/logger';
 import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
-  const isAuthEnabled = process.env.ENABLE_AUTH === 'true';
+  const isAuthEnabled = process.env.AUTH_ENABLE === 'true';
   const session = isAuthEnabled ? await auth() : null;
 
   if (isAuthEnabled && !session) {

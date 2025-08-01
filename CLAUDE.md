@@ -74,7 +74,7 @@ The application uses a Next.js API layer (`/app/api`) that proxies requests to t
 
 ### Authentication
 
-Authentication is optional and controlled by `ENABLE_AUTH` environment variable. When enabled, uses NextAuth.js with Keycloak provider support.
+Authentication is optional and controlled by `AUTH_ENABLE` environment variable. When enabled, uses NextAuth.js with OIDC provider support.
 
 ## Development Standards
 
@@ -93,7 +93,7 @@ Authentication is optional and controlled by `ENABLE_AUTH` environment variable.
 Key environment variables for development:
 
 - `INFERENCE_GATEWAY_URL` - Backend API URL (default: http://localhost:8080)
-- `ENABLE_AUTH` - Enable authentication (default: false)
+- `AUTH_ENABLE` - Enable authentication (default: false)
 - `LOG_LEVEL` - Logging level for both client and server-side code (default: 'debug' in development, 'info' in production)
 
 ## Coding Conventions

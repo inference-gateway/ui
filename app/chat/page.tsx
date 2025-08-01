@@ -7,7 +7,7 @@ import type { StorageConfig } from '@/types/chat';
 export const dynamic = 'force-dynamic';
 
 export default async function Page() {
-  const isAuthEnabled = process.env.ENABLE_AUTH === 'true';
+  const isAuthEnabled = process.env.AUTH_ENABLE === 'true';
   const session = await auth();
 
   if (isAuthEnabled && !session) {

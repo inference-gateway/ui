@@ -2,7 +2,7 @@ import 'next-auth';
 
 declare module 'next-auth' {
   /**
-   * Injected to the client's components when ENABLE_AUTH is true
+   * Injected to the client's components when AUTH_ENABLE is true
    */
   interface Session {
     user?: {

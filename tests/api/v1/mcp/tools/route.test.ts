@@ -33,13 +33,13 @@ describe('/api/v1/mcp/tools GET', () => {
   });
 
   afterEach(() => {
-    delete process.env.ENABLE_AUTH;
+    delete process.env.AUTH_ENABLE;
     delete process.env.INFERENCE_GATEWAY_URL;
   });
 
   describe('authentication', () => {
-    it('should require authentication when ENABLE_AUTH is true', async () => {
-      process.env.ENABLE_AUTH = 'true';
+    it('should require authentication when AUTH_ENABLE is true', async () => {
+      process.env.AUTH_ENABLE = 'true';
       mockAuth.mockResolvedValue(null);
 
       const response = await GET();
@@ -49,8 +49,8 @@ describe('/api/v1/mcp/tools GET', () => {
       expect(data.error).toBe('Unauthorized');
     });
 
-    it('should allow access when ENABLE_AUTH is false', async () => {
-      process.env.ENABLE_AUTH = 'false';
+    it('should allow access when AUTH_ENABLE is false', async () => {
+      process.env.AUTH_ENABLE = 'false';
       process.env.INFERENCE_GATEWAY_URL = 'http://localhost:8080';
 
       const mockTools: ListToolsResponse = {
@@ -87,7 +87,7 @@ describe('/api/v1/mcp/tools GET', () => {
     });
 
     it('should allow access when authenticated', async () => {
-      process.env.ENABLE_AUTH = 'true';
+      process.env.AUTH_ENABLE = 'true';
       process.env.INFERENCE_GATEWAY_URL = 'http://localhost:8080';
 
       const mockSession = {
@@ -132,7 +132,7 @@ describe('/api/v1/mcp/tools GET', () => {
 
   describe('gateway integration', () => {
     beforeEach(() => {
-      process.env.ENABLE_AUTH = 'false';
+      process.env.AUTH_ENABLE = 'false';
       process.env.INFERENCE_GATEWAY_URL = 'http://localhost:8080';
     });
 
@@ -216,7 +216,7 @@ describe('/api/v1/mcp/tools GET', () => {
     });
 
     it('should create client with proper authentication headers', async () => {
-      process.env.ENABLE_AUTH = 'true';
+      process.env.AUTH_ENABLE = 'true';
       const mockSession = {
         user: { email: 'test@example.com' },
         accessToken: 'test-token',
@@ -240,7 +240,7 @@ describe('/api/v1/mcp/tools GET', () => {
 
   describe('error handling', () => {
     beforeEach(() => {
-      process.env.ENABLE_AUTH = 'false';
+      process.env.AUTH_ENABLE = 'false';
       process.env.INFERENCE_GATEWAY_URL = 'http://localhost:8080';
     });
 

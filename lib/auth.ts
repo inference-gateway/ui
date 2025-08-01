@@ -14,128 +14,69 @@ import type { NextRequest } from 'next/server';
  */
 async function refreshAccessToken(token: JWT): Promise<JWT> {
   try {
+    let url: string;
+    let clientId: string;
+    let clientSecret: string;
+
     switch (token.provider) {
-      case 'keycloak': {
-        const url = `${process.env.KEYCLOAK_ISSUER!}/protocol/openid-connect/token`;
-        logger.debug(`[Auth] Attempting to refresh Keycloak token at ${url}`);
-
-        const params = {
-          client_id: process.env.KEYCLOAK_ID!,
-          client_secret: process.env.KEYCLOAK_SECRET!,
-          grant_type: 'refresh_token',
-          refresh_token: token.refreshToken as string,
-        };
-
-        logger.debug('[Auth] Refresh token params:', {
-          client_id: params.client_id,
-          grant_type: params.grant_type,
-          refresh_token_length: token.refreshToken
-            ? `${(token.refreshToken as string).substring(0, 8)}...`
-            : 'undefined',
-        });
-
-        const response = await fetch(url, {
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          method: 'POST',
-          body: new URLSearchParams(params),
-        });
-
-        const refreshedTokens = await response.json();
-
-        if (!response.ok) {
-          logger.error('[Auth] Keycloak token refresh failed', {
-            status: response.status,
-            error: refreshedTokens.error,
-            error_description: refreshedTokens.error_description,
-          });
-          return {
-            ...token,
-            error: 'TokenExpiredError',
-          };
-        }
-
-        logger.debug('[Auth] Refreshed Keycloak access token successfully');
-
-        return {
-          ...token,
-          accessToken: refreshedTokens.access_token,
-          accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
-          refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
-        };
-      }
-      case 'google': {
-        const url = 'https://oauth2.googleapis.com/token';
-        const response = await fetch(url, {
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          method: 'POST',
-          body: new URLSearchParams({
-            client_id: process.env.GOOGLE_ID!,
-            client_secret: process.env.GOOGLE_SECRET!,
-            grant_type: 'refresh_token',
-            refresh_token: token.refreshToken as string,
-          }),
-        });
-
-        const refreshedTokens = await response.json();
-
-        if (!response.ok) {
-          logger.error('[Auth] Google token refresh failed', refreshedTokens);
-          return {
-            ...token,
-            error: 'TokenExpiredError',
-          };
-        }
-
-        logger.debug('[Auth] Refreshed Google access token');
-
-        return {
-          ...token,
-          accessToken: refreshedTokens.access_token,
-          accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
-          refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
-        };
-      }
-      case 'github': {
-        const url = 'https://github.com/login/oauth/access_token';
-        const response = await fetch(url, {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            Accept: 'application/json',
-          },
-          method: 'POST',
-          body: new URLSearchParams({
-            client_id: process.env.GITHUB_ID!,
-            client_secret: process.env.GITHUB_SECRET!,
-            grant_type: 'refresh_token',
-            refresh_token: token.refreshToken as string,
-          }),
-        });
-
-        const refreshedTokens = await response.json();
-
-        if (!response.ok) {
-          logger.error('[Auth] GitHub token refresh failed', refreshedTokens);
-          return {
-            ...token,
-            error: 'TokenExpiredError',
-          };
-        }
-
-        logger.debug('[Auth] Refreshed GitHub access token');
-
-        return {
-          ...token,
-          accessToken: refreshedTokens.access_token,
-          accessTokenExpires: Date.now() + (refreshedTokens.expires_in || 3600) * 1000,
-          refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
-        };
-      }
+      case 'keycloak':
+        url =
+          process.env.AUTH_OIDC_KEYCLOAK_ISSUER ||
+          `http://localhost:8080/protocol/openid-connect/token`;
+        clientId = process.env.AUTH_OIDC_KEYCLOAK_CLIENT_ID!;
+        clientSecret = process.env.AUTH_OIDC_KEYCLOAK_CLIENT_SECRET!;
+        break;
+      case 'google':
+        url = process.env.AUTH_OIDC_GOOGLE_ISSUER || 'https://oauth2.googleapis.com/token';
+        clientId = process.env.AUTH_OIDC_GOOGLE_CLIENT_ID!;
+        clientSecret = process.env.AUTH_OIDC_GOOGLE_CLIENT_SECRET!;
+        break;
+      case 'github':
+        url = process.env.AUTH_OIDC_GITHUB_ISSUER || 'https://github.com/login/oauth/access_token';
+        clientId = process.env.AUTH_OIDC_GITHUB_CLIENT_ID!;
+        clientSecret = process.env.AUTH_OIDC_GITHUB_CLIENT_SECRET!;
+        break;
       default:
-        return {
-          ...token,
-          error: 'RefreshAccessTokenError',
-        };
+        throw new Error(`Unsupported provider for token refresh: ${token.provider}`);
     }
+
+    logger.debug(`[Auth] Attempting to refresh ${token.provider} token at ${url}`);
+
+    const params = {
+      client_id: clientId,
+      client_secret: clientSecret,
+      grant_type: 'refresh_token',
+      refresh_token: token.refreshToken as string,
+    };
+
+    const response = await fetch(url, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      method: 'POST',
+      body: new URLSearchParams(params),
+    });
+
+    const refreshedTokens = await response.json();
+
+    if (!response.ok) {
+      logger.error(`[Auth] ${token.provider} token refresh failed`, {
+        status: response.status,
+        error: refreshedTokens.error,
+        error_description: refreshedTokens.error_description,
+      });
+      return {
+        ...token,
+        error: 'TokenExpiredError',
+      };
+    }
+
+    logger.debug(`[Auth] Refreshed ${token.provider} access token successfully`);
+
+    return {
+      ...token,
+      accessToken: refreshedTokens.access_token,
+      accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
+      refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
+    };
   } catch (error) {
     logger.error('[Auth] Error refreshing access token', error);
 
@@ -164,57 +105,84 @@ export const authConfig: NextAuthConfig = {
     signIn: '/auth/signin',
   },
   trustHost: true,
-  useSecureCookies: process.env.SECURE_COOKIES === 'true',
+  useSecureCookies: process.env.AUTH_SECURE_COOKIES === 'true',
   providers: [
-    Keycloak({
-      id: 'keycloak',
-      name: 'Keycloak',
-      clientId: process.env.KEYCLOAK_ID!,
-      clientSecret: process.env.KEYCLOAK_SECRET!,
-      issuer: process.env.KEYCLOAK_ISSUER!,
-      wellKnown: `${process.env.KEYCLOAK_ISSUER!}/.well-known/openid-configuration`,
-      authorization: {
-        params: {
-          scope: 'openid profile email roles',
-          response_type: 'code',
-        },
-      },
-      profile(profile) {
-        return {
-          id: profile.sub,
-          name: profile.name ?? profile.preferred_username,
-          email: profile.email,
-          image: profile.picture,
-        };
-      },
-    }),
-    GitHub({
-      clientId: process.env.GITHUB_ID!,
-      clientSecret: process.env.GITHUB_SECRET!,
-      authorization: {
-        params: {
-          scope: 'read:user user:email',
-        },
-      },
-    }),
-    Google({
-      clientId: process.env.GOOGLE_ID!,
-      clientSecret: process.env.GOOGLE_SECRET!,
-      authorization: {
-        params: {
-          prompt: 'consent',
-          access_type: 'offline',
-          response_type: 'code',
-          scope:
-            'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
-        },
-      },
-    }),
+    ...(process.env.AUTH_OIDC_KEYCLOAK_CLIENT_ID && process.env.AUTH_OIDC_KEYCLOAK_CLIENT_SECRET
+      ? [
+          Keycloak({
+            id: 'keycloak',
+            name: 'Keycloak',
+            clientId: process.env.AUTH_OIDC_KEYCLOAK_CLIENT_ID,
+            clientSecret: process.env.AUTH_OIDC_KEYCLOAK_CLIENT_SECRET,
+            issuer: process.env.AUTH_OIDC_KEYCLOAK_ISSUER!,
+            wellKnown:
+              process.env.AUTH_OIDC_KEYCLOAK_WELL_KNOWN ||
+              `${process.env.AUTH_OIDC_KEYCLOAK_ISSUER!}/.well-known/openid-configuration`,
+            authorization: {
+              params: {
+                scope: process.env.AUTH_OIDC_KEYCLOAK_SCOPES || 'openid profile email roles',
+                response_type: 'code',
+              },
+            },
+            profile(profile) {
+              return {
+                id: profile.sub,
+                name: profile.name ?? profile.preferred_username,
+                email: profile.email,
+                image: profile.picture,
+              };
+            },
+          }),
+        ]
+      : []),
+    ...(process.env.AUTH_OIDC_GITHUB_CLIENT_ID && process.env.AUTH_OIDC_GITHUB_CLIENT_SECRET
+      ? [
+          GitHub({
+            clientId: process.env.AUTH_OIDC_GITHUB_CLIENT_ID,
+            clientSecret: process.env.AUTH_OIDC_GITHUB_CLIENT_SECRET,
+            ...(process.env.AUTH_OIDC_GITHUB_ISSUER && {
+              issuer: process.env.AUTH_OIDC_GITHUB_ISSUER,
+              wellKnown:
+                process.env.AUTH_OIDC_GITHUB_WELL_KNOWN ||
+                `${process.env.AUTH_OIDC_GITHUB_ISSUER}/.well-known/openid-configuration`,
+            }),
+            authorization: {
+              params: {
+                scope: process.env.AUTH_OIDC_GITHUB_SCOPES || 'read:user user:email',
+              },
+            },
+          }),
+        ]
+      : []),
+    ...(process.env.AUTH_OIDC_GOOGLE_CLIENT_ID && process.env.AUTH_OIDC_GOOGLE_CLIENT_SECRET
+      ? [
+          Google({
+            clientId: process.env.AUTH_OIDC_GOOGLE_CLIENT_ID,
+            clientSecret: process.env.AUTH_OIDC_GOOGLE_CLIENT_SECRET,
+            ...(process.env.AUTH_OIDC_GOOGLE_ISSUER && {
+              issuer: process.env.AUTH_OIDC_GOOGLE_ISSUER,
+              wellKnown:
+                process.env.AUTH_OIDC_GOOGLE_WELL_KNOWN ||
+                `${process.env.AUTH_OIDC_GOOGLE_ISSUER}/.well-known/openid-configuration`,
+            }),
+            authorization: {
+              params: {
+                prompt: 'consent',
+                access_type: 'offline',
+                response_type: 'code',
+                scope:
+                  process.env.AUTH_OIDC_GOOGLE_SCOPES ||
+                  'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
+              },
+            },
+          }),
+        ]
+      : []),
   ],
   session: {
     strategy: 'jwt',
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET!,
   callbacks: {
     async jwt({ token, account, user }: { token: JWT; account?: Account | null; user?: User }) {
       if (account && user) {
@@ -249,7 +217,6 @@ export const authConfig: NextAuthConfig = {
         return token;
       }
 
-      // Token is 1 minute away from expiring, refresh it
       if (process.env.NEXTAUTH_REFRESH_TOKEN_ENABLED === 'true') {
         try {
           logger.debug('[Auth] Token expired or about to expire, refreshing...');
@@ -292,7 +259,7 @@ export const authConfig: NextAuthConfig = {
         httpOnly: true,
         sameSite: 'lax',
         path: '/',
-        secure: process.env.SECURE_COOKIES === 'true',
+        secure: process.env.AUTH_SECURE_COOKIES === 'true',
       },
     },
   },
@@ -314,7 +281,7 @@ type AuthHandlers = {
 };
 
 const createAuthHandlers = (): AuthHandlers => {
-  if (process.env.ENABLE_AUTH !== 'true') {
+  if (process.env.AUTH_ENABLE !== 'true') {
     return {
       GET: async () => new Response(null, { status: 404 }),
       POST: async () => new Response(null, { status: 404 }),
@@ -348,12 +315,12 @@ export type ProviderConfig = {
 };
 
 export function getEnabledProviders(): ProviderConfig[] {
-  return [
+  const providers = [
     {
       id: 'keycloak',
       name: 'Keycloak',
       enabled: Boolean(
-        process.env.KEYCLOAK_ID && process.env.KEYCLOAK_SECRET && process.env.KEYCLOAK_ISSUER
+        process.env.AUTH_OIDC_KEYCLOAK_CLIENT_ID && process.env.AUTH_OIDC_KEYCLOAK_CLIENT_SECRET
       ),
       signinUrl: `/api/auth/signin/keycloak`,
       callbackUrl: `/api/auth/callback/keycloak`,
@@ -361,16 +328,22 @@ export function getEnabledProviders(): ProviderConfig[] {
     {
       id: 'github',
       name: 'GitHub',
-      enabled: Boolean(process.env.GITHUB_ID && process.env.GITHUB_SECRET),
+      enabled: Boolean(
+        process.env.AUTH_OIDC_GITHUB_CLIENT_ID && process.env.AUTH_OIDC_GITHUB_CLIENT_SECRET
+      ),
       signinUrl: `/api/auth/signin/github`,
       callbackUrl: `/api/auth/callback/github`,
     },
     {
       id: 'google',
       name: 'Google',
-      enabled: Boolean(process.env.GOOGLE_ID && process.env.GOOGLE_SECRET),
+      enabled: Boolean(
+        process.env.AUTH_OIDC_GOOGLE_CLIENT_ID && process.env.AUTH_OIDC_GOOGLE_CLIENT_SECRET
+      ),
       signinUrl: `/api/auth/signin/google`,
       callbackUrl: `/api/auth/callback/google`,
     },
-  ].filter(provider => provider.enabled);
+  ];
+
+  return providers.filter(provider => provider.enabled);
 }
