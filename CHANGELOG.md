@@ -2,6 +2,48 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.9.0](https://github.com/inference-gateway/ui/compare/v0.8.1...v0.9.0) (2025-08-01)
+
+### ✨ Features
+
+* Add A2A Support to UI ([#43](https://github.com/inference-gateway/ui/issues/43)) - WIP ([8f2a1e0](https://github.com/inference-gateway/ui/commit/8f2a1e01a4114ec3ad70337f999044300f81a74a))
+* **storage:** Add PostgreSQL storage backend for conversation history ([#60](https://github.com/inference-gateway/ui/issues/60)) ([5b1bd5b](https://github.com/inference-gateway/ui/commit/5b1bd5b88b7a6c86be22f3f8a4117efc8b197b3d)), closes [#58](https://github.com/inference-gateway/ui/issues/58)
+
+### ♻️ Improvements
+
+* **auth:** Standardize environment variables to AUTH_ prefix ([#70](https://github.com/inference-gateway/ui/issues/70)) ([7c52071](https://github.com/inference-gateway/ui/commit/7c5207124eaa54c1377498020733e08ede6e6fe6)), closes [#59](https://github.com/inference-gateway/ui/issues/59)
+* **logging:** Consolidate LOG_LEVEL environment variables ([#68](https://github.com/inference-gateway/ui/issues/68)) ([6425ec7](https://github.com/inference-gateway/ui/commit/6425ec7e0c69cea6f966d5ab76e01814c2588a60))
+* **storage:** Rename STORAGE_CONNECTION_URL to DB_CONNECTION_URL in configuration and examples ([391a6f1](https://github.com/inference-gateway/ui/commit/391a6f1fa83d526fddb11578cea23f2a07d6e7fd))
+* **Storage:** Simplify environment variables by removing NextJS-specific prefixes ([#57](https://github.com/inference-gateway/ui/issues/57)) ([0c53b72](https://github.com/inference-gateway/ui/commit/0c53b725cd71e3d22a31fb90d5dc80b6ad033ed4)), closes [#56](https://github.com/inference-gateway/ui/issues/56)
+* Streamline feature request template by removing unnecessary prompts ([7cec0a4](https://github.com/inference-gateway/ui/commit/7cec0a41d02fa7c2883e1cdd1a599f6abb60d7be))
+* Sync the latest configurations from the latest inference gateway ([08acbf1](https://github.com/inference-gateway/ui/commit/08acbf1efd2771712ee6cdff54d988c8c22d9d28))
+
+### 👷 CI
+
+* Update Claude workflows to enhance issue comment handling and permissions ([c95989e](https://github.com/inference-gateway/ui/commit/c95989e328524ff7503e304a4d98454d0293ddeb))
+
+### 🔧 Miscellaneous
+
+* Add bug report template for improved issue tracking ([0d1bc04](https://github.com/inference-gateway/ui/commit/0d1bc0498674e3d607fa0f80f55abe1ae760adc9))
+* Add refactor request template for improved code refactoring process ([cce15a8](https://github.com/inference-gateway/ui/commit/cce15a81b912eea6e2b1bbbeac4e2391ff026223))
+* **deps:** Upgrade NextJS to 15.4.5 ([#71](https://github.com/inference-gateway/ui/issues/71)) ([b9100ab](https://github.com/inference-gateway/ui/commit/b9100ab46ce9ade4155f4e535809e67299b78162))
+* **docker-compose:** Remove build context and target for UI service, using image instead ([47ffc9f](https://github.com/inference-gateway/ui/commit/47ffc9f9d9bd2339df4efc2206e3ae2a5fe0a2f9))
+* **docker:** Remove Go installation from Dockerfile ([f30aa88](https://github.com/inference-gateway/ui/commit/f30aa88adc6bada2fd7bc2c36e70428652ef8258))
+* Update CLAUDE.md ([a4d621e](https://github.com/inference-gateway/ui/commit/a4d621ed5170baa502a86208fdbce597d5989aab))
+* Update claude.yml ([46cf9c9](https://github.com/inference-gateway/ui/commit/46cf9c9a57149dc79748f6495746645792d174a6))
+* Update claude.yml - add nodejs ([ba4afc3](https://github.com/inference-gateway/ui/commit/ba4afc3f230cb428dc8c3e4c24d0e87a405fca14))
+* Update claude.yml - add permissions ([18a7b07](https://github.com/inference-gateway/ui/commit/18a7b07b12e6d00c5a6e2f3707e605468282d7b9))
+
+### 📦 Miscellaneous
+
+* Add Taskfile for task automation and project setup ([fda9079](https://github.com/inference-gateway/ui/commit/fda9079d88f1e2d08299b263b83609c491fb2a4a))
+* **deps-dev:** bump form-data from 4.0.2 to 4.0.4 ([#63](https://github.com/inference-gateway/ui/issues/63)) ([28b0193](https://github.com/inference-gateway/ui/commit/28b0193102b45e1e29f72438a85456f1e12da077))
+* **deps:** bump github.com/gin-gonic/gin ([#66](https://github.com/inference-gateway/ui/issues/66)) ([9b2937b](https://github.com/inference-gateway/ui/commit/9b2937b8ca38271243fb766c6c0e32a832739976))
+* **deps:** bump golang.org/x/crypto ([#62](https://github.com/inference-gateway/ui/issues/62)) ([0c4ca75](https://github.com/inference-gateway/ui/commit/0c4ca7557160c58166a9f4ee6878445d1ea82e02))
+* **deps:** bump golang.org/x/net ([#64](https://github.com/inference-gateway/ui/issues/64)) ([0d4bc27](https://github.com/inference-gateway/ui/commit/0d4bc27ecac579cb9f3cc94b0e55cd218b1bf8f1))
+* **deps:** bump google.golang.org/protobuf ([#65](https://github.com/inference-gateway/ui/issues/65)) ([5c441cd](https://github.com/inference-gateway/ui/commit/5c441cd97adb989a689e9fbec5baa373cfc3aefc))
+* Install @anthropic-ai/claude-code and clean up devcontainer.json ([a0148a5](https://github.com/inference-gateway/ui/commit/a0148a54f7b48fdb399807f99e0fe1bff1abd3f2))
+
 ## [0.8.1](https://github.com/inference-gateway/ui/compare/v0.8.0...v0.8.1) (2025-07-17)
 
 ### 🐛 Bug Fixes
