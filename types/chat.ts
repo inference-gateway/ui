@@ -33,6 +33,7 @@ export interface StorageService {
 export enum StorageType {
   LOCAL = 'local',
   POSTGRES = 'postgres',
+  SQLITE = 'sqlite',
 }
 
 export interface StorageConfig {

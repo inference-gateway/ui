@@ -1,0 +1,35 @@
+services:
+  ui:
+    image: ghcr.io/inference-gateway/ui:latest
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    volumes:
+      - sqlite_data:/data
+    env_file:
+      - .env.frontend
+    depends_on:
+      inference-gateway:
+        condition: service_started
+    pull_policy: always
+    restart: unless-stopped
+
+  inference-gateway:
+    image: ghcr.io/inference-gateway/inference-gateway:latest
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+    env_file:
+      - .env.backend
+    pull_policy: always
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  sqlite_data:
+    driver: local

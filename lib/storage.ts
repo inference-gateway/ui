@@ -5,7 +5,7 @@ import { ApiStorageService } from './storage-api';
 
 /**
  * Client-side storage factory that supports both local storage and API-based storage.
- * For PostgreSQL storage, it uses API routes to communicate with the server.
+ * For PostgreSQL and SQLite storage, it uses API routes to communicate with the server.
  */
 export class StorageServiceFactory {
   static createService(options?: StorageOptions): StorageService {
@@ -23,6 +23,10 @@ export class StorageServiceFactory {
       case StorageType.POSTGRES:
       case 'postgres':
         logger.debug('Using API-based storage for PostgreSQL backend');
+        return new ApiStorageService(options);
+      case StorageType.SQLITE:
+      case 'sqlite':
+        logger.debug('Using API-based storage for SQLite backend');
         return new ApiStorageService(options);
       default:
         logger.warn('Unknown storage type, falling back to local storage', {
