@@ -11,7 +11,6 @@ data:
   HOSTNAME: {{ .Values.config.HOSTNAME | quote }}
   INFERENCE_GATEWAY_URL: {{ .Values.config.INFERENCE_GATEWAY_URL | quote }}
   LOG_LEVEL: {{ .Values.config.LOG_LEVEL | quote }}
-  NEXT_PUBLIC_LOG_LEVEL: {{ .Values.config.NEXT_PUBLIC_LOG_LEVEL | quote }}
   # Storage
   STORAGE_TYPE: {{ .Values.config.STORAGE_TYPE | quote }}
   # Authentication General Settings

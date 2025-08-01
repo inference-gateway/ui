@@ -94,8 +94,7 @@ Key environment variables for development:
 
 - `INFERENCE_GATEWAY_URL` - Backend API URL (default: http://localhost:8080)
 - `ENABLE_AUTH` - Enable authentication (default: false)
-- `NEXT_PUBLIC_LOG_LEVEL` - Client-side logging level
-- `LOG_LEVEL` - Server-side logging level
+- `LOG_LEVEL` - Logging level for both client and server-side code (default: 'debug' in development, 'info' in production)
 
 ## Coding Conventions
 
