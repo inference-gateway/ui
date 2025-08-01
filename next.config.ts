@@ -14,6 +14,8 @@ const nextConfig: NextConfig = {
   },
   env: {
     NEXT_PUBLIC_NODE_ENV: process.env.NODE_ENV || 'development',
+    NEXT_PUBLIC_LOG_LEVEL:
+      process.env.LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'info' : 'debug'),
   },
   webpack: config => {
     config.resolve.fallback = { fs: false };
