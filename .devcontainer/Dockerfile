@@ -30,15 +30,6 @@ RUN npm install -g @anthropic-ai/claude-code
 # Install global npm packages
 RUN su node -c "npm install -g next typescript"
 
-# Install Go - only needed for the examples
-RUN curl -fsSL https://golang.org/dl/go1.24.linux-amd64.tar.gz | tar -xz -C /usr/local \
-    && echo 'export PATH=$PATH:/usr/local/go/bin' >> /home/node/.bashrc \
-    && echo 'export PATH=$PATH:/usr/local/go/bin' >> /home/node/.zshrc \
-    && echo 'export GOPATH=/home/node/go' >> /home/node/.bashrc \
-    && echo 'export GOPATH=/home/node/go' >> /home/node/.zshrc \
-    && echo 'export PATH=$PATH:/home/node/go/bin' >> /home/node/.bashrc \
-    && echo 'export PATH=$PATH:/home/node/go/bin' >> /home/node/.zshrc
-
 # Install latest Helm
 RUN curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
