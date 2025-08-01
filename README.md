@@ -101,7 +101,7 @@ Examples:
 
 | Environment Variable           | Default Value           | Description                                |
 | ------------------------------ | ----------------------- | ------------------------------------------ |
-| ENABLE_AUTH                    | `false`                 | Enable authentication                      |
+| AUTH_ENABLE                    | `false`                 | Enable authentication                      |
 | SECURE_COOKIES                 | `false`                 | Use secure cookies (set to true for HTTPS) |
 | NEXTAUTH_URL                   | `http://localhost:3000` | URL of this application (for NextAuth)     |
 | NEXTAUTH_SECRET                | -                       | Secret used to encrypt session cookies     |
@@ -112,9 +112,9 @@ Examples:
 
 | Environment Variable | Default Value                            | Description            |
 | -------------------- | ---------------------------------------- | ---------------------- |
-| KEYCLOAK_ID          | `app-client`                             | Keycloak client ID     |
-| KEYCLOAK_SECRET      | -                                        | Keycloak client secret |
-| KEYCLOAK_ISSUER      | `http://localhost:8080/realms/app-realm` | Keycloak issuer URL    |
+| AUTH_OIDC_CLIENT_ID          | `app-client`                             | OIDC client ID     |
+| AUTH_OIDC_CLIENT_SECRET      | -                                        | OIDC client secret |
+| AUTH_OIDC_ISSUER      | `http://localhost:8080/realms/app-realm` | OIDC issuer URL    |
 
 ## Docker
 

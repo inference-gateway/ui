@@ -16,12 +16,12 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
   try {
     switch (token.provider) {
       case 'keycloak': {
-        const url = `${process.env.KEYCLOAK_ISSUER!}/protocol/openid-connect/token`;
+        const url = `${process.env.AUTH_OIDC_ISSUER!}/protocol/openid-connect/token`;
         logger.debug(`[Auth] Attempting to refresh Keycloak token at ${url}`);
 
         const params = {
-          client_id: process.env.KEYCLOAK_ID!,
-          client_secret: process.env.KEYCLOAK_SECRET!,
+          client_id: process.env.AUTH_OIDC_CLIENT_ID!,
+          client_secret: process.env.AUTH_OIDC_CLIENT_SECRET!,
           grant_type: 'refresh_token',
           refresh_token: token.refreshToken as string,
         };
@@ -169,10 +169,10 @@ export const authConfig: NextAuthConfig = {
     Keycloak({
       id: 'keycloak',
       name: 'Keycloak',
-      clientId: process.env.KEYCLOAK_ID!,
-      clientSecret: process.env.KEYCLOAK_SECRET!,
-      issuer: process.env.KEYCLOAK_ISSUER!,
-      wellKnown: `${process.env.KEYCLOAK_ISSUER!}/.well-known/openid-configuration`,
+      clientId: process.env.AUTH_OIDC_CLIENT_ID!,
+      clientSecret: process.env.AUTH_OIDC_CLIENT_SECRET!,
+      issuer: process.env.AUTH_OIDC_ISSUER!,
+      wellKnown: `${process.env.AUTH_OIDC_ISSUER!}/.well-known/openid-configuration`,
       authorization: {
         params: {
           scope: 'openid profile email roles',
@@ -314,7 +314,7 @@ type AuthHandlers = {
 };
 
 const createAuthHandlers = (): AuthHandlers => {
-  if (process.env.ENABLE_AUTH !== 'true') {
+  if (process.env.AUTH_ENABLE !== 'true') {
     return {
       GET: async () => new Response(null, { status: 404 }),
       POST: async () => new Response(null, { status: 404 }),
@@ -353,7 +353,7 @@ export function getEnabledProviders(): ProviderConfig[] {
       id: 'keycloak',
       name: 'Keycloak',
       enabled: Boolean(
-        process.env.KEYCLOAK_ID && process.env.KEYCLOAK_SECRET && process.env.KEYCLOAK_ISSUER
+        process.env.AUTH_OIDC_CLIENT_ID && process.env.AUTH_OIDC_CLIENT_SECRET && process.env.AUTH_OIDC_ISSUER
       ),
       signinUrl: `/api/auth/signin/keycloak`,
       callbackUrl: `/api/auth/callback/keycloak`,

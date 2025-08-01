@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const isAuthEnabled = process.env.ENABLE_AUTH === 'true';
+  const isAuthEnabled = process.env.AUTH_ENABLE === 'true';
 
   return (
     <html lang="en" suppressHydrationWarning>

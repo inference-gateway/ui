@@ -5,7 +5,7 @@ import { ListToolsResponse } from '@/types/mcp';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
-  const isAuthEnabled = process.env.ENABLE_AUTH === 'true';
+  const isAuthEnabled = process.env.AUTH_ENABLE === 'true';
   const session = isAuthEnabled ? await auth() : null;
 
   if (isAuthEnabled && !session) {

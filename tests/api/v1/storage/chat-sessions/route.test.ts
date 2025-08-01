@@ -59,8 +59,8 @@ describe('/api/v1/storage/chat-sessions', () => {
       });
     });
 
-    it('should require authentication when ENABLE_AUTH is true', async () => {
-      process.env.ENABLE_AUTH = 'true';
+    it('should require authentication when AUTH_ENABLE is true', async () => {
+      process.env.AUTH_ENABLE = 'true';
       mockAuth.mockResolvedValue(null);
 
       const response = await GET();
@@ -70,8 +70,8 @@ describe('/api/v1/storage/chat-sessions', () => {
       expect(data.error).toBe('Unauthorized');
     });
 
-    it('should allow access when ENABLE_AUTH is false', async () => {
-      process.env.ENABLE_AUTH = 'false';
+    it('should allow access when AUTH_ENABLE is false', async () => {
+      process.env.AUTH_ENABLE = 'false';
       mockAuth.mockResolvedValue(null);
       mockStorageService.getChatSessions.mockResolvedValue([]);
 
@@ -114,8 +114,8 @@ describe('/api/v1/storage/chat-sessions', () => {
       expect(mockStorageService.saveChatSessions).toHaveBeenCalledWith(mockChatSessions);
     });
 
-    it('should require authentication when ENABLE_AUTH is true', async () => {
-      process.env.ENABLE_AUTH = 'true';
+    it('should require authentication when AUTH_ENABLE is true', async () => {
+      process.env.AUTH_ENABLE = 'true';
       mockAuth.mockResolvedValue(null);
 
       const mockRequest = {

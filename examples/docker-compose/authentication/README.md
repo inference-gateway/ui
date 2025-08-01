@@ -20,23 +20,23 @@ cp .env.frontend.example .env.frontend
 2. Configure backend environment (.env.backend):
 
 ```ini
-ENABLE_AUTH=true
+AUTH_ENABLE=true
 SECURE_COOKIES=false # Set to true if you are using HTTPS for production
 NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=your-secure-random-salt
 NEXTAUTH_TRUST_HOST=true
 NEXTAUTH_REFRESH_TOKEN_ENABLED=true # Wether you want to use refresh tokens once the access token expires
 
-# Keycloak Configuration
-KEYCLOAK_ID=app-client
-KEYCLOAK_SECRET=very-secret
-KEYCLOAK_ISSUER=http://localhost:8080/realms/app-realm
+# OIDC Configuration
+AUTH_OIDC_CLIENT_ID=app-client
+AUTH_OIDC_CLIENT_SECRET=very-secret
+AUTH_OIDC_ISSUER=http://localhost:8080/realms/app-realm
 ```
 
 3. Configure frontend environment (.env.frontend):
 
 ```ini
-ENABLE_AUTH="true"
+AUTH_ENABLE="true"
 ```
 
 4. Start the services:

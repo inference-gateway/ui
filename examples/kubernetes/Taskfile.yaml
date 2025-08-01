@@ -291,8 +291,8 @@ tasks:
         helm upgrade --install {{.UI_RELEASE}} oci://ghcr.io/inference-gateway/charts/inference-gateway-ui --version {{.CHART_VERSION}} \
           --create-namespace \
           --namespace {{.NAMESPACE}} \
-          --set config.ENABLE_AUTH=false \
-          --set gateway.config.ENABLE_AUTH=false
+          --set config.AUTH_ENABLE=false \
+          --set gateway.config.AUTH_ENABLE=false
 
   deploy-ui-only:
     desc: Deploy just the UI, connecting to existing Gateway
@@ -302,7 +302,7 @@ tasks:
         helm upgrade --install {{.UI_RELEASE}} oci://ghcr.io/inference-gateway/charts/inference-gateway-ui --version {{.CHART_VERSION}} \
           --create-namespace \
           --namespace {{.NAMESPACE}} \
-          --set config.ENABLE_AUTH=false \
+          --set config.AUTH_ENABLE=false \
           --set gateway.enabled=false
 
   deploy-with-ingress:
@@ -316,8 +316,8 @@ tasks:
           --set replicaCount=1 \
           --set gateway.envFrom.secretRef=inference-gateway \
           --set gateway.enabled=true \
-          --set gateway.config.ENABLE_AUTH=false \
-          --set config.ENABLE_AUTH=false \
+          --set gateway.config.AUTH_ENABLE=false \
+          --set config.AUTH_ENABLE=false \
           --set ingress.enabled=true \
           --set ingress.className=nginx \
           --set ingress.hosts[0].host=ui.inference-gateway.local \
@@ -374,9 +374,9 @@ tasks:
         type: Opaque
         stringData:
           NEXTAUTH_SECRET: dummy-secret
-          KEYCLOAK_ID: inference-gateway-client
-          KEYCLOAK_SECRET: very-secret
-          KEYCLOAK_ISSUER: https://keycloak.inference-gateway.local/realms/inference-gateway-realm
+          AUTH_OIDC_CLIENT_ID: inference-gateway-client
+          AUTH_OIDC_CLIENT_SECRET: very-secret
+          AUTH_OIDC_ISSUER: https://keycloak.inference-gateway.local/realms/inference-gateway-realm
         EOF
       - echo "Deploying UI with authentication..."
       - |

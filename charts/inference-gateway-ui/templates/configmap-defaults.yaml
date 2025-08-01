@@ -14,7 +14,7 @@ data:
   # Storage
   STORAGE_TYPE: {{ .Values.config.STORAGE_TYPE | quote }}
   # Authentication General Settings
-  ENABLE_AUTH: {{ .Values.config.ENABLE_AUTH | quote }}
+  AUTH_ENABLE: {{ .Values.config.AUTH_ENABLE | quote }}
   SECURE_COOKIES: {{ .Values.config.SECURE_COOKIES | quote }}
   NEXTAUTH_URL: {{ .Values.config.NEXTAUTH_URL | quote }}
   NEXTAUTH_TRUST_HOST: {{ .Values.config.NEXTAUTH_TRUST_HOST | quote }}

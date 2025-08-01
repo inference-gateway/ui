@@ -460,7 +460,7 @@ components:
       bearerFormat: JWT
       description: |
         Authentication is optional by default.
-        To enable authentication, set ENABLE_AUTH to true.
+        To enable authentication, set AUTH_ENABLE to true.
         When enabled, requests must include a valid JWT token in the Authorization header.
   schemas:
     Provider:
@@ -1243,7 +1243,7 @@ components:
                   default: 'false'
                   description: 'Enable telemetry'
                 - name: enable_auth
-                  env: 'ENABLE_AUTH'
+                  env: 'AUTH_ENABLE'
                   type: bool
                   default: 'false'
                   description: 'Enable authentication'
