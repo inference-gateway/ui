@@ -49,12 +49,15 @@ You will be redirected to the signin page for login. After successful login, you
 
 In this example keycloak is used as an Identity Provider (IdP) that supports OIDC.
 
-username: `user`
-password: `password`
+**username: `user`**
 
-** Check the keycloak/imprort/realm-config.json file for more details on how to import the realm configuration into keycloak. **
-** If you wish to add more identity providers, you can check the main README.md for the envrionment variables. **
-** Currently Keycloak, Google, and GitHub are supported. **
+**password: `password`**
+
+**Check the ./keycloak/import/realm-config.json file for more details on how to import the realm configuration into keycloak.**
+
+**If you wish to add more identity providers, you can check the main README.md for the envrionment variables.**
+
+**Currently Keycloak, Google, and GitHub are supported.**
 
 ## Configuration Notes
 
