@@ -2,9 +2,10 @@ import logger from '@/lib/logger';
 import { type StorageOptions, type StorageService, StorageType } from '@/types/chat';
 import { LocalStorageService } from './storage-local';
 import { PostgresStorageService } from './storage-postgres';
+import { SqliteStorageService } from './storage-sqlite';
 
 /**
- * Server-side storage factory that can create both local and PostgreSQL storage services.
+ * Server-side storage factory that can create local, PostgreSQL, and SQLite storage services.
  * This should only be used in server-side code (API routes, server components).
  */
 export class ServerStorageServiceFactory {
@@ -36,6 +37,29 @@ export class ServerStorageServiceFactory {
         } catch (error) {
           logger.error(
             'Failed to create PostgreSQL storage service, falling back to local storage',
+            {
+              storageType,
+              hasConnectionUrl: !!options?.connectionUrl,
+              error: error instanceof Error ? error.message : error,
+            }
+          );
+          return new LocalStorageService(options);
+        }
+      case StorageType.SQLITE:
+      case 'sqlite':
+        if (!options?.connectionUrl) {
+          logger.error('SQLite storage requires connectionUrl, falling back to local storage', {
+            storageType,
+            hasConnectionUrl: !!options?.connectionUrl,
+          });
+          return new LocalStorageService(options);
+        }
+
+        try {
+          return new SqliteStorageService(options);
+        } catch (error) {
+          logger.error(
+            'Failed to create SQLite storage service, falling back to local storage',
             {
               storageType,
               hasConnectionUrl: !!options?.connectionUrl,

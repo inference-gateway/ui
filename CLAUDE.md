@@ -40,7 +40,8 @@ This is a Next.js 15 application with App Router that serves as the UI for the I
 - **Chat Interface**: Main user interaction point built with React components
 - **API Integration**: Uses the `@inference-gateway/sdk` TypeScript SDK for backend communication
 - **Authentication**: Optional NextAuth.js integration with Keycloak support
-- **State Management**: React hooks with local storage for chat history persistence
+- **State Management**: React hooks with configurable storage backends
+- **Storage Options**: Support for local browser storage, PostgreSQL, and SQLite databases
 - **Streaming**: Real-time streaming responses from AI models
 - **Tools Support**: Integrated web search and page fetch capabilities via MCP tools
 
@@ -95,6 +96,8 @@ Key environment variables for development:
 - `INFERENCE_GATEWAY_URL` - Backend API URL (default: http://localhost:8080)
 - `AUTH_ENABLE` - Enable authentication (default: false)
 - `LOG_LEVEL` - Logging level for both client and server-side code (default: 'debug' in development, 'info' in production)
+- `STORAGE_TYPE` - Storage backend type: 'local', 'postgres', or 'sqlite' (default: 'local')
+- `DB_CONNECTION_URL` - Database connection URL for PostgreSQL or SQLite storage
 
 ## Coding Conventions
 
