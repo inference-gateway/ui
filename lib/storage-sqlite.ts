@@ -1,7 +1,7 @@
 import { Database, OPEN_READWRITE, OPEN_CREATE } from 'sqlite3';
 import logger from '@/lib/logger';
 import type { StorageOptions, StorageService, Message } from '@/types/chat';
-import { ChatSession, MessageRole } from '@/types/chat';
+import { ChatSession } from '@/types/chat';
 
 interface DatabaseRow {
   [key: string]: unknown;
