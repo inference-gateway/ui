@@ -41,7 +41,7 @@ describe('Enhanced MCP Tool Components', () => {
         id: 'call_123',
         type: 'function' as ChatCompletionToolType,
         function: {
-          name: 'read_file',
+          name: 'mcp_read_file',
           arguments: JSON.stringify({ path: '/test/file.txt' }),
         },
       },
@@ -49,7 +49,7 @@ describe('Enhanced MCP Tool Components', () => {
         id: 'call_456',
         type: 'function' as ChatCompletionToolType,
         function: {
-          name: 'write_file',
+          name: 'mcp_write_file',
           arguments: JSON.stringify({
             path: '/test/output.txt',
             content: 'Hello World',
@@ -92,11 +92,11 @@ describe('Enhanced MCP Tool Components', () => {
       fireEvent.click(mainButton);
 
       await waitFor(() => {
-        expect(screen.getByText('read_file')).toBeInTheDocument();
-        expect(screen.getByText('write_file')).toBeInTheDocument();
+        expect(screen.getByText('mcp_read_file')).toBeInTheDocument();
+        expect(screen.getByText('mcp_write_file')).toBeInTheDocument();
       });
 
-      const readFileButton = screen.getByRole('button', { name: /read_file/ });
+      const readFileButton = screen.getByRole('button', { name: /mcp_read_file/ });
       fireEvent.click(readFileButton);
 
       await waitFor(() => {
@@ -165,22 +165,22 @@ describe('Enhanced MCP Tool Components', () => {
     });
 
     it('should display MCP tool response with correct formatting', async () => {
-      render(<ToolResponseBubble response={mockMCPResponse} toolName="read_file" />);
+      render(<ToolResponseBubble response={mockMCPResponse} toolName="mcp_read_file" />);
 
-      expect(screen.getByText(/read_file Response/)).toBeInTheDocument();
+      expect(screen.getByText(/mcp_read_file Response/)).toBeInTheDocument();
       expect(screen.getByText('MCP')).toBeInTheDocument();
       expect(screen.getByTestId('check-circle')).toBeInTheDocument();
     });
 
     it('should display MCP error response with error styling', async () => {
-      render(<ToolResponseBubble response={mockMCPErrorResponse} toolName="read_file" />);
+      render(<ToolResponseBubble response={mockMCPErrorResponse} toolName="mcp_read_file" />);
 
       expect(screen.getByText('Error')).toBeInTheDocument();
       expect(screen.getByTestId('x-circle')).toBeInTheDocument();
     });
 
     it('should expand and show detailed MCP response content', async () => {
-      render(<ToolResponseBubble response={mockMCPResponse} toolName="read_file" />);
+      render(<ToolResponseBubble response={mockMCPResponse} toolName="mcp_read_file" />);
 
       fireEvent.click(screen.getByRole('button'));
 
@@ -203,7 +203,7 @@ describe('Enhanced MCP Tool Components', () => {
 
     it('should handle plain text responses', async () => {
       const plainTextResponse = 'Simple text response';
-      render(<ToolResponseBubble response={plainTextResponse} toolName="read_file" />);
+      render(<ToolResponseBubble response={plainTextResponse} toolName="mcp_read_file" />);
 
       fireEvent.click(screen.getByRole('button'));
 
@@ -214,13 +214,13 @@ describe('Enhanced MCP Tool Components', () => {
 
     it('should handle malformed JSON gracefully', () => {
       const malformedResponse = '{ invalid json }';
-      render(<ToolResponseBubble response={malformedResponse} toolName="read_file" />);
+      render(<ToolResponseBubble response={malformedResponse} toolName="mcp_read_file" />);
 
-      expect(screen.getByText(/read_file Response/)).toBeInTheDocument();
+      expect(screen.getByText(/mcp_read_file Response/)).toBeInTheDocument();
     });
 
     it('should return null when no response provided', () => {
-      const { container } = render(<ToolResponseBubble response="" toolName="read_file" />);
+      const { container } = render(<ToolResponseBubble response="" toolName="mcp_read_file" />);
       expect(container.firstChild).toBeNull();
     });
   });
