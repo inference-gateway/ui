@@ -5,22 +5,9 @@ jest.mock('@/components/code-block', () => ({
   CodeBlock: ({ children }: { children: string }) => <pre data-testid="code-block">{children}</pre>,
 }));
 
-jest.mock('@/lib/tools', () => ({
-  isMCPTool: jest.fn(),
-  isA2ATool: jest.fn(),
-}));
-
-import { isMCPTool, isA2ATool } from '@/lib/tools';
-
-const mockIsMCPTool = isMCPTool as jest.MockedFunction<typeof isMCPTool>;
-const mockIsA2ATool = isA2ATool as jest.MockedFunction<typeof isA2ATool>;
+// Note: Not mocking @/lib/tools anymore since we're using real prefix-based detection
 
 describe('ToolResponseBubble', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockIsMCPTool.mockReturnValue(false);
-    mockIsA2ATool.mockReturnValue(false);
-  });
 
   const jsonResponse = JSON.stringify({
     results: [
@@ -86,18 +73,13 @@ describe('ToolResponseBubble', () => {
   });
 
   describe('A2A Tools', () => {
-    beforeEach(() => {
-      mockIsA2ATool.mockReturnValue(true);
-      mockIsMCPTool.mockReturnValue(false);
-    });
-
     test('renders A2A tool badge and success message', () => {
       const a2aResponse = JSON.stringify({
         content: [{ type: 'text', text: 'Task completed successfully' }],
         isError: false,
       });
 
-      render(<ToolResponseBubble response={a2aResponse} toolName="submit_task_to_agent" />);
+      render(<ToolResponseBubble response={a2aResponse} toolName="a2a_submit_task_to_agent" />);
 
       expect(screen.getByText('A2A')).toBeInTheDocument();
 
@@ -111,7 +93,7 @@ describe('ToolResponseBubble', () => {
         isError: true,
       });
 
-      render(<ToolResponseBubble response={a2aErrorResponse} toolName="submit_task_to_agent" />);
+      render(<ToolResponseBubble response={a2aErrorResponse} toolName="a2a_submit_task_to_agent" />);
 
       const button = screen.getByRole('button');
       expect(button).toHaveClass('bg-red-50', 'border-red-200');
@@ -122,7 +104,7 @@ describe('ToolResponseBubble', () => {
     test('handles plain text A2A responses', () => {
       const plainTextResponse = 'Task completed successfully';
 
-      render(<ToolResponseBubble response={plainTextResponse} toolName="submit_task_to_agent" />);
+      render(<ToolResponseBubble response={plainTextResponse} toolName="a2a_submit_task_to_agent" />);
 
       fireEvent.click(screen.getByRole('button'));
       expect(screen.getByText('A2A Tool executed successfully')).toBeInTheDocument();
@@ -132,7 +114,7 @@ describe('ToolResponseBubble', () => {
     test('handles malformed A2A JSON responses', () => {
       const malformedResponse = 'invalid json {';
 
-      render(<ToolResponseBubble response={malformedResponse} toolName="submit_task_to_agent" />);
+      render(<ToolResponseBubble response={malformedResponse} toolName="a2a_submit_task_to_agent" />);
 
       fireEvent.click(screen.getByRole('button'));
       expect(screen.getByText('A2A Tool executed successfully')).toBeInTheDocument();
@@ -141,18 +123,13 @@ describe('ToolResponseBubble', () => {
   });
 
   describe('MCP Tools', () => {
-    beforeEach(() => {
-      mockIsA2ATool.mockReturnValue(false);
-      mockIsMCPTool.mockReturnValue(true);
-    });
-
     test('renders MCP tool badge and success message', () => {
       const mcpResponse = JSON.stringify({
         content: [{ type: 'text', text: 'MCP operation completed' }],
         isError: false,
       });
 
-      render(<ToolResponseBubble response={mcpResponse} toolName="mcp_tool" />);
+      render(<ToolResponseBubble response={mcpResponse} toolName="mcp_filesystem_read" />);
 
       expect(screen.getByText('MCP')).toBeInTheDocument();
 
@@ -166,7 +143,7 @@ describe('ToolResponseBubble', () => {
         isError: true,
       });
 
-      render(<ToolResponseBubble response={mcpErrorResponse} toolName="mcp_tool" />);
+      render(<ToolResponseBubble response={mcpErrorResponse} toolName="mcp_filesystem_read" />);
 
       const button = screen.getByRole('button');
       expect(button).toHaveClass('bg-red-50', 'border-red-200');
@@ -179,7 +156,7 @@ describe('ToolResponseBubble', () => {
         isError: false,
       });
 
-      render(<ToolResponseBubble response={mcpResponse} toolName="mcp_tool" />);
+      render(<ToolResponseBubble response={mcpResponse} toolName="mcp_filesystem_read" />);
 
       fireEvent.click(screen.getByRole('button'));
       expect(screen.getByText('MCP Tool executed successfully')).toBeInTheDocument();
@@ -188,7 +165,7 @@ describe('ToolResponseBubble', () => {
     test('handles plain text MCP responses', () => {
       const plainTextResponse = 'MCP operation completed';
 
-      render(<ToolResponseBubble response={plainTextResponse} toolName="mcp_tool" />);
+      render(<ToolResponseBubble response={plainTextResponse} toolName="mcp_filesystem_read" />);
 
       fireEvent.click(screen.getByRole('button'));
       expect(screen.getByText('MCP Tool executed successfully')).toBeInTheDocument();
@@ -198,27 +175,21 @@ describe('ToolResponseBubble', () => {
 
   describe('Response Formatting', () => {
     test('displays formatted JSON for complex responses', () => {
-      mockIsA2ATool.mockReturnValue(false);
-      mockIsMCPTool.mockReturnValue(true);
-
       const complexResponse = JSON.stringify({
         content: [{ type: 'text', text: '{"result": "complex data"}' }],
         isError: false,
       });
 
-      render(<ToolResponseBubble response={complexResponse} toolName="mcp_tool" />);
+      render(<ToolResponseBubble response={complexResponse} toolName="mcp_filesystem_read" />);
 
       fireEvent.click(screen.getByRole('button'));
       expect(screen.getByTestId('code-block')).toBeInTheDocument();
     });
 
     test('displays plain text for simple responses', () => {
-      mockIsA2ATool.mockReturnValue(true);
-      mockIsMCPTool.mockReturnValue(false);
-
       const simpleResponse = 'Simple text response';
 
-      render(<ToolResponseBubble response={simpleResponse} toolName="submit_task_to_agent" />);
+      render(<ToolResponseBubble response={simpleResponse} toolName="a2a_submit_task_to_agent" />);
 
       fireEvent.click(screen.getByRole('button'));
       expect(screen.queryByTestId('code-block')).not.toBeInTheDocument();

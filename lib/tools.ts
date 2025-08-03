@@ -15,30 +15,28 @@ interface PageContent {
   error?: string;
 }
 
-const BUILTIN_TOOLS = ['web_search', 'fetch_page'];
-const A2A_TOOLS = ['query_a2a_agent_card', 'submit_task_to_agent'];
+// Note: BUILTIN_TOOLS kept for potential future use, currently not needed for prefix-based detection
+// const BUILTIN_TOOLS = ['web_search', 'fetch_page'];
 
 /**
  * Centralized function to detect if a tool is an A2A (Agent-to-Agent) tool
+ * Uses prefix-based detection for tools starting with "a2a_"
  * @param toolName - The name of the tool to check
  * @returns true if the tool is an A2A tool, false otherwise
  */
 export const isA2ATool = (toolName: string): boolean => {
-  return A2A_TOOLS.includes(toolName);
+  return toolName.startsWith('a2a_');
 };
 
 /**
  * Centralized function to detect if a tool is an MCP tool
+ * Uses prefix-based detection for tools starting with "mcp_"
  * @param toolName - The name of the tool to check
- * @param tools - Optional array of available tools
+ * @param tools - Optional array of available tools (deprecated, kept for backward compatibility)
  * @returns true if the tool is an MCP tool, false otherwise
  */
-export const isMCPTool = (toolName: string, tools?: SchemaChatCompletionTool[]): boolean => {
-  if (tools && tools.length > 0) {
-    return !tools.some(tool => tool.function.name === toolName);
-  }
-
-  return !BUILTIN_TOOLS.includes(toolName) && !A2A_TOOLS.includes(toolName);
+export const isMCPTool = (toolName: string, _tools?: SchemaChatCompletionTool[]): boolean => {
+  return toolName.startsWith('mcp_');
 };
 
 export const WebSearchTool: SchemaChatCompletionTool = {
