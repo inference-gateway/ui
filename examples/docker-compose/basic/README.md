@@ -1,6 +1,7 @@
 # Basic Docker Compose Example
 
-This example demonstrates how to set up and use the Inference Gateway UI using Docker Compose.
+This example demonstrates how to set up and use the Inference Gateway UI using
+Docker Compose.
 
 ## Prerequisites
 
@@ -9,13 +10,17 @@ This example demonstrates how to set up and use the Inference Gateway UI using D
 
 ## Getting Started
 
-1. Copy the `.env.backend.example` file to `.env.backend` and update the environment variables as needed. This file contains configuration settings for the backend service.
+1. Copy the `.env.backend.example` file to `.env.backend` and update the
+   environment variables as needed. This file contains configuration settings
+   for the backend service.
 
    ```sh
    cp .env.backend.example .env.backend
    ```
 
-2. Copy the `.env.frontend.example` file to `.env.frontend` and update the environment variables as needed. This file contains configuration settings for the frontend service.
+2. Copy the `.env.frontend.example` file to `.env.frontend` and update the
+   environment variables as needed. This file contains configuration settings
+   for the frontend service.
 
    ```sh
    cp .env.frontend.example .env.frontend
@@ -27,4 +32,5 @@ This example demonstrates how to set up and use the Inference Gateway UI using D
    docker-compose up
    ```
 
-4. Open your web browser and navigate to `http://localhost:3000` to see the UI in action.
+4. Open your web browser and navigate to `http://localhost:3000` to see the UI
+   in action.

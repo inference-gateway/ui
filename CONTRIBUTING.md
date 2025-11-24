@@ -1,6 +1,7 @@
 # Contributing to Inference Gateway UI
 
-Thank you for your interest in contributing to Inference Gateway UI! This document provides guidelines and instructions for contributing to this project.
+Thank you for your interest in contributing to Inference Gateway UI! This
+document provides guidelines and instructions for contributing to this project.
 
 ## Table of Contents
 
@@ -25,7 +26,9 @@ Thank you for your interest in contributing to Inference Gateway UI! This docume
 
 ## Code of Conduct
 
-We expect all contributors to adhere to our code of conduct. Please be respectful, inclusive, and considerate when interacting with other contributors.
+We expect all contributors to adhere to our code of conduct. Please be
+respectful, inclusive, and considerate when interacting with other
+contributors.
 
 ## Getting Started
 
@@ -45,6 +48,7 @@ We expect all contributors to adhere to our code of conduct. Please be respectfu
    ```
 
 3. **Run development server**:
+
    ```bash
    npm run dev
    ```
@@ -76,7 +80,7 @@ Always create your feature/bugfix branch from `develop`.
 
 Follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
 
-```
+```text
 <type>[optional scope]: <description>
 
 [optional body]
