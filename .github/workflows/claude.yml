@@ -36,16 +36,6 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Set up Go
-        uses: actions/setup-go@v6
-        with:
-          go-version-file: "go.mod"
-          cache: true
-
-      - name: Install golangci-lint
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/bin v2.6.0
-
       - name: Install task
         run: |
           curl -s https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin v3.45.4
@@ -53,7 +43,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: "lts/*"
+          node-version: "24.11.0"
 
       - name: Install additional dependencies
         run: npm install -g markdownlint-cli
@@ -70,5 +60,5 @@ jobs:
           branch_prefix: "claude/"
           claude_args: |
             --system-prompt "IMPORTANT: You must NEVER push directly to the main branch. Always: 1. Create a new feature branch (claude/feature-name), 2. Make your changes on the feature branch, 3. Open a pull request to main. COMMIT MESSAGE FORMAT: Always use conventional commits with capital letters. Follow the format: 'type(scope): Description' where the description starts with a capital letter. Examples: 'feat(grafana): Add retry mechanism for agent connections', 'fix(auth): Resolve token validation issue'. Follow the development workflow specified in the coding instructions."
-            --allowedTools "Bash(task:*),Bash(go:*),Bash(gh:*),Bash(git:*)"
+            --allowedTools "Bash(task:*),Bash(gh:*),Bash(git:*),Bash(node:*),Bash(npm:*),Bash(npx)"
             --mcp-config '{"mcpServers":{"context7":{"command":"npx","args":["-y","@upstash/context7-mcp@latest"]}}}'
