@@ -1,6 +1,7 @@
 # Kubernetes Deployment Example
 
-This example demonstrates how to deploy the Inference Gateway UI with the Inference Gateway backend on Kubernetes using k3d.
+This example demonstrates how to deploy the Inference Gateway UI with the
+Inference Gateway backend on Kubernetes using k3d.
 
 ## Prerequisites
 
@@ -15,10 +16,14 @@ This example demonstrates how to deploy the Inference Gateway UI with the Infere
 
 This example provides two deployment options:
 
-1. **Combined Deployment**: Deploy the UI with the Inference Gateway backend as a dependency (recommended)
-2. **Separate Deployment**: Deploy the UI and connect it to an existing Inference Gateway instance
-3. **Deploy with Ingress**: Deploy the UI with an ingress controller for external access
-4. **Deploy with authentication**: Deploy the UI with authentication using a secret and IdP with OIDC
+1. **Combined Deployment**: Deploy the UI with the Inference Gateway backend
+   as a dependency (recommended)
+2. **Separate Deployment**: Deploy the UI and connect it to an existing
+   Inference Gateway instance
+3. **Deploy with Ingress**: Deploy the UI with an ingress controller for
+   external access
+4. **Deploy with authentication**: Deploy the UI with authentication using a
+   secret and IdP with OIDC
 
 ## Quick Start Using Task
 
@@ -38,8 +43,8 @@ task deploy-with-ingress
 task port-forward
 ```
 
-Then access the UI at: http://localhost:3000
-Or use the ingress to access the UI via the domain name: https://ui.inference-gateway.local
+Then access the UI at: <http://localhost:3000>. Or use the ingress to access
+the UI via the domain name: <https://ui.inference-gateway.local>
 
 ## Manual Deployment Steps
 
@@ -71,7 +76,7 @@ helm upgrade --install \
   --wait \
   cert-manager jetstack/cert-manager
 
-# Create a self-signed issuer for TLS certificates, in production use a proper issuer
+# Create a self-signed issuer for TLS certificates, in production use proper issuer
 kubectl apply -f - <<EOF
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -131,12 +136,13 @@ helm upgrade --install inference-gateway-ui \
   --set "ingress.tls[0].hosts[0]=ui.inference-gateway.local"
 ```
 
-Access the UI at: http://localhost:3000
-Or use the ingress to access the UI via the domain name: https://ui.inference-gateway.local
+Access the UI at: <http://localhost:3000>
+Or use the ingress to access the UI via the domain name: <https://ui.inference-gateway.local>
 
 ## Configuration
 
-The deployment uses Helm's `--set` parameters instead of values files for clarity and direct configuration. Key configuration options include:
+The deployment uses Helm's `--set` parameters instead of values files for
+clarity and direct configuration. Key configuration options include:
 
 - `gateway.enabled`: Set to `true` to deploy the Gateway backend with the UI
 - `ingress.enabled`: Enable ingress for external access

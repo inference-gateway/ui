@@ -26,7 +26,9 @@ tasks:
 
   lint:
     desc: Run ESLint to check for code quality issues
-    cmd: npm run lint
+    cmds:
+      - npm run lint
+      - markdownlint . --ignore CHANGELOG.md --ignore node_modules --fix
 
   lint:fix:
     desc: Automatically fix linting issues

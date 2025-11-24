@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD013 MD033 MD041 -->
 <h1 align="center">Inference Gateway UI</h1>
 
 <p align="center">
@@ -18,7 +19,10 @@
   </a>
 </p>
 
-The Inference Gateway UI is a Next.js application that provides a user-friendly interface to interact with AI models through the [Inference Gateway](https://github.com/inference-gateway/inference-gateway) service. It enables easy access to various language models through a consistent interface, streamlining the process of sending requests and receiving responses.
+<p align="center">
+The Inference Gateway UI is a Next.js application that provides a user-friendly interface to interact with AI models through the <a href="https://github.com/inference-gateway/inference-gateway">Inference Gateway</a> service. It enables easy access to various language models through a consistent interface, streamlining the process of sending requests and receiving responses.
+</p>
+<!-- markdownlint-enable MD013 MD033 MD041 -->
 
 ## Table of Contents
 
@@ -46,18 +50,21 @@ The Inference Gateway UI is a Next.js application that provides a user-friendly 
 
 ## Key Features
 
-- 🎨 **Modern Interface**: Clean, responsive design built with Next.js 15 and Tailwind CSS
-- 🔌 **Seamless API Integration**: Connects directly to the Inference Gateway backend API
-- 🛠️ **Model Selection**: Support for multiple language models through an intuitive model selector
+<!-- markdownlint-disable MD013 -->
+
+- 🎨 **Modern Interface**: Clean, responsive design with Next.js 15 and Tailwind
+- 🔌 **Seamless API Integration**: Connects directly to the Inference Gateway API
+- 🛠️ **Model Selection**: Support for multiple language models
 - 💬 **Chat Interface**: Intuitive chat UI for interacting with AI models
-- 🧰 **Tool Support**: Enables AI models to use tools, including web search capability
-- 🔍 **Web Search**: Integrated web search functionality for models to retrieve current information
+- 🧰 **Tool Support**: Enables AI models to use tools, including web search
+- 🔍 **Web Search**: Integrated web search for models to retrieve current info
 - 🔒 **Authentication**: Optional authentication using NextAuth.js
 - 📱 **Responsive Design**: Works on desktop and mobile devices
 - 🐳 **Docker Support**: Easy containerization and deployment
 - ☸️ **Kubernetes Ready**: Includes configurations for Kubernetes deployment
-- 🧩 **Component Library**: Built with shadcn/ui components and Radix UI primitives
+- 🧩 **Component Library**: Built with shadcn/ui components and Radix UI
 - 🔄 **State Management**: Efficient state management with React hooks
+<!-- markdownlint-enable MD013 -->
 
 ## Development
 
@@ -69,7 +76,7 @@ npm install
 npm run dev
 ```
 
-The development server will be available at http://localhost:3000.
+The development server will be available at <http://localhost:3000>.
 
 ## Configuration
 
@@ -77,20 +84,20 @@ The UI can be configured using the following environment variables:
 
 ### General Settings
 
-| Environment Variable  | Default Value           | Description                                                                                                   |
-| --------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------- |
-| NODE_ENV              | `development`           | Node environment                                                                                              |
-| PORT                  | `3000`                  | Port to run the application on                                                                                |
-| HOSTNAME              | `0.0.0.0`               | Hostname to bind to                                                                                           |
-| INFERENCE_GATEWAY_URL | `http://localhost:8080` | URL of the Inference Gateway API                                                                              |
-| LOG_LEVEL             | `debug`                 | Logging level for both client and server-side code (defaults to 'debug' in development, 'info' in production) |
+| Variable              | Default                 | Description                                |
+| --------------------- | ----------------------- | ------------------------------------------ |
+| NODE_ENV              | `development`           | Node environment                           |
+| PORT                  | `3000`                  | Port to run the application on             |
+| HOSTNAME              | `0.0.0.0`               | Hostname to bind to                        |
+| INFERENCE_GATEWAY_URL | `http://localhost:8080` | Inference Gateway URL                      |
+| LOG_LEVEL             | `debug`                 | Logging level (debug in dev, info in prod) |
 
 ### Storage Settings
 
-| Environment Variable | Default Value | Description                                        |
-| -------------------- | ------------- | -------------------------------------------------- |
-| STORAGE_TYPE         | `local`       | Storage type for chat history                      |
-| DB_CONNECTION_URL    | -             | Connection URL for storage (required for postgres) |
+| Variable          | Default | Description                            |
+| ----------------- | ------- | -------------------------------------- |
+| STORAGE_TYPE      | `local` | Storage type for chat history          |
+| DB_CONNECTION_URL | -       | Connection URL (required for postgres) |
 
 Examples:
 
@@ -99,45 +106,50 @@ Examples:
 
 ### Authentication Settings
 
-| Environment Variable           | Default Value           | Description                                |
-| ------------------------------ | ----------------------- | ------------------------------------------ |
-| AUTH_ENABLE                    | `false`                 | Enable authentication                      |
-| AUTH_SECURE_COOKIES            | `false`                 | Use secure cookies (set to true for HTTPS) |
-| NEXTAUTH_URL                   | `http://localhost:3000` | URL of this application (for NextAuth)     |
-| NEXTAUTH_SECRET                | -                       | Secret used to encrypt session cookies     |
-| NEXTAUTH_TRUST_HOST            | `true`                  | Trust the host header from the proxy       |
-| NEXTAUTH_REFRESH_TOKEN_ENABLED | `true`                  | Enable refresh token rotation              |
+| Variable                       | Default                 | Description                         |
+| ------------------------------ | ----------------------- | ----------------------------------- |
+| AUTH_ENABLE                    | `false`                 | Enable authentication               |
+| AUTH_SECURE_COOKIES            | `false`                 | Use secure cookies (true for HTTPS) |
+| NEXTAUTH_URL                   | `http://localhost:3000` | URL of this application             |
+| NEXTAUTH_SECRET                | -                       | Secret to encrypt session cookies   |
+| NEXTAUTH_TRUST_HOST            | `true`                  | Trust the host header from proxy    |
+| NEXTAUTH_REFRESH_TOKEN_ENABLED | `true`                  | Enable refresh token rotation       |
 
 ### Keycloak Auth Provider
 
-| Environment Variable             | Default Value                            | Description        |
-| -------------------------------- | ---------------------------------------- | ------------------ |
-| AUTH_OIDC_KEYCLOAK_CLIENT_ID     | `app-client`                             | OIDC client ID     |
-| AUTH_OIDC_KEYCLOAK_CLIENT_SECRET | -                                        | OIDC client secret |
-| AUTH_OIDC_KEYCLOAK_ISSUER        | `http://localhost:8080/realms/app-realm` | OIDC issuer URL    |
-| AUTH_OIDC_KEYCLOAK_SCOPES        | `openid profile email`                   | OIDC scopes        |
+| Variable                         | Default                | Description        |
+| -------------------------------- | ---------------------- | ------------------ |
+| AUTH_OIDC_KEYCLOAK_CLIENT_ID     | `app-client`           | OIDC client ID     |
+| AUTH_OIDC_KEYCLOAK_CLIENT_SECRET | -                      | OIDC client secret |
+| AUTH_OIDC_KEYCLOAK_ISSUER        | (see note)             | OIDC issuer URL    |
+| AUTH_OIDC_KEYCLOAK_SCOPES        | `openid profile email` | OIDC scopes        |
+
+Default issuer: `http://localhost:8080/realms/app-realm`
 
 ### Github Auth Provider
 
-| Environment Variable           | Default Value                            | Description        |
-| ------------------------------ | ---------------------------------------- | ------------------ |
-| AUTH_OIDC_GITHUB_CLIENT_ID     | `app-client`                             | OIDC client ID     |
-| AUTH_OIDC_GITHUB_CLIENT_SECRET | -                                        | OIDC client secret |
-| AUTH_OIDC_GITHUB_ISSUER        | `http://localhost:8080/realms/app-realm` | OIDC issuer URL    |
-| AUTH_OIDC_GITHUB_SCOPES        | `read:user user:email`                   | OIDC scopes        |
+| Variable                       | Default                | Description        |
+| ------------------------------ | ---------------------- | ------------------ |
+| AUTH_OIDC_GITHUB_CLIENT_ID     | `app-client`           | OIDC client ID     |
+| AUTH_OIDC_GITHUB_CLIENT_SECRET | -                      | OIDC client secret |
+| AUTH_OIDC_GITHUB_ISSUER        | (see note above)       | OIDC issuer URL    |
+| AUTH_OIDC_GITHUB_SCOPES        | `read:user user:email` | OIDC scopes        |
 
 ### Google Auth Provider
 
-| Environment Variable           | Default Value                                                                                     | Description        |
-| ------------------------------ | ------------------------------------------------------------------------------------------------- | ------------------ |
-| AUTH_OIDC_GOOGLE_CLIENT_ID     | `app-client`                                                                                      | OIDC client ID     |
-| AUTH_OIDC_GOOGLE_CLIENT_SECRET | -                                                                                                 | OIDC client secret |
-| AUTH_OIDC_GOOGLE_ISSUER        | `http://localhost:8080/realms/app-realm`                                                          | OIDC issuer URL    |
-| AUTH_OIDC_GOOGLE_SCOPES        | `https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile` | OIDC scopes        |
+| Variable                       | Default          | Description        |
+| ------------------------------ | ---------------- | ------------------ |
+| AUTH_OIDC_GOOGLE_CLIENT_ID     | `app-client`     | OIDC client ID     |
+| AUTH_OIDC_GOOGLE_CLIENT_SECRET | -                | OIDC client secret |
+| AUTH_OIDC_GOOGLE_ISSUER        | (see note above) | OIDC issuer URL    |
+| AUTH_OIDC_GOOGLE_SCOPES        | (see below)      | OIDC scopes        |
+
+Default Google scopes: `userinfo.email` and `userinfo.profile`
 
 ## Docker
 
-Pre-built container images are available on the GitHub Container Registry. You can use these images directly:
+Pre-built container images are available on the GitHub Container Registry.
+You can use these images directly:
 
 ```bash
 # Pull the pre-built image
@@ -164,7 +176,9 @@ docker run -p 3000:3000 \
 
 ## Kubernetes Deployment
 
-The Inference Gateway UI provides a Helm chart for easy deployment to Kubernetes environments. The chart is available as an OCI artifact, which can be deployed directly without adding a Helm repository.
+The Inference Gateway UI provides a Helm chart for easy deployment to
+Kubernetes environments. The chart is available as an OCI artifact, which
+can be deployed directly without adding a Helm repository.
 
 ### Quick Installation
 
@@ -231,20 +245,22 @@ helm upgrade --install inference-gateway-ui \
 
 ### Key Configuration Parameters
 
-| Parameter           | Description                                                            | Default                        |
-| ------------------- | ---------------------------------------------------------------------- | ------------------------------ |
-| `replicaCount`      | Number of UI replicas to deploy                                        | `1`                            |
-| `image.repository`  | UI container image repository                                          | `ghcr.io/inference-gateway/ui` |
-| `image.tag`         | UI container image tag (defaults to chart appVersion if not specified) | `""`                           |
-| `gateway.enabled`   | Deploy the Inference Gateway backend with the UI                       | `true`                         |
-| `ingress.enabled`   | Enable ingress for external access                                     | `false`                        |
-| `ingress.className` | Ingress controller class to use                                        | `nginx`                        |
-| `resources`         | CPU/Memory resource limits and requests                                | See values.yaml                |
-| `config.*`          | Environment variables for the UI configuration                         | See values.yaml                |
+| Parameter           | Description                           | Default                        |
+| ------------------- | ------------------------------------- | ------------------------------ |
+| `replicaCount`      | Number of UI replicas to deploy       | `1`                            |
+| `image.repository`  | UI image repository                   | `ghcr.io/inference-gateway/ui` |
+| `image.tag`         | UI image tag (defaults to appVersion) | `""`                           |
+| `gateway.enabled`   | Deploy the Gateway backend with UI    | `true`                         |
+| `ingress.enabled`   | Enable ingress for external access    | `false`                        |
+| `ingress.className` | Ingress controller class to use       | `nginx`                        |
+| `resources`         | CPU/Memory limits and requests        | See values.yaml                |
+| `config.*`          | Environment variables for UI          | See values.yaml                |
 
 ### Complete Example
 
-For a complete example including a local Kubernetes setup with k3d, ingress configuration, and more, refer to the [Kubernetes example directory](./examples/kubernetes/).
+For a complete example including a local Kubernetes setup with k3d, ingress
+configuration, and more, refer to the
+[Kubernetes example directory](./examples/kubernetes/).
 
 ```bash
 # Example with comprehensive configuration
@@ -268,7 +284,8 @@ helm upgrade --install inference-gateway-ui \
 
 ## Deployment
 
-The application is automatically packaged as a Docker image and published to GitHub Container Registry (ghcr.io) when a new release is created.
+The application is automatically packaged as a Docker image and published to
+GitHub Container Registry (ghcr.io) when a new release is created.
 
 To pull the latest release:
 
@@ -278,13 +295,17 @@ docker pull ghcr.io/inference-gateway/ui:latest
 
 ## Related Projects
 
-- [Inference Gateway](https://github.com/inference-gateway/inference-gateway) - The main gateway service
+- [Inference Gateway](https://github.com/inference-gateway/inference-gateway) -
+  The main gateway service
 - [Documentation](https://docs.inference-gateway.com) - Project documentation
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE)
+file for details.
 
 ## Contributing
 
-Contributions are welcome! Please see our [Contributing Guide](CONTRIBUTING.md) for details on how to get started, coding standards, development workflow, and more.
+Contributions are welcome! Please see our [Contributing Guide](CONTRIBUTING.md)
+for details on how to get started, coding standards, development workflow,
+and more.

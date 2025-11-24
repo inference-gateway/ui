@@ -1,6 +1,7 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with
+code in this repository.
 
 ## Commands
 
@@ -28,7 +29,9 @@ npm run oas-download     # Download latest OpenAPI schema from inference-gateway
 
 ## Architecture
 
-This is a Next.js 15 App Router application that provides a chat UI for the [Inference Gateway](https://github.com/inference-gateway/inference-gateway) backend service.
+This is a Next.js 15 App Router application that provides a chat UI for the
+[Inference Gateway](https://github.com/inference-gateway/inference-gateway)
+backend service.
 
 ### Directory Structure
 
@@ -42,18 +45,24 @@ This is a Next.js 15 App Router application that provides a chat UI for the [Inf
 
 ### Key Patterns
 
-**API Proxy Pattern**: Client-side code calls Next.js API routes (`/app/api/v1/`), which proxy requests to the Inference Gateway backend. The backend URL is configured via `INFERENCE_GATEWAY_URL` env var.
+**API Proxy Pattern**: Client-side code calls Next.js API routes
+(`/app/api/v1/`), which proxy requests to the Inference Gateway backend.
+The backend URL is configured via `INFERENCE_GATEWAY_URL` env var.
 
-**Storage Abstraction**: Chat history supports multiple backends via `StorageServiceFactory`:
+**Storage Abstraction**: Chat history supports multiple backends via
+`StorageServiceFactory`:
 
 - `local` - Browser localStorage (default)
 - `postgres` - PostgreSQL via API routes
 
-**Authentication**: Optional NextAuth.js integration with OIDC providers (Keycloak, GitHub, Google). Controlled by `AUTH_ENABLE` env var.
+**Authentication**: Optional NextAuth.js integration with OIDC providers
+(Keycloak, GitHub, Google). Controlled by `AUTH_ENABLE` env var.
 
-**Streaming**: Uses Server-Sent Events (SSE) for streaming chat completions. See `apiStreamFetch` in `lib/api.ts`.
+**Streaming**: Uses Server-Sent Events (SSE) for streaming chat completions.
+See `apiStreamFetch` in `lib/api.ts`.
 
-**Path Aliases**: Use `@/*` for imports from project root (configured in tsconfig.json).
+**Path Aliases**: Use `@/*` for imports from project root (configured in
+tsconfig.json).
 
 ### Component Patterns
 
@@ -70,6 +79,7 @@ This is a Next.js 15 App Router application that provides a chat UI for the [Inf
 
 ## Commit Convention
 
-Follow [Conventional Commits](https://www.conventionalcommits.org/): `<type>[scope]: <description>`
+Follow [Conventional Commits](https://www.conventionalcommits.org/):
+`<type>[scope]: <description>`
 
 Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`

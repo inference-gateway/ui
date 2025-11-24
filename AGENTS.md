@@ -1,10 +1,15 @@
 # AGENTS.md - Inference Gateway UI
 
-This document provides comprehensive guidance for AI agents working with the Inference Gateway UI project.
+This document provides comprehensive guidance for AI agents working with the
+Inference Gateway UI project.
 
 ## Project Overview
 
-**Inference Gateway UI** is a Next.js 15 application that provides a modern chat interface for interacting with AI models through the [Inference Gateway](https://github.com/inference-gateway/inference-gateway) backend service. It enables seamless access to various language models through a consistent interface.
+**Inference Gateway UI** is a Next.js 15 application that provides a modern
+chat interface for interacting with AI models through the
+[Inference Gateway](https://github.com/inference-gateway/inference-gateway)
+backend service. It enables seamless access to various language models through
+a consistent interface.
 
 ### Key Technologies
 
@@ -21,7 +26,7 @@ This document provides comprehensive guidance for AI agents working with the Inf
 
 ### Directory Structure
 
-```
+```text
 ├── app/                    # Next.js App Router pages & layouts
 │   ├── api/               # API routes (proxy to backend)
 │   │   ├── auth/          # Authentication endpoints
@@ -214,7 +219,7 @@ npm run lint:fix
 
 ### Test Structure
 
-```
+```text
 tests/
 ├── jest-setup.ts           # Global test setup
 ├── mocks/                  # Mock files
@@ -315,7 +320,7 @@ import { cn } from '../../lib/utils';
 
 Follow [Conventional Commits](https://www.conventionalcommits.org/):
 
-```
+```text
 <type>[scope]: <description>
 ```
 
@@ -351,7 +356,7 @@ LOG_LEVEL=debug|info|warn|error
 ### Key Directories
 
 - **`/app`**: Next.js App Router pages, layouts, and API routes
-- **`/components`**: React components (feature components in root, base components in `/ui`)
+- **`/components`**: React components (feature components in root, base in `/ui`)
 - **`/lib`**: Core utilities, API clients, storage services
 - **`/tests`**: Test files mirroring source structure
 - **`/charts`**: Kubernetes Helm charts for deployment
@@ -382,4 +387,6 @@ The project uses GitHub Actions for CI/CD:
 
 ---
 
-This AGENTS.md file provides comprehensive guidance for AI agents working with the Inference Gateway UI project. Follow the established patterns and conventions to ensure consistent and maintainable code contributions.
+This AGENTS.md file provides comprehensive guidance for AI agents working with
+the Inference Gateway UI project. Follow the established patterns and
+conventions to ensure consistent and maintainable code contributions.

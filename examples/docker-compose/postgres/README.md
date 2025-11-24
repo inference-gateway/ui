@@ -1,6 +1,7 @@
 # PostgreSQL Storage Example
 
-This example demonstrates how to set up and use the Inference Gateway UI with PostgreSQL storage backend using Docker Compose.
+This example demonstrates how to set up and use the Inference Gateway UI with
+PostgreSQL storage backend using Docker Compose.
 
 ## Prerequisites
 
@@ -18,13 +19,15 @@ This setup includes:
 
 ## Getting Started
 
-1. Copy the `.env.backend.example` file to `.env.backend` and update the environment variables as needed:
+1. Copy the `.env.backend.example` file to `.env.backend` and update the
+   environment variables as needed:
 
    ```sh
    cp .env.backend.example .env.backend
    ```
 
-2. Copy the `.env.frontend.example` file to `.env.frontend` and update the environment variables as needed:
+2. Copy the `.env.frontend.example` file to `.env.frontend` and update the
+   environment variables as needed:
 
    ```sh
    cp .env.frontend.example .env.frontend
@@ -36,9 +39,11 @@ This setup includes:
    docker-compose up
    ```
 
-4. The database will be automatically initialized with the required schema on first startup.
+4. The database will be automatically initialized with the required schema on
+   first startup.
 
-5. Open your web browser and navigate to `http://localhost:3000` to see the UI in action.
+5. Open your web browser and navigate to `http://localhost:3000` to see the UI
+   in action.
 
 ## Configuration
 
@@ -73,13 +78,15 @@ The PostgreSQL schema includes:
 
 - `chat_sessions` - Stores chat sessions with metadata and token usage
 - `messages` - Stores individual messages within chat sessions
-- `user_preferences` - Stores user preferences including active chat and selected model
+- `user_preferences` - Stores user preferences (active chat, selected model)
 
-The schema is automatically created when the database starts using the migration files in the `migrations/` directory.
+The schema is automatically created when the database starts using the
+migration files in the `migrations/` directory.
 
 ## Data Persistence
 
-Chat data is persisted in the PostgreSQL database and will survive container restarts. The database data is stored in a Docker volume named `postgres_data`.
+Chat data is persisted in the PostgreSQL database and will survive container
+restarts. The database data is stored in a Docker volume named `postgres_data`.
 
 ## Troubleshooting
 
@@ -89,7 +96,8 @@ If you encounter database connection errors:
 
 1. Ensure the PostgreSQL container is healthy: `docker-compose ps`
 2. Check the database logs: `docker-compose logs postgres`
-3. Verify the `DB_CONNECTION_URL` in your `.env.frontend` file matches the database configuration
+3. Verify the `DB_CONNECTION_URL` in your `.env.frontend` file matches the
+   database configuration
 
 ### Schema Issues
 
@@ -114,7 +122,9 @@ Enable SSL connections by updating your `DB_CONNECTION_URL`:
 DB_CONNECTION_URL=postgresql://postgres:password@postgres:5432/inference_gateway?sslmode=require
 
 # For self-signed certificates (development only)
-DB_CONNECTION_URL=postgresql://postgres:password@postgres:5432/inference_gateway?sslmode=require&sslcert=client-cert.pem&sslkey=client-key.pem&sslrootcert=ca-cert.pem
+# DB_CONNECTION_URL=postgresql://postgres:password@postgres:5432/\
+#   inference_gateway?sslmode=require&sslcert=client-cert.pem&\
+#   sslkey=client-key.pem&sslrootcert=ca-cert.pem
 ```
 
 #### Database Authentication

@@ -9,3 +9,6 @@ claude-code.version = "^2.0.30"
 
 prettier.pkg-path = "prettier"
 prettier.version = "^3.6.2"
+
+markdownlint-cli.pkg-path = "markdownlint-cli"
+markdownlint-cli.version = "^0.45.0"
