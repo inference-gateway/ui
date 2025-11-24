@@ -61,7 +61,6 @@ for security.
    ```
 
    This will start three services:
-
    - MCP Filesystem Server on port 3001 (internal)
    - Inference Gateway Backend (internal)
    - UI on port 3000

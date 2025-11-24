@@ -1,4 +1,4 @@
-FROM node:22-alpine AS base
+FROM node:24.11-alpine3.22 AS base
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs && \
     mkdir -p /app && chown -R nextjs:nodejs /app

@@ -1,6 +1,6 @@
 import type { Config } from 'jest';
 import { pathsToModuleNameMapper } from 'ts-jest';
-import { compilerOptions } from './tsconfig.json';
+import tsconfig from './tsconfig.json' with { type: 'json' };
 
 const config: Config = {
   verbose: true,
@@ -12,7 +12,7 @@ const config: Config = {
   cache: true,
   testTimeout: 10000,
   moduleNameMapper: {
-    ...pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>/' }),
+    ...pathsToModuleNameMapper(tsconfig.compilerOptions.paths, { prefix: '<rootDir>/' }),
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
   },
   setupFilesAfterEnv: ['<rootDir>/tests/jest-setup.ts'],
@@ -23,11 +23,12 @@ const config: Config = {
         tsconfig: 'tsconfig.jest.json',
       },
     ],
-    '^.+\\.(js|jsx)$': 'babel-jest',
+    '^.+\\.(js|jsx)$': ['babel-jest', { configFile: './babel.config.jest.cjs' }],
   },
   transformIgnorePatterns: [
-    '/node_modules/(?!(react-markdown|rehype-raw|rehype-sanitize|hast-util-sanitize|micromark|decode-named-character-reference|character-entities|remark-rehype|mdast-util-to-hast|mdast-util-to-string|remark-parse|markdown-table|unist-util-stringify-position|unist-util-visit|unist-util-is|trough|unified|bail|is-plain-obj|vfile|vfile-message|@types|mdast-util-from-markdown|remark-gfm|ccount|escape-string-regexp|property-information|next-auth|@auth)/)',
+    '/node_modules/(?!(react-markdown|rehype-raw|rehype-sanitize|hast-util-sanitize|micromark|decode-named-character-reference|character-entities|remark-rehype|mdast-util-to-hast|mdast-util-to-string|remark-parse|markdown-table|unist-util-stringify-position|unist-util-visit|unist-util-is|trough|unified|bail|is-plain-obj|vfile|vfile-message|@types|mdast-util-from-markdown|remark-gfm|ccount|escape-string-regexp|property-information|next-auth|@auth|uuid)/)',
   ],
+  modulePathIgnorePatterns: ['<rootDir>/.next/'],
   testMatch: ['**/__tests__/**/*.+(ts|tsx|js)', '**/?(*.)+(spec|test).+(ts|tsx|js)'],
   collectCoverage: process.env.COLLECT_COVERAGE === 'true',
   coveragePathIgnorePatterns: ['/node_modules/', '/tests/'],

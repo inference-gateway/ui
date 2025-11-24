@@ -41,7 +41,11 @@ interface InputAreaProps {
   onEditLastUserMessage?: () => void;
 }
 
-export function InputArea({
+export function InputArea(props: InputAreaProps) {
+  return <InputAreaContent key={props.editingMessageId || 'new-message'} {...props} />;
+}
+
+function InputAreaContent({
   isLoading,
   selectedModel,
   tokenUsage,
@@ -55,9 +59,13 @@ export function InputArea({
   onCancelEdit,
   onEditLastUserMessage,
 }: InputAreaProps) {
-  const [inputValue, setInputValue] = useState('');
-  const [showCommands, setShowCommands] = useState(false);
-  const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
+  // Initial value comes from editMessageContent when editing, empty otherwise
+  const [inputValue, setInputValue] = useState(editMessageContent || '');
+  const [dismissedAtInput, setDismissedAtInput] = useState<string | null>(null);
+  const [keyboardSelection, setKeyboardSelection] = useState<{
+    input: string;
+    index: number;
+  } | null>(null);
   const isMobile = useIsMobile();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const commandsRef = useRef<HTMLDivElement>(null);
@@ -94,36 +102,48 @@ export function InputArea({
     }
   }, []);
 
-  useEffect(() => {
-    if (editingMessageId && editMessageContent) {
-      setInputValue(editMessageContent);
-    }
-  }, [editingMessageId, editMessageContent]);
+  const commandsDismissed = dismissedAtInput === inputValue;
 
-  useEffect(() => {
+  const keyboardSelectedIndex =
+    keyboardSelection?.input === inputValue ? keyboardSelection.index : null;
+
+  const {
+    showCommands,
+    selectedCommandIndex,
+    filteredCommands: derivedFilteredCommands,
+  } = useMemo(() => {
+    if (commandsDismissed) {
+      return { showCommands: false, selectedCommandIndex: 0, filteredCommands: commands };
+    }
+
     if (inputValue === '/') {
-      setShowCommands(true);
-      setSelectedCommandIndex(0);
-    } else if (!inputValue.startsWith('/') || inputValue.includes(' ')) {
-      setShowCommands(false);
+      return {
+        showCommands: true,
+        selectedCommandIndex: keyboardSelectedIndex ?? 0,
+        filteredCommands: commands,
+      };
     }
 
-    if (inputValue.startsWith('/') && !inputValue.includes(' ')) {
-      const query = inputValue.substring(1).toLowerCase();
-      const hasMatches = commands.some(cmd => cmd.name.includes(query));
-      setShowCommands(hasMatches);
-
-      const firstMatchIndex = commands.findIndex(cmd => cmd.name.includes(query));
-      if (firstMatchIndex !== -1) {
-        setSelectedCommandIndex(firstMatchIndex);
-      }
+    if (!inputValue.startsWith('/') || inputValue.includes(' ')) {
+      return { showCommands: false, selectedCommandIndex: 0, filteredCommands: commands };
     }
-  }, [inputValue, commands]);
+
+    const query = inputValue.substring(1).toLowerCase();
+    const filtered = commands.filter(cmd => cmd.name.includes(query));
+    const hasMatches = filtered.length > 0;
+    const selectedIdx = keyboardSelectedIndex ?? 0;
+
+    return {
+      showCommands: hasMatches,
+      selectedCommandIndex: Math.min(selectedIdx, Math.max(0, filtered.length - 1)),
+      filteredCommands: filtered,
+    };
+  }, [inputValue, commands, commandsDismissed, keyboardSelectedIndex]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (commandsRef.current && !commandsRef.current.contains(event.target as Node)) {
-        setShowCommands(false);
+        setDismissedAtInput(inputValue);
       }
     };
 
@@ -131,24 +151,30 @@ export function InputArea({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [inputValue]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (showCommands) {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setSelectedCommandIndex(prev => (prev + 1) % filteredCommands.length);
+        const currentIdx = keyboardSelectedIndex ?? 0;
+        setKeyboardSelection({
+          input: inputValue,
+          index: (currentIdx + 1) % derivedFilteredCommands.length,
+        });
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setSelectedCommandIndex(
-          prev => (prev - 1 + filteredCommands.length) % filteredCommands.length
-        );
+        const currentIdx = keyboardSelectedIndex ?? 0;
+        setKeyboardSelection({
+          input: inputValue,
+          index: (currentIdx - 1 + derivedFilteredCommands.length) % derivedFilteredCommands.length,
+        });
       } else if (e.key === 'Tab' || e.key === 'Enter') {
         e.preventDefault();
-        selectCommand(filteredCommands[selectedCommandIndex].name);
+        selectCommand(derivedFilteredCommands[selectedCommandIndex].name);
       } else if (e.key === 'Escape') {
         e.preventDefault();
-        setShowCommands(false);
+        setDismissedAtInput(inputValue);
       }
     } else {
       if (e.key === 'Enter' && !e.shiftKey) {
@@ -169,10 +195,12 @@ export function InputArea({
     if (command && command.action) {
       command.action();
       setInputValue('');
+      setDismissedAtInput('');
     } else {
-      setInputValue(`/${commandName} `);
+      const newInput = `/${commandName} `;
+      setInputValue(newInput);
+      setDismissedAtInput(newInput);
     }
-    setShowCommands(false);
   };
 
   const processCommand = (input: string) => {

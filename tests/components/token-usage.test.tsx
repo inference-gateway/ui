@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { TokenUsage } from '@/components/token-usage';
 import { SchemaCompletionUsage } from '@inference-gateway/sdk';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 jest.mock('@/hooks/use-mobile', () => ({
   useIsMobile: jest.fn(),
@@ -13,9 +14,11 @@ describe('TokenUsage Component', () => {
     total_tokens: 125,
   };
 
-  test('renders token usage information correctly', () => {
-    require('@/hooks/use-mobile').useIsMobile.mockReturnValue(false);
+  beforeEach(() => {
+    (useIsMobile as jest.Mock).mockReturnValue(false);
+  });
 
+  test('renders token usage information correctly', () => {
     render(<TokenUsage tokenUsage={mockTokenUsage} />);
 
     expect(screen.getByText('Tokens: 125')).toBeInTheDocument();
@@ -23,7 +26,7 @@ describe('TokenUsage Component', () => {
   });
 
   test('hides detailed breakdown on mobile', () => {
-    require('@/hooks/use-mobile').useIsMobile.mockReturnValue(true);
+    (useIsMobile as jest.Mock).mockReturnValue(true);
 
     render(<TokenUsage tokenUsage={mockTokenUsage} />);
 
@@ -32,8 +35,6 @@ describe('TokenUsage Component', () => {
   });
 
   test('applies custom class name when provided', () => {
-    require('@/hooks/use-mobile').useIsMobile.mockReturnValue(false);
-
     const { container } = render(
       <TokenUsage tokenUsage={mockTokenUsage} className="custom-class" />
     );
@@ -42,8 +43,6 @@ describe('TokenUsage Component', () => {
   });
 
   test('respects showDetailedBreakdown prop', () => {
-    require('@/hooks/use-mobile').useIsMobile.mockReturnValue(false);
-
     render(<TokenUsage tokenUsage={mockTokenUsage} showDetailedBreakdown={false} />);
 
     expect(screen.getByText('Tokens: 125')).toBeInTheDocument();
@@ -51,8 +50,6 @@ describe('TokenUsage Component', () => {
   });
 
   test('handles zero values gracefully', () => {
-    require('@/hooks/use-mobile').useIsMobile.mockReturnValue(false);
-
     const emptyTokenUsage: SchemaCompletionUsage = {
       prompt_tokens: 0,
       completion_tokens: 0,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import ThinkingBubble from '@/components/thinking-bubble';
 import ToolCallBubble from '@/components/tool-call-bubble';
@@ -25,9 +25,9 @@ interface ChatAreaProps {
 }
 
 export function ChatArea({ messages, isStreaming, selectedModel, onEditMessage }: ChatAreaProps) {
-  const [streamedTokens, setStreamedTokens] = useState<string>('');
-  const [streamedMessageIds, setStreamedMessageIds] = useState<Set<string>>(new Set());
   const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  const streamedTokens = isStreaming ? '' : '';
 
   // Scroll management logic
   const scrollToBottom = useCallback(() => {
@@ -49,25 +49,6 @@ export function ChatArea({ messages, isStreaming, selectedModel, onEditMessage }
       if (scrollInterval) clearInterval(scrollInterval);
     };
   }, [isStreaming, scrollToBottom]);
-
-  useEffect(() => {
-    if (!isStreaming) {
-      setStreamedTokens('');
-    }
-  }, [isStreaming]);
-
-  useEffect(() => {
-    if (!isStreaming && messages.length > 0) {
-      const lastMessage = messages[messages.length - 1];
-      if (lastMessage.role !== 'user') {
-        setStreamedMessageIds(prev => {
-          const updated = new Set(prev);
-          updated.add(lastMessage.id);
-          return updated;
-        });
-      }
-    }
-  }, [isStreaming, messages]);
 
   const getToolNameForResponse = (toolCallId: string | undefined): string | undefined => {
     if (!toolCallId) return undefined;
@@ -132,9 +113,7 @@ export function ChatArea({ messages, isStreaming, selectedModel, onEditMessage }
               const showToolCalls = !isUser && message.tool_calls;
               const showToolResponse = message.role === 'tool' && message.content;
               const isLastMessage = index === messages.length - 1;
-              const wasStreamed = streamedMessageIds.has(message.id);
-              const showThinking =
-                !isUser && (showReasoning || (isLastMessage && isStreaming) || wasStreamed);
+              const showThinking = !isUser && (showReasoning || (isLastMessage && isStreaming));
 
               const isThinkingModel = !!message.reasoning;
               const toolName = getToolNameForResponse(message.tool_call_id);

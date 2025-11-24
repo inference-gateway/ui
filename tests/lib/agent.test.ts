@@ -2,11 +2,16 @@ import { runAgentLoop } from '@/lib/agent';
 import { Message, MessageRole } from '@/types/chat';
 import { ToolHandlers } from '@/lib/tools';
 import logger from '@/lib/logger';
+import {
+  SchemaChatCompletionMessageToolCall,
+  InferenceGatewayClient,
+  ChatCompletionToolType,
+} from '@inference-gateway/sdk';
 
 interface StreamCallbacks {
   onContent: (delta: string) => void;
   onReasoning: (delta: string) => void;
-  onTool: (toolCall: any) => void;
+  onTool: (toolCall: SchemaChatCompletionMessageToolCall) => void;
   onUsageMetrics: (usage: {
     prompt_tokens: number;
     completion_tokens: number;
@@ -50,7 +55,7 @@ describe('agent module', () => {
   describe('runAgentLoop', () => {
     it('should initialize with assistant message and call streamChatCompletion', async () => {
       mockClient.streamChatCompletion.mockImplementation(
-        async (_: any, callbacks: StreamCallbacks) => {
+        async (_: unknown, callbacks: StreamCallbacks) => {
           callbacks.onContent('Test response');
           callbacks.onUsageMetrics({ prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 });
         }
@@ -60,7 +65,7 @@ describe('agent module', () => {
         model: 'test-model',
         messages: initialMessages,
         tools: [],
-        client: mockClient as any,
+        client: mockClient as unknown as InferenceGatewayClient,
         onUpdateMessages: mockUpdateMessages,
         onUpdateUsage: mockUpdateUsage,
       });
@@ -88,7 +93,7 @@ describe('agent module', () => {
 
     it('should handle content streaming properly', async () => {
       mockClient.streamChatCompletion.mockImplementation(
-        async (_: any, callbacks: StreamCallbacks) => {
+        async (_: unknown, callbacks: StreamCallbacks) => {
           callbacks.onContent('Hello');
           callbacks.onContent(' world');
           callbacks.onContent('!');
@@ -98,7 +103,7 @@ describe('agent module', () => {
       await runAgentLoop({
         model: 'test-model',
         messages: initialMessages,
-        client: mockClient as any,
+        client: mockClient as unknown as InferenceGatewayClient,
         onUpdateMessages: mockUpdateMessages,
         onUpdateUsage: mockUpdateUsage,
       });
@@ -110,7 +115,7 @@ describe('agent module', () => {
 
     it('should handle reasoning streaming properly', async () => {
       mockClient.streamChatCompletion.mockImplementation(
-        async (_: any, callbacks: StreamCallbacks) => {
+        async (_: unknown, callbacks: StreamCallbacks) => {
           callbacks.onReasoning('First');
           callbacks.onReasoning(' thought');
           callbacks.onReasoning(' process');
@@ -120,7 +125,7 @@ describe('agent module', () => {
       await runAgentLoop({
         model: 'test-model',
         messages: initialMessages,
-        client: mockClient as any,
+        client: mockClient as unknown as InferenceGatewayClient,
         onUpdateMessages: mockUpdateMessages,
         onUpdateUsage: mockUpdateUsage,
       });
@@ -134,7 +139,7 @@ describe('agent module', () => {
       const toolCallId = 'tool-123';
       const mockToolCall = {
         id: toolCallId,
-        type: 'function',
+        type: 'function' as ChatCompletionToolType,
         function: {
           name: 'test-tool',
           arguments: JSON.stringify({ param: 'test' }),
@@ -142,7 +147,7 @@ describe('agent module', () => {
       };
 
       mockClient.streamChatCompletion.mockImplementation(
-        async (_: any, callbacks: StreamCallbacks) => {
+        async (_: unknown, callbacks: StreamCallbacks) => {
           callbacks.onTool(mockToolCall);
         }
       );
@@ -150,8 +155,18 @@ describe('agent module', () => {
       await runAgentLoop({
         model: 'test-model',
         messages: initialMessages,
-        tools: [{ name: 'test-tool', description: 'Test tool', parameters: {} } as any],
-        client: mockClient as any,
+        tools: [
+          {
+            type: 'function' as ChatCompletionToolType,
+            function: {
+              name: 'test-tool',
+              description: 'Test tool',
+              parameters: {},
+              strict: false,
+            },
+          },
+        ],
+        client: mockClient as unknown as InferenceGatewayClient,
         onUpdateMessages: mockUpdateMessages,
         onUpdateUsage: mockUpdateUsage,
       });
@@ -174,7 +189,7 @@ describe('agent module', () => {
       await runAgentLoop({
         model: 'openai/o1-mini',
         messages: initialMessages,
-        client: mockClient as any,
+        client: mockClient as unknown as InferenceGatewayClient,
         onUpdateMessages: mockUpdateMessages,
         onUpdateUsage: mockUpdateUsage,
       });
@@ -182,12 +197,12 @@ describe('agent module', () => {
       expect(mockClient.streamChatCompletion).toHaveBeenCalled();
 
       const o1MiniCallFound = mockClient.streamChatCompletion.mock.calls.some(call => {
-        const requestConfig = call[0] as { messages?: any[] };
+        const requestConfig = call[0] as { messages?: unknown[] };
         if (!requestConfig || !requestConfig.messages) return false;
 
         const messages = requestConfig.messages;
 
-        return messages.length === 1 && messages[0].role === MessageRole.user;
+        return messages.length === 1 && (messages[0] as { role: string }).role === MessageRole.user;
       });
 
       expect(o1MiniCallFound).toBe(true);
@@ -201,7 +216,7 @@ describe('agent module', () => {
       await runAgentLoop({
         model: 'test-model',
         messages: initialMessages,
-        client: mockClient as any,
+        client: mockClient as unknown as InferenceGatewayClient,
         onUpdateMessages: mockUpdateMessages,
         onUpdateUsage: mockUpdateUsage,
       });
@@ -214,7 +229,7 @@ describe('agent module', () => {
     it('should handle callback errors properly', async () => {
       const callbackError = new Error('Callback failed');
       mockClient.streamChatCompletion.mockImplementation(
-        async (_: any, callbacks: StreamCallbacks) => {
+        async (_: unknown, callbacks: StreamCallbacks) => {
           callbacks.onError(callbackError);
         }
       );
@@ -223,7 +238,7 @@ describe('agent module', () => {
       await runAgentLoop({
         model: 'test-model',
         messages: initialMessages,
-        client: mockClient as any,
+        client: mockClient as unknown as InferenceGatewayClient,
         onUpdateMessages: mockUpdateMessages,
         onUpdateUsage: mockUpdateUsage,
       });
@@ -236,7 +251,7 @@ describe('agent module', () => {
     it('should handle invalid tool arguments', async () => {
       const mockToolCall = {
         id: 'tool-123',
-        type: 'function',
+        type: 'function' as ChatCompletionToolType,
         function: {
           name: 'test-tool',
           arguments: '{invalid json',
@@ -244,7 +259,7 @@ describe('agent module', () => {
       };
 
       mockClient.streamChatCompletion.mockImplementation(
-        async (_: any, callbacks: StreamCallbacks) => {
+        async (_: unknown, callbacks: StreamCallbacks) => {
           callbacks.onTool(mockToolCall);
         }
       );
@@ -253,8 +268,18 @@ describe('agent module', () => {
       await runAgentLoop({
         model: 'test-model',
         messages: initialMessages,
-        tools: [{ name: 'test-tool', description: 'Test tool', parameters: {} } as any],
-        client: mockClient as any,
+        tools: [
+          {
+            type: 'function' as ChatCompletionToolType,
+            function: {
+              name: 'test-tool',
+              description: 'Test tool',
+              parameters: {},
+              strict: false,
+            },
+          },
+        ],
+        client: mockClient as unknown as InferenceGatewayClient,
         onUpdateMessages: mockUpdateMessages,
         onUpdateUsage: mockUpdateUsage,
       });
@@ -267,7 +292,7 @@ describe('agent module', () => {
     it('should handle unknown tools gracefully', async () => {
       const mockToolCall = {
         id: 'tool-123',
-        type: 'function',
+        type: 'function' as ChatCompletionToolType,
         function: {
           name: 'unknown-tool',
           arguments: '{}',
@@ -275,7 +300,7 @@ describe('agent module', () => {
       };
 
       mockClient.streamChatCompletion.mockImplementation(
-        async (_: any, callbacks: StreamCallbacks) => {
+        async (_: unknown, callbacks: StreamCallbacks) => {
           callbacks.onTool(mockToolCall);
         }
       );
@@ -284,8 +309,18 @@ describe('agent module', () => {
       await runAgentLoop({
         model: 'test-model',
         messages: initialMessages,
-        tools: [{ name: 'test-tool', description: 'Test tool', parameters: {} } as any],
-        client: mockClient as any,
+        tools: [
+          {
+            type: 'function' as ChatCompletionToolType,
+            function: {
+              name: 'test-tool',
+              description: 'Test tool',
+              parameters: {},
+              strict: false,
+            },
+          },
+        ],
+        client: mockClient as unknown as InferenceGatewayClient,
         onUpdateMessages: mockUpdateMessages,
         onUpdateUsage: mockUpdateUsage,
       });
